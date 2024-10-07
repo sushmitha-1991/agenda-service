@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/summonNotification")
+@RequestMapping("agendapapers/summonNotification")
 public class SummonNotificationController {
 
 	@Autowired
