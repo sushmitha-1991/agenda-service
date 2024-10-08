@@ -22,7 +22,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 	@Autowired
 	private RestTemplate restTemplate;
 	
-	private final String applicationInstanceServiceUrl = "http://localhost:8080/api/application-instances";
+	private final String applicationInstanceServiceUrl = "http://10.247.128.16/master/application-instances";
 
 
 	@Override

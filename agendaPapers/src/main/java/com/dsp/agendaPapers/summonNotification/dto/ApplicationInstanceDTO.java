@@ -18,4 +18,5 @@ public class ApplicationInstanceDTO {
  private String applicationNo;
  private String currentStatus;
  private String publishedDocumentUrl;
+ private Long refId;
 }

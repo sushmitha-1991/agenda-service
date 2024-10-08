@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.summonNotification.controller;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("agendapapers/summonNotification")
+@RequestMapping("/agendapapers/summonNotification")
 public class SummonNotificationController {
 
 	@Autowired
@@ -86,9 +87,9 @@ public class SummonNotificationController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@Operation(summary = "Delete an application by ID", description = "Deletes a specific application by its ID.")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Application deleted successfully"),
-			@ApiResponse(responseCode = "404", description = "Application not found"),
+	@Operation(summary = "Delete an summonNotification by ID", description = "Deletes a specific summonNotifiction by its ID.")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "SummonNotification deleted successfully"),
+			@ApiResponse(responseCode = "404", description = "SummonNotification not found"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<GenericResponse<String>> deleteSummonNotification(@PathVariable Long id) {
