@@ -54,6 +54,7 @@ public class SummonNotificationController {
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@GetMapping("/getAll")
 	public ResponseEntity<GenericResponse<List<SummonNotificationDTO>>> getAllSummonNotifications() {
+		System.out.println("#################################");
 		List<SummonNotificationDTO> summonNOtificationDTOs = summonNotificationService.getAllSummonNotifications();
 		GenericResponse<List<SummonNotificationDTO>> response = new GenericResponse<>(true,
 				"Summon notifications retrieved successfully", summonNOtificationDTOs, HttpStatus.OK.value());

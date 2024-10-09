@@ -81,7 +81,8 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 	private ApplicationInstanceDTO fetchApplicationInstanceData(Long notificationId) {
 		// Fetch the ApplicationInstance by its ID
-		String url = applicationInstanceServiceUrl + "/getByRefId/" + notificationId; // Use the correct URL structure
+		String url = applicationInstanceServiceUrl + "/getByRefId/" + notificationId;
+		// Use the correct URL structure
 		return restTemplate.getForObject(url, ApplicationInstanceDTO.class);
 	}
 
@@ -136,21 +137,20 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 		return responseDTO;
 	}
 
+	
 	@Override
 	public void deleteSummonNotification(Long id) {
-		// Fetch the existing summonNotification
-		SummonNotification existingNotification = summonNotificationRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("SummonNotification not found with id: " + id));
+	    // Fetch the existing summonNotification
+	    SummonNotification existingNotification = summonNotificationRepository.findById(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("SummonNotification not found with id: " + id));
 
-		// Delete the associated ApplicationInstance by applicationId
-		String url = applicationInstanceServiceUrl + "/deleteByRefId/" + existingNotification.getId(); // Use the
-																										// correct field
-																										// for the ref
-																										// ID
-		restTemplate.delete(url);
+	    // Delete the associated ApplicationInstance by refId
+	    String url = applicationInstanceServiceUrl + "/deleteByRefId/" + existingNotification.getId();
+	    restTemplate.delete(url); // Ensure that existingNotification.getId() corresponds to the refId in ApplicationInstance
 
-		// Now delete the SummonNotification
-		summonNotificationRepository.delete(existingNotification);
+	    // Now delete the SummonNotification
+	    summonNotificationRepository.delete(existingNotification);
 	}
+
 
 }

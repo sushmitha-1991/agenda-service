@@ -42,6 +42,8 @@ private Long id;
     private ApplicationInstanceDTO applicationInstanceDTO;
     private String currentStatus;
     private String publishedDocumentUrl;
+    private Long aplicationId;
+    private Long refId;
 }
 
 

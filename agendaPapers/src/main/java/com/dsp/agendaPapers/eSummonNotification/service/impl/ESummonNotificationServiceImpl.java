@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.eSummonNotification.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
+import com.dsp.agendaPapers.exception.ResourceNotFoundException;
 import com.dsp.agendaPapers.mapper.ESummonNotificationMapper;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 
@@ -36,10 +38,12 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 			// Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
 			ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-					.applicationNo(savedNotification.getApplicationNo()) // Assuming this is set in the DTO
-					.currentStatus(eSummonNotificationDTO.getCurrentStatus()) // Getting from DTO
-					.applicationId(savedNotification.getId()) // Use the saved notification ID
-					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // Getting from DTO
+					.applicationId(eSummonNotificationDTO.getApplicationInstanceDTO().getApplicationId()) // Coming from
+																											// frontend
+					.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+					.currentStatus(eSummonNotificationDTO.getCurrentStatus()) // Coming from frontend
+					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // Coming from frontend
+					.refId(savedNotification.getId()) // Use ESummonNotification's ID as refId
 					.build();
 
 			// Call ApplicationInstance microservice to save the application instance data
@@ -62,14 +66,39 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 	@Override
 	public List<ESummonNotificationDTO> getAllESummonNotifications() {
-		// TODO Auto-generated method stub
-		return null;
+		List<ESummonNotification> notifications = eSummonNotificationRepository.findAll();
+		List<ESummonNotificationDTO> notificationDTOs = new ArrayList<>();
+
+		for (ESummonNotification notification : notifications) {
+			ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
+			ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getId());
+			dto.setApplicationInstanceDTO(instanceDTO);
+			notificationDTOs.add(dto);
+		}
+
+		return notificationDTOs;
 	}
+
+	private ApplicationInstanceDTO fetchApplicationInstanceData(Long notificationId) {
+		// Fetch the ApplicationInstance by its ID
+		String url = applicationInstanceServiceUrl + "/getByRefId/" + notificationId;
+		// Use the correct URL structure
+		return restTemplate.getForObject(url, ApplicationInstanceDTO.class);
+	}
+	
 
 	@Override
 	public ESummonNotificationDTO getESummonNotificationById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		ESummonNotification notification = eSummonNotificationRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("e SummonNotification not found with id: " + id));
+
+		ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
+
+		// Fetching the application instance data
+		ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getId());
+		dto.setApplicationInstanceDTO(instanceDTO);
+
+		return dto;
 	}
 
 	
@@ -82,8 +111,37 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 	@Override
 	public ESummonNotificationDTO updateESummonNotification(Long id, ESummonNotificationDTO eSummonNotificationDTO) {
-		// TODO Auto-generated method stub
-		return null;
+		ESummonNotification existingNotification = eSummonNotificationRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("e SummonNotification not found with id: " + id));
+
+		// Update the SummonNotification fields
+		existingNotification.setLokSabhaNo(eSummonNotificationDTO.getLokSabhaNo());
+		existingNotification.setSessionNo(eSummonNotificationDTO.getSessionNo());
+		existingNotification.setSummonIssuanceDate(eSummonNotificationDTO.getSummonIssuanceDate());
+		existingNotification.setStatus(eSummonNotificationDTO.getStatus());
+		existingNotification.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
+
+		// Save the updated SummonNotification
+		ESummonNotification updatedNotification = eSummonNotificationRepository.save(existingNotification);
+
+		// Check if ApplicationInstanceDTO is not null and update ApplicationInstance
+		if (eSummonNotificationDTO.getApplicationInstanceDTO() != null) {
+			ApplicationInstanceDTO applicationInstanceDTO = eSummonNotificationDTO.getApplicationInstanceDTO();
+			String url = applicationInstanceServiceUrl + "/updateByRefId/" + applicationInstanceDTO.getRefId();
+
+			// Making a PUT request to update the ApplicationInstance in the other
+			// microservice
+			restTemplate.put(url, applicationInstanceDTO);
+		}
+
+		// Fetch the updated ApplicationInstanceDTO to include it in the response
+		ApplicationInstanceDTO updatedInstanceDTO = fetchApplicationInstanceData(updatedNotification.getId());
+
+		// Prepare the response DTO
+		ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(updatedNotification);
+		responseDTO.setApplicationInstanceDTO(updatedInstanceDTO); // Set the updated ApplicationInstanceDTO
+
+		return responseDTO;
 	}
 
 }
