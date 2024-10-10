@@ -15,133 +15,194 @@ import com.dsp.agendaPapers.exception.ResourceNotFoundException;
 import com.dsp.agendaPapers.mapper.ESummonNotificationMapper;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class ESummonNotificationServiceImpl implements ESummonNotificationService {
-	
+
+	private static final Logger log = LoggerFactory.getLogger(ESummonNotificationServiceImpl.class);
+
 	@Autowired
 	private ESummonNotificationRepository eSummonNotificationRepository;
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
-	
-	private final String applicationInstanceServiceUrl = "http://10.247.128.16/master/application-instances";
 
+	private final String applicationInstanceServiceUrl = "http://10.247.128.16/master/application-instances";
 
 	@Override
 	public ESummonNotificationDTO saveESummonNotification(ESummonNotificationDTO eSummonNotificationDTO) {
+		log.debug("Entering saveESummonNotification with ESummonNotificationDTO: {}", eSummonNotificationDTO);
 
+		try {
 			// Convert DTO to entity
 			ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
+			log.debug("Converted ESummonNotificationDTO to entity: {}", summonNotification);
 
 			// Save SummonNotification entity
 			ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
+			log.debug("Saved ESummonNotification entity: {}", savedNotification);
+
+			// Log saved attributes
+			log.info("Saved ESummonNotification attributes: ID={}, LokSabhaNo={}, SessionNo={}, SummonIssuanceDate={}, Status={}, TemplateContent={}",
+				savedNotification.getId(), savedNotification.getLokSabhaNo(), savedNotification.getSessionNo(),
+				savedNotification.getSummonIssuanceDate(), savedNotification.getStatus(), savedNotification.getTemplateContent());
 
 			// Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
 			ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-					.applicationId(eSummonNotificationDTO.getApplicationInstanceDTO().getApplicationId()) // Coming from
-																											// frontend
+					.applicationId(eSummonNotificationDTO.getApplicationInstanceDTO().getApplicationId()) // From frontend
 					.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-					.currentStatus(eSummonNotificationDTO.getCurrentStatus()) // Coming from frontend
-					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // Coming from frontend
+					.currentStatus(eSummonNotificationDTO.getCurrentStatus()) // From frontend
+					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
 					.refId(savedNotification.getId()) // Use ESummonNotification's ID as refId
 					.build();
+			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
 
 			// Call ApplicationInstance microservice to save the application instance data
 			ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+			log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
 
 			// Convert saved entity back to DTO
 			ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(savedNotification);
-
-			// Ensure ApplicationInstanceDTO is included in the response
 			responseDTO.setApplicationInstanceDTO(savedInstanceDTO); // Set the ApplicationInstanceDTO
+			log.debug("Returning ESummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
 
 			return responseDTO;
+		} catch (Exception e) {
+			log.error("Error in saveESummonNotification: ", e);
+			throw e;
 		}
+	}
 
-		private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
-			String url = applicationInstanceServiceUrl + "/create";
-			return restTemplate.postForObject(url, applicationInstanceDTO,
+	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
+		String url = applicationInstanceServiceUrl + "/create";
+		log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url, applicationInstanceDTO);
+
+		try {
+			ApplicationInstanceDTO savedInstance = restTemplate.postForObject(url, applicationInstanceDTO,
 					ApplicationInstanceDTO.class);
+			log.debug("Received response from ApplicationInstance service: {}", savedInstance);
+
+			// Log saved attributes of ApplicationInstanceDTO
+			log.info("Saved ApplicationInstance attributes: RefId={}, ApplicationId={}, ApplicationNo={}, CurrentStatus={}, PublishedDocumentUrl={}",
+				savedInstance.getRefId(), savedInstance.getApplicationId(), savedInstance.getApplicationNo(),
+				savedInstance.getCurrentStatus(), savedInstance.getPublishedDocumentUrl());
+
+			return savedInstance;
+		} catch (Exception e) {
+			log.error("Error calling ApplicationInstance service: ", e);
+			throw e;
 		}
+	}
 
 	@Override
 	public List<ESummonNotificationDTO> getAllESummonNotifications() {
+		log.debug("Entering getAllESummonNotifications");
 		List<ESummonNotification> notifications = eSummonNotificationRepository.findAll();
+		log.debug("Fetched all ESummonNotifications: {}", notifications);
+
 		List<ESummonNotificationDTO> notificationDTOs = new ArrayList<>();
 
 		for (ESummonNotification notification : notifications) {
+			log.debug("Processing ESummonNotification: {}", notification);
 			ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
 			ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getId());
 			dto.setApplicationInstanceDTO(instanceDTO);
 			notificationDTOs.add(dto);
 		}
 
+		log.debug("Returning list of ESummonNotificationDTOs: {}", notificationDTOs);
 		return notificationDTOs;
 	}
 
 	private ApplicationInstanceDTO fetchApplicationInstanceData(Long notificationId) {
-		// Fetch the ApplicationInstance by its ID
 		String url = applicationInstanceServiceUrl + "/getByRefId/" + notificationId;
-		// Use the correct URL structure
-		return restTemplate.getForObject(url, ApplicationInstanceDTO.class);
+		log.debug("Fetching ApplicationInstance by refId from URL: {}", url);
+
+		try {
+			ApplicationInstanceDTO instanceDTO = restTemplate.getForObject(url, ApplicationInstanceDTO.class);
+			log.debug("Fetched ApplicationInstanceDTO: {}", instanceDTO);
+			return instanceDTO;
+		} catch (Exception e) {
+			log.error("Error fetching ApplicationInstance for refId: {}", notificationId, e);
+			throw e;
+		}
 	}
-	
 
 	@Override
 	public ESummonNotificationDTO getESummonNotificationById(Long id) {
+		log.debug("Entering getESummonNotificationById with id: {}", id);
+
 		ESummonNotification notification = eSummonNotificationRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("e SummonNotification not found with id: " + id));
+		log.debug("Fetched ESummonNotification by id: {}", notification);
 
 		ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
-
-		// Fetching the application instance data
 		ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getId());
 		dto.setApplicationInstanceDTO(instanceDTO);
 
+		log.debug("Returning ESummonNotificationDTO with ApplicationInstanceDTO: {}", dto);
 		return dto;
 	}
 
-	
-
 	@Override
 	public void deleteESummonNotification(Long id) {
-		// TODO Auto-generated method stub
-		
+		log.debug("Entering deleteESummonNotification with id: {}", id);
+		try {
+			eSummonNotificationRepository.deleteById(id);
+			log.debug("Deleted ESummonNotification with id: {}", id);
+		} catch (Exception e) {
+			log.error("Error deleting ESummonNotification with id: {}", id, e);
+			throw e;
+		}
 	}
 
 	@Override
 	public ESummonNotificationDTO updateESummonNotification(Long id, ESummonNotificationDTO eSummonNotificationDTO) {
+		log.debug("Entering updateESummonNotification with id: {} and ESummonNotificationDTO: {}", id, eSummonNotificationDTO);
+
 		ESummonNotification existingNotification = eSummonNotificationRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("e SummonNotification not found with id: " + id));
+		log.debug("Fetched existing ESummonNotification for update: {}", existingNotification);
 
-		// Update the SummonNotification fields
+		// Update the ESummonNotification fields
 		existingNotification.setLokSabhaNo(eSummonNotificationDTO.getLokSabhaNo());
 		existingNotification.setSessionNo(eSummonNotificationDTO.getSessionNo());
 		existingNotification.setSummonIssuanceDate(eSummonNotificationDTO.getSummonIssuanceDate());
 		existingNotification.setStatus(eSummonNotificationDTO.getStatus());
 		existingNotification.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
+		log.debug("Updated ESummonNotification fields: {}", existingNotification);
 
 		// Save the updated SummonNotification
 		ESummonNotification updatedNotification = eSummonNotificationRepository.save(existingNotification);
+		log.debug("Saved updated ESummonNotification: {}", updatedNotification);
+
+		// Log saved attributes
+		log.info("Updated ESummonNotification attributes: ID={}, LokSabhaNo={}, SessionNo={}, SummonIssuanceDate={}, Status={}, TemplateContent={}",
+			updatedNotification.getId(), updatedNotification.getLokSabhaNo(), updatedNotification.getSessionNo(),
+			updatedNotification.getSummonIssuanceDate(), updatedNotification.getStatus(), updatedNotification.getTemplateContent());
 
 		// Check if ApplicationInstanceDTO is not null and update ApplicationInstance
 		if (eSummonNotificationDTO.getApplicationInstanceDTO() != null) {
 			ApplicationInstanceDTO applicationInstanceDTO = eSummonNotificationDTO.getApplicationInstanceDTO();
-			String url = applicationInstanceServiceUrl + "/updateByRefId/" + applicationInstanceDTO.getRefId();
+			String url = applicationInstanceServiceUrl + "/updateByRefId/" + updatedNotification.getId();
+			log.debug("Updating ApplicationInstance at URL: {} with ApplicationInstanceDTO: {}", url, applicationInstanceDTO);
 
-			// Making a PUT request to update the ApplicationInstance in the other
-			// microservice
-			restTemplate.put(url, applicationInstanceDTO);
+			try {
+				restTemplate.put(url, applicationInstanceDTO);
+				log.debug("Updated ApplicationInstance successfully");
+			} catch (Exception e) {
+				log.error("Error updating ApplicationInstance for refId: {}", updatedNotification.getId(), e);
+				throw e;
+			}
 		}
 
-		// Fetch the updated ApplicationInstanceDTO to include it in the response
-		ApplicationInstanceDTO updatedInstanceDTO = fetchApplicationInstanceData(updatedNotification.getId());
-
-		// Prepare the response DTO
+		// Convert updated entity back to DTO
 		ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(updatedNotification);
-		responseDTO.setApplicationInstanceDTO(updatedInstanceDTO); // Set the updated ApplicationInstanceDTO
+		responseDTO.setApplicationInstanceDTO(eSummonNotificationDTO.getApplicationInstanceDTO());
 
+		log.debug("Returning updated ESummonNotificationDTO: {}", responseDTO);
 		return responseDTO;
 	}
-
 }

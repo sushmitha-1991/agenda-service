@@ -1,10 +1,12 @@
 package com.dsp.agendaPapers.summonNotification.service.impl;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
@@ -15,8 +17,13 @@ import com.dsp.agendaPapers.summonNotification.entity.SummonNotification;
 import com.dsp.agendaPapers.summonNotification.repository.SummonNotificationRepository;
 import com.dsp.agendaPapers.summonNotification.service.SummonNotificationService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class SummonNotificationServiceImpl implements SummonNotificationService {
+
+	private static final Logger log = LoggerFactory.getLogger(SummonNotificationServiceImpl.class);
 
 	@Autowired
 	private SummonNotificationRepository summonNotificationRepository;
@@ -29,128 +36,206 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Transactional
 	@Override
 	public SummonNotificationDTO saveSummonNotification(SummonNotificationDTO summonNotificationDTO) {
-		// Convert DTO to entity
-		SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
+		log.debug("Entering saveSummonNotification with SummonNotificationDTO: {}", summonNotificationDTO);
 
-		// Save SummonNotification entity
-		SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
+		try {
+			// Convert DTO to entity
+			SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
+			log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
 
-		// Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
-		ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-				.applicationId(summonNotificationDTO.getApplicationInstanceDTO().getApplicationId()) // Coming from
-																										// frontend
-				.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-				.currentStatus(summonNotificationDTO.getCurrentStatus()) // Coming from frontend
-				.publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl()) // Coming from frontend
-				.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-				.build();
+			// Save SummonNotification entity
+			SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
+			log.debug("Saved SummonNotification entity: {}", savedNotification);
 
-		// Call ApplicationInstance microservice to save the application instance data
-		ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+			// Create ApplicationInstanceDTO for external microservice
+			ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
+					.applicationId(summonNotificationDTO.getApplicationInstanceDTO().getApplicationId()) // From
+																											// frontend
+					.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+					.currentStatus(summonNotificationDTO.getCurrentStatus()) // From frontend
+					.publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl()) // From frontend
+					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+					.build();
+			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
 
-		// Convert saved entity back to DTO
-		SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
+			// Call ApplicationInstance microservice to save the application instance data
+			ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+			log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
 
-		// Ensure ApplicationInstanceDTO is included in the response
-		responseDTO.setApplicationInstanceDTO(savedInstanceDTO); // Set the ApplicationInstanceDTO
+			// Convert saved entity back to DTO
+			SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
+			responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
+			log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
 
-		return responseDTO;
+			return responseDTO;
+		} catch (Exception e) {
+			log.error("Error in saveSummonNotification: ", e);
+			throw e;
+		}
 	}
 
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
 		String url = applicationInstanceServiceUrl + "/create";
-		return restTemplate.postForObject(url, applicationInstanceDTO, ApplicationInstanceDTO.class);
-	}
+		log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url,
+				applicationInstanceDTO);
 
-	@Override
-	public List<SummonNotificationDTO> getAllSummonNotifications() {
-		List<SummonNotification> notifications = summonNotificationRepository.findAll();
-		List<SummonNotificationDTO> notificationDTOs = new ArrayList<>();
-
-		for (SummonNotification notification : notifications) {
-			SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
-			ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getId());
-			dto.setApplicationInstanceDTO(instanceDTO);
-			notificationDTOs.add(dto);
+		try {
+			ApplicationInstanceDTO savedInstance = restTemplate.postForObject(url, applicationInstanceDTO,
+					ApplicationInstanceDTO.class);
+			log.debug("Received response from ApplicationInstance service: {}", savedInstance);
+			return savedInstance;
+		} catch (Exception e) {
+			log.error("Error calling ApplicationInstance service: ", e);
+			throw e;
 		}
-
-		return notificationDTOs;
-	}
-
-	private ApplicationInstanceDTO fetchApplicationInstanceData(Long notificationId) {
-		// Fetch the ApplicationInstance by its ID
-		String url = applicationInstanceServiceUrl + "/getByRefId/" + notificationId;
-		// Use the correct URL structure
-		return restTemplate.getForObject(url, ApplicationInstanceDTO.class);
-	}
-
-	@Override
-	public SummonNotificationDTO getSummonNotificationById(Long id) {
-		SummonNotification notification = summonNotificationRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("SummonNotification not found with id: " + id));
-
-		SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
-
-		// Fetching the application instance data
-		ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getId());
-		dto.setApplicationInstanceDTO(instanceDTO);
-
-		return dto;
 	}
 
 	@Override
 	public SummonNotificationDTO updateSummonNotification(Long id, SummonNotificationDTO summonNotificationDTO) {
-		// Fetch the existing summonNotification
-		SummonNotification existingNotification = summonNotificationRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("SummonNotification not found with id: " + id));
+		log.debug("Entering updateSummonNotification with ID: {} and SummonNotificationDTO: {}", id,
+				summonNotificationDTO);
 
-		// Update the SummonNotification fields
-		existingNotification.setLokSabhaNo(summonNotificationDTO.getLokSabhaNo());
-		existingNotification.setSessionNo(summonNotificationDTO.getSessionNo());
-		existingNotification.setSummonIssuanceDate(summonNotificationDTO.getSummonIssuanceDate());
-		existingNotification.setNotificationNo(summonNotificationDTO.getNotificationNo());
-		existingNotification.setStatus(summonNotificationDTO.getStatus());
-		existingNotification.setTemplateContent(summonNotificationDTO.getTemplateContent());
+		try {
+			SummonNotification existingNotification = summonNotificationRepository.findById(id).orElseThrow(() -> {
+				log.error("SummonNotification not found with ID: {}", id);
+				return new ResourceNotFoundException("SummonNotification not found with id: " + id);
+			});
 
-		// Save the updated SummonNotification
-		SummonNotification updatedNotification = summonNotificationRepository.save(existingNotification);
+			// Update the fields
+			existingNotification.setLokSabhaNo(summonNotificationDTO.getLokSabhaNo());
+			existingNotification.setSessionNo(summonNotificationDTO.getSessionNo());
+			existingNotification.setSummonIssuanceDate(summonNotificationDTO.getSummonIssuanceDate());
+			existingNotification.setNotificationNo(summonNotificationDTO.getNotificationNo());
+			existingNotification.setStatus(summonNotificationDTO.getStatus());
+			existingNotification.setTemplateContent(summonNotificationDTO.getTemplateContent());
 
-		// Check if ApplicationInstanceDTO is not null and update ApplicationInstance
-		if (summonNotificationDTO.getApplicationInstanceDTO() != null) {
-			ApplicationInstanceDTO applicationInstanceDTO = summonNotificationDTO.getApplicationInstanceDTO();
-			String url = applicationInstanceServiceUrl + "/updateByRefId/" + applicationInstanceDTO.getRefId();
+			log.debug("Updated SummonNotification entity before save: {}", existingNotification);
 
-			// Making a PUT request to update the ApplicationInstance in the other
-			// microservice
-			restTemplate.put(url, applicationInstanceDTO);
+			// Save updated entity
+			SummonNotification updatedNotification = summonNotificationRepository.save(existingNotification);
+			log.debug("Updated SummonNotification saved to database: {}", updatedNotification);
+
+			// Update ApplicationInstance if present
+			if (summonNotificationDTO.getApplicationInstanceDTO() != null) {
+				ApplicationInstanceDTO applicationInstanceDTO = summonNotificationDTO.getApplicationInstanceDTO();
+				String url = applicationInstanceServiceUrl + "/updateByRefId/" + applicationInstanceDTO.getRefId();
+				log.debug(
+						"Calling ApplicationInstance service to update instance at URL: {} with ApplicationInstanceDTO: {}",
+						url, applicationInstanceDTO);
+
+				try {
+					restTemplate.put(url, applicationInstanceDTO);
+					log.debug("Updated ApplicationInstance with refId: {}", applicationInstanceDTO.getRefId());
+				} catch (Exception e) {
+					log.error("Error updating ApplicationInstance with refId: {}", applicationInstanceDTO.getRefId(),
+							e);
+					throw e;
+				}
+			}
+
+			ApplicationInstanceDTO updatedInstanceDTO = fetchApplicationInstanceData(updatedNotification.getId());
+
+			SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(updatedNotification);
+			responseDTO.setApplicationInstanceDTO(updatedInstanceDTO);
+			log.debug("Returning updated SummonNotificationDTO: {}", responseDTO);
+
+			return responseDTO;
+		} catch (Exception e) {
+			log.error("Error in updateSummonNotification: ", e);
+			throw e;
 		}
-
-		// Fetch the updated ApplicationInstanceDTO to include it in the response
-		ApplicationInstanceDTO updatedInstanceDTO = fetchApplicationInstanceData(updatedNotification.getId());
-
-		// Prepare the response DTO
-		SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(updatedNotification);
-		responseDTO.setApplicationInstanceDTO(updatedInstanceDTO); // Set the updated ApplicationInstanceDTO
-
-		return responseDTO;
 	}
 
-	
 	@Override
 	public void deleteSummonNotification(Long id) {
-	    // Fetch the existing summonNotification
-	    SummonNotification existingNotification = summonNotificationRepository.findById(id)
-	            .orElseThrow(() -> new ResourceNotFoundException("SummonNotification not found with id: " + id));
+		log.debug("Entering deleteSummonNotification with ID: {}", id);
 
-	    // Delete the associated ApplicationInstance by refId
-	    String url = applicationInstanceServiceUrl + "/deleteByRefId/" + existingNotification.getId();
-	    restTemplate.delete(url); // Ensure that existingNotification.getId() corresponds to the refId in ApplicationInstance
+		try {
+			SummonNotification existingNotification = summonNotificationRepository.findById(id).orElseThrow(() -> {
+				log.error("SummonNotification not found with ID: {}", id);
+				return new ResourceNotFoundException("SummonNotification not found with id: " + id);
+			});
 
-	    // Now delete the SummonNotification
-	    summonNotificationRepository.delete(existingNotification);
+			// Delete associated ApplicationInstance
+			String url = applicationInstanceServiceUrl + "/deleteByRefId/" + existingNotification.getId();
+			log.debug("Calling ApplicationInstance service to delete instance at URL: {}", url);
+
+			try {
+				restTemplate.delete(url);
+				log.debug("Deleted ApplicationInstance for refId: {}", existingNotification.getId());
+			} catch (Exception e) {
+				log.error("Error deleting ApplicationInstance with refId: {}", existingNotification.getId(), e);
+				throw e;
+			}
+
+			summonNotificationRepository.delete(existingNotification);
+			log.debug("Deleted SummonNotification with ID: {}", id);
+		} catch (Exception e) {
+			log.error("Error in deleteSummonNotification: ", e);
+			throw e;
+		}
 	}
 
+	@Override
+	public List<SummonNotificationDTO> getAllSummonNotifications() {
+		log.debug("Entering getAllSummonNotifications");
 
+		try {
+			List<SummonNotification> summonNotifications = summonNotificationRepository.findAll();
+			log.debug("Fetched all SummonNotifications from database: {}", summonNotifications);
+
+			List<SummonNotificationDTO> responseList = new ArrayList<>();
+			for (SummonNotification notification : summonNotifications) {
+				SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
+				ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getId());
+				dto.setApplicationInstanceDTO(instanceDTO);
+				responseList.add(dto);
+			}
+
+			log.debug("Returning all SummonNotificationDTOs with ApplicationInstanceDTOs: {}", responseList);
+			return responseList;
+		} catch (Exception e) {
+			log.error("Error in getAllSummonNotifications: ", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public SummonNotificationDTO getSummonNotificationById(Long id) {
+		log.debug("Entering getSummonNotificationById with ID: {}", id);
+
+		try {
+			SummonNotification summonNotification = summonNotificationRepository.findById(id).orElseThrow(() -> {
+				log.error("SummonNotification not found with ID: {}", id);
+				return new ResourceNotFoundException("SummonNotification not found with id: " + id);
+			});
+
+			SummonNotificationDTO summonNotificationDTO = summonNotificationMapper.toDTO(summonNotification);
+			ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(id);
+			summonNotificationDTO.setApplicationInstanceDTO(instanceDTO);
+
+			log.debug("Returning SummonNotificationDTO: {}", summonNotificationDTO);
+			return summonNotificationDTO;
+		} catch (Exception e) {
+			log.error("Error in getSummonNotificationById: ", e);
+			throw e;
+		}
+	}
+
+	private ApplicationInstanceDTO fetchApplicationInstanceData(Long refId) {
+		String url = applicationInstanceServiceUrl + "/getByRefId/" + refId;
+		log.debug("Fetching ApplicationInstance by refId from URL: {}", url);
+
+		try {
+			ApplicationInstanceDTO instanceDTO = restTemplate.getForObject(url, ApplicationInstanceDTO.class);
+			log.debug("Fetched ApplicationInstanceDTO from microservice: {}", instanceDTO);
+			return instanceDTO;
+		} catch (Exception e) {
+			log.error("Error fetching ApplicationInstance by refId: {}", refId, e);
+			throw e;
+		}
+	}
 }
