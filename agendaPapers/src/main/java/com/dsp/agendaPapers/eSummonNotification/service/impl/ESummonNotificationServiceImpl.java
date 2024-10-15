@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
@@ -30,7 +31,8 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 	private RestTemplate restTemplate;
 
 	private final String applicationInstanceServiceUrl = "http://10.247.128.16/master/application-instances";
-
+    
+	@Transactional
 	@Override
 	public ESummonNotificationDTO saveESummonNotification(ESummonNotificationDTO eSummonNotificationDTO) {
 		log.debug("Entering saveESummonNotification with ESummonNotificationDTO: {}", eSummonNotificationDTO);
@@ -40,6 +42,9 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
 			log.debug("Converted ESummonNotificationDTO to entity: {}", summonNotification);
 
+			 String applicationNo = generateApplicationNo(eSummonNotificationDTO.getLokSabhaNo(), eSummonNotificationDTO.getSessionNo());
+		        summonNotification.setApplicationNo(applicationNo);
+		        log.debug("Generated Application No: {}", applicationNo);
 			// Save SummonNotification entity
 			ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
 			log.debug("Saved ESummonNotification entity: {}", savedNotification);
@@ -50,13 +55,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 				savedNotification.getSummonIssuanceDate(), savedNotification.getStatus(), savedNotification.getTemplateContent());
 
 			// Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
-			ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-					.applicationId(eSummonNotificationDTO.getApplicationInstanceDTO().getApplicationId()) // From frontend
-					.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-					.currentStatus(eSummonNotificationDTO.getCurrentStatus()) // From frontend
-					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
-					.refId(savedNotification.getId()) // Use ESummonNotification's ID as refId
-					.build();
+			  ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
+		                .applicationId(eSummonNotificationDTO.getApplicationId()) // From frontend
+		                .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+		                .currentStatus(savedNotification.getStatus()) // From frontend
+		                .publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
+		                .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+		                .build();
 			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
 
 			// Call ApplicationInstance microservice to save the application instance data
@@ -73,6 +78,10 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			log.error("Error in saveESummonNotification: ", e);
 			throw e;
 		}
+	}
+	
+	private String generateApplicationNo(String lokSabhaNo, String sessionNo) {
+	    return "Ref-SNLS" + lokSabhaNo + sessionNo + "01";
 	}
 
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {

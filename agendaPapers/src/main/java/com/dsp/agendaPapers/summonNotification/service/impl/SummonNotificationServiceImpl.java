@@ -39,43 +39,52 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	@Transactional
 	@Override
 	public SummonNotificationDTO saveSummonNotification(SummonNotificationDTO summonNotificationDTO) {
-		log.debug("Entering saveSummonNotification with SummonNotificationDTO: {}", summonNotificationDTO);
+	    log.debug("Entering saveSummonNotification with SummonNotificationDTO: {}", summonNotificationDTO);
 
-		try {
-			// Convert DTO to entity
-			SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
-			log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
+	    try {
+	        // Convert DTO to entity
+	        SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
+	        log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
 
-			// Save SummonNotification entity
-			SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
-			log.debug("Saved SummonNotification entity: {}", savedNotification);
+	        // Generate Application Number before saving
+	        String applicationNo = generateApplicationNo(summonNotificationDTO.getLokSabhaNo(), summonNotificationDTO.getSessionNo());
+	        summonNotification.setApplicationNo(applicationNo);
+	        log.debug("Generated Application No: {}", applicationNo);
 
-			// Create ApplicationInstanceDTO for external microservice
-			ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-					.applicationId(summonNotificationDTO.getApplicationInstanceDTO().getApplicationId()) // From
-																											// frontend
-					.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-					.currentStatus(summonNotificationDTO.getCurrentStatus()) // From frontend
-					.publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl()) // From frontend
-					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-					.build();
-			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
+	        // Save SummonNotification entity
+	        SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
+	        log.debug("Saved SummonNotification entity: {}", savedNotification);
 
-			// Call ApplicationInstance microservice to save the application instance data
-			ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
-			log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+	        // Create ApplicationInstanceDTO for external microservice
+	        ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
+	                .applicationId(summonNotificationDTO.getApplicationId()) // From frontend
+	                .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+	                .currentStatus(savedNotification.getStatus()) // From frontend
+	                .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl()) // From frontend
+	                .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+	                .build();
+	        log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
 
-			// Convert saved entity back to DTO
-			SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
-			responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
-			log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
+	        // Call ApplicationInstance microservice to save the application instance data
+	        ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+	        log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
 
-			return responseDTO;
-		} catch (Exception e) {
-			log.error("Error in saveSummonNotification: ", e);
-			throw e;
-		}
+	        // Convert saved entity back to DTO
+	        SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
+	        responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
+	        log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
+
+	        return responseDTO;
+	    } catch (Exception e) {
+	        log.error("Error in saveSummonNotification: ", e);
+	        throw e;
+	    }
 	}
+
+	private String generateApplicationNo(String lokSabhaNo, String sessionNo) {
+	    return "Ref-SNLS" + lokSabhaNo + sessionNo + "01";
+	}
+
 
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
 		String url = applicationInstanceServiceUrl + "/create";
@@ -93,61 +102,9 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 		}
 	}
 
-	@Override
-	public SummonNotificationDTO updateSummonNotification(Long id, SummonNotificationDTO summonNotificationDTO) {
-		log.debug("Entering updateSummonNotification with ID: {} and SummonNotificationDTO: {}", id,
-				summonNotificationDTO);
+	
 
-		try {
-			SummonNotification existingNotification = summonNotificationRepository.findById(id).orElseThrow(() -> {
-				log.error("SummonNotification not found with ID: {}", id);
-				return new ResourceNotFoundException("SummonNotification not found with id: " + id);
-			});
 
-			// Update the fields
-			existingNotification.setLokSabhaNo(summonNotificationDTO.getLokSabhaNo());
-			existingNotification.setSessionNo(summonNotificationDTO.getSessionNo());
-			existingNotification.setSummonIssuanceDate(summonNotificationDTO.getSummonIssuanceDate());
-			existingNotification.setNotificationNo(summonNotificationDTO.getNotificationNo());
-			existingNotification.setStatus(summonNotificationDTO.getStatus());
-			existingNotification.setTemplateContent(summonNotificationDTO.getTemplateContent());
-
-			log.debug("Updated SummonNotification entity before save: {}", existingNotification);
-
-			// Save updated entity
-			SummonNotification updatedNotification = summonNotificationRepository.save(existingNotification);
-			log.debug("Updated SummonNotification saved to database: {}", updatedNotification);
-
-			// Update ApplicationInstance if present
-			if (summonNotificationDTO.getApplicationInstanceDTO() != null) {
-				ApplicationInstanceDTO applicationInstanceDTO = summonNotificationDTO.getApplicationInstanceDTO();
-				String url = applicationInstanceServiceUrl + "/updateByRefId/" + applicationInstanceDTO.getRefId();
-				log.debug(
-						"Calling ApplicationInstance service to update instance at URL: {} with ApplicationInstanceDTO: {}",
-						url, applicationInstanceDTO);
-
-				try {
-					restTemplate.put(url, applicationInstanceDTO);
-					log.debug("Updated ApplicationInstance with refId: {}", applicationInstanceDTO.getRefId());
-				} catch (Exception e) {
-					log.error("Error updating ApplicationInstance with refId: {}", applicationInstanceDTO.getRefId(),
-							e);
-					throw e;
-				}
-			}
-
-			ApplicationInstanceDTO updatedInstanceDTO = fetchApplicationInstanceData(updatedNotification.getId());
-
-			SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(updatedNotification);
-			responseDTO.setApplicationInstanceDTO(updatedInstanceDTO);
-			log.debug("Returning updated SummonNotificationDTO: {}", responseDTO);
-
-			return responseDTO;
-		} catch (Exception e) {
-			log.error("Error in updateSummonNotification: ", e);
-			throw e;
-		}
-	}
 
 	@Override
 	public void deleteSummonNotification(Long id) {
@@ -238,4 +195,52 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			throw e;
 		}
 	}
+
+	@Transactional
+	@Override
+	public SummonNotificationDTO updateSummonNotification(Long id, SummonNotificationDTO summonNotificationDTO) {
+	    log.debug("Starting update for SummonNotification with ID: {}", id);
+
+	    try {
+	        // Fetch the existing SummonNotification
+	        SummonNotification existingNotification = summonNotificationRepository.findById(id).orElseThrow(() -> 
+	            new ResourceNotFoundException("SummonNotification not found with id: " + id));
+
+	        // Update only the fields you want to change
+	        existingNotification.setLokSabhaNo(summonNotificationDTO.getLokSabhaNo());
+	        existingNotification.setSessionNo(summonNotificationDTO.getSessionNo());
+	        existingNotification.setSummonIssuanceDate(summonNotificationDTO.getSummonIssuanceDate());
+	        existingNotification.setNotificationNo(summonNotificationDTO.getNotificationNo());
+	        existingNotification.setStatus(summonNotificationDTO.getStatus());
+	        existingNotification.setSummonStartAt(summonNotificationDTO.getSummonStartAt());
+	        existingNotification.setTemplateContent(summonNotificationDTO.getTemplateContent());
+
+	        // Save the updated SummonNotification
+	        SummonNotification updatedNotification = summonNotificationRepository.save(existingNotification);
+
+	        // Now, let's automatically update the ApplicationInstance
+	        if (updatedNotification.getStatus() != null) {
+	            ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
+	            applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus()); // New status from SummonNotification
+
+	            // Call the external service to update ApplicationInstance
+	            String url = applicationInstanceServiceUrl + "/updateByRefId/" + updatedNotification.getId(); // assuming refId is available from the existingNotification
+	            restTemplate.put(url, applicationInstanceDTO);
+	            log.debug("Updated ApplicationInstance with new status: {}", applicationInstanceDTO.getCurrentStatus());
+	        }
+
+	        // Convert the updated notification back to DTO
+	        SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(updatedNotification);
+	        log.debug("Returning updated SummonNotificationDTO: {}", responseDTO);
+
+	        return responseDTO;
+	    } catch (Exception e) {
+	        log.error("Error updating SummonNotification: ", e);
+	        throw e;
+	    }
+	}
+
+
+
+
 }

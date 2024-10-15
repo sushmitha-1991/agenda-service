@@ -30,6 +30,7 @@ public class SummonNotificationDTO {
 	    private String notificationNo;
 	 
 	    private LocalDateTime summonStartAt;
+	    private Long applicationId;
 	 
 	    private String applicationNo;
 	 @NotEmpty
@@ -39,6 +40,6 @@ public class SummonNotificationDTO {
 	    private ApplicationInstanceDTO applicationInstanceDTO;
 	    private String currentStatus;
 	    private String publishedDocumentUrl;
-	    private Long aplicationId;
+	 
 	    private Long refId;
 }

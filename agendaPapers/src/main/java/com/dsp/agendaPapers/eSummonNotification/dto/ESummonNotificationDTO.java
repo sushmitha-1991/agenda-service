@@ -32,7 +32,7 @@ private Long id;
     private String summonIssuanceDateHindi;
 
     private LocalDateTime summonStartAt;
-
+   private Long applicationId;
     private String applicationNo;
    
     private String status;
@@ -42,7 +42,7 @@ private Long id;
     private ApplicationInstanceDTO applicationInstanceDTO;
     private String currentStatus;
     private String publishedDocumentUrl;
-    private Long aplicationId;
+   
     private Long refId;
 }
 
