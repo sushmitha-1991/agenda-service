@@ -54,6 +54,19 @@ public class SummonNotificationController {
 				"Summon notifications retrieved successfully", summonNotificationDTOs, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@Operation(summary = "Get summonNotification By SessionNo", description = "Retrieve all summonNotification By its SessionNo.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "SummonNotification retrieved successfully"),
+			@ApiResponse(responseCode = "500", description = "Internal server error") })
+	@GetMapping("/get/sessionNo/{sessionNo}")
+	public ResponseEntity<GenericResponse<List<SummonNotificationDTO>>> getAllSummonNotificationBySessionNo(@PathVariable String sessionNo) {
+		List<SummonNotificationDTO> summonNotificationDTO = summonNotificationService.getAllSummonNotificationBySessionNo(sessionNo);
+		GenericResponse<List<SummonNotificationDTO>> response = new GenericResponse<>(true,
+				"Summon notifications retrieved successfully", summonNotificationDTO, HttpStatus.OK.value());
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
 
 	@Operation(summary = "Get summonNotification By Id", description = "Retrieve all summonNotification By its Id.")
 	@ApiResponses(value = {

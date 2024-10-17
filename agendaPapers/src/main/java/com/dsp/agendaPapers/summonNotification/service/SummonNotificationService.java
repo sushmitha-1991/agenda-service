@@ -9,27 +9,19 @@ import jakarta.validation.Valid;
 
 public interface SummonNotificationService {
 
-	
-	//SummonNotificationDTO createSummonNotification(@Valid SummonNotificationDTO summonNotificationDTO);
+	// SummonNotificationDTO createSummonNotification(@Valid SummonNotificationDTO
+	// summonNotificationDTO);
 
-	
 	List<SummonNotificationDTO> getAllSummonNotifications();
-
 
 	SummonNotificationDTO getSummonNotificationById(Long id);
 
-
 	SummonNotificationDTO saveSummonNotification(SummonNotificationDTO summonNotificationDTO);
-
 
 	SummonNotificationDTO updateSummonNotification(Long id, SummonNotificationDTO summonNotificationDTO);
 
-
 	void deleteSummonNotification(Long id);
 
-
-	
-
-
+	List<SummonNotificationDTO> getAllSummonNotificationBySessionNo(String sessionNo);
 
 }

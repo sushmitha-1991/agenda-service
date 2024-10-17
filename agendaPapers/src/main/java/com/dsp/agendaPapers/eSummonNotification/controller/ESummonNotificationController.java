@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
 import com.dsp.agendaPapers.response.GenericResponse;
+import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -53,6 +54,18 @@ public class ESummonNotificationController {
 		List<ESummonNotificationDTO> eSummonNotificationDTOs = eSummonNotificationService.getAllESummonNotifications();
 		GenericResponse<List<ESummonNotificationDTO>> response = new GenericResponse<>(true,
 				"E-Summon notifications retrieved successfully", eSummonNotificationDTOs, HttpStatus.OK.value());
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@Operation(summary = "Get E-summonNotification By SessionNo", description = "Retrieve all E-summonNotification By its SessionNo.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "E-SummonNotification retrieved successfully"),
+			@ApiResponse(responseCode = "500", description = "Internal server error") })
+	@GetMapping("/get/sessionNo/{sessionNo}")
+	public ResponseEntity<GenericResponse<List<ESummonNotificationDTO>>> getAllESummonNotificationBySessionNo(@PathVariable String sessionNo) {
+		List<ESummonNotificationDTO> eSummonNotificationDTO = eSummonNotificationService.getAllESummonNotificationBySessionNo(sessionNo);
+		GenericResponse<List<ESummonNotificationDTO>> response = new GenericResponse<>(true,
+				"E-Summon notifications retrieved successfully", eSummonNotificationDTO, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 

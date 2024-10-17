@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ApplicationInstanceDTO {
- //private String house;
+	private Long id;
+
  private Long applicationId; // Reference to Application ID
  private String applicationNo;
  private String currentStatus;
