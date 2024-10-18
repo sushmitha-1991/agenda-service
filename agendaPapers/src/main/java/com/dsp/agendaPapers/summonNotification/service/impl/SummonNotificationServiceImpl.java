@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.dsp.agendaPapers.exception.ExternalServiceException;
@@ -212,6 +215,8 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
         }
     }
 
+
+
     @Transactional
     @Override
     public SummonNotificationDTO updateSummonNotification(Long id, SummonNotificationDTO summonNotificationDTO) {
@@ -223,9 +228,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
                     .orElseThrow(() -> new ResourceNotFoundException("SummonNotification not found with id: " + id));
 
             // Update only the fields you want to change
-         //   existingNotification.setLokSabhaNo(summonNotificationDTO.getLokSabhaNo());
-           // existingNotification.setSessionNo(summonNotificationDTO.getSessionNo());
-        //    existingNotification.setSummonIssuanceDate(summonNotificationDTO.getSummonIssuanceDate());
             existingNotification.setNotificationNo(summonNotificationDTO.getNotificationNo());
             existingNotification.setStatus(summonNotificationDTO.getStatus());
             existingNotification.setSummonStartAt(summonNotificationDTO.getSummonStartAt());
@@ -234,25 +236,47 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
             // Save the updated SummonNotification
             SummonNotification updatedNotification = summonNotificationRepository.save(existingNotification);
 
+            // Prepare the response DTO
+            SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(updatedNotification);
+
             // Now, let's automatically update the ApplicationInstance
             if (updatedNotification.getStatus() != null) {
                 ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
                 applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus()); // New status from SummonNotification
 
                 // Call the external service to update ApplicationInstance
-                String url = applicationInstanceServiceUrl + "/updateByRefId/" + updatedNotification.getId();
+                String url = applicationInstanceServiceUrl + "/updateByApplicationNo/" + updatedNotification.getApplicationNo();
                 try {
                     restTemplate.put(url, applicationInstanceDTO);
-                    log.debug("Updated ApplicationInstance with new status for refId: {}", updatedNotification.getId());
+                    log.debug("Updated ApplicationInstance with new status for refId: {}", updatedNotification.getApplicationNo());
                 } catch (Exception e) {
                     log.error("Failed to update ApplicationInstance: ", e);
                     throw new RuntimeException("Failed to update ApplicationInstance", e);
                 }
             }
 
-            SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(updatedNotification);
-            log.debug("Returning updated SummonNotificationDTO: {}", responseDTO);
+            // Fetch the updated ApplicationInstance data
+            String applicationNo = updatedNotification.getApplicationNo(); // Get the applicationNo for the ApplicationInstance
+            String applicationInstanceUrl = applicationInstanceServiceUrl + "/getApplicationNo/" + applicationNo;
+
+            try {
+                ResponseEntity<ApplicationInstanceDTO> response = restTemplate.getForEntity(applicationInstanceUrl, ApplicationInstanceDTO.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    ApplicationInstanceDTO applicationInstanceDTOResponse = response.getBody();
+                    if (applicationInstanceDTOResponse != null) {
+                        responseDTO.setApplicationInstanceDTO(applicationInstanceDTOResponse); // Include ApplicationInstance data
+                        responseDTO.setApplicationId(applicationInstanceDTOResponse.getApplicationId()); // Include applicationId
+                        log.debug("Fetched ApplicationInstance for applicationNo: {}", applicationNo);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to fetch ApplicationInstance: ", e);
+                // You can choose to handle this case as needed
+            }
+
+            log.debug("Returning updated SummonNotificationDTO with ApplicationInstance data: {}", responseDTO);
             return responseDTO;
+
         } catch (ResourceNotFoundException e) {
             log.error("Resource not found during updateSummonNotification: {}", e.getMessage());
             throw e; // Re-throw the exception for further handling
@@ -262,7 +286,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
         }
     }
 
-  
 
 	
 	@Override
@@ -304,37 +327,29 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	public void deleteSummonNotification(Long id) {
 	    log.debug("Starting deleteSummonNotification with ID: {}", id);
 
+	    // Fetch the SummonNotification or throw a ResourceNotFoundException
+	    SummonNotification summonNotification = summonNotificationRepository.findById(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("SummonNotification not found with id: " + id));
+
+	    // Try deleting the ApplicationInstance by calling the external microservice
+	    String url = applicationInstanceServiceUrl + "/deleteByApplicationNo/" + summonNotification.getApplicationNo();
 	    try {
-	        // Fetch the SummonNotification or throw a ResourceNotFoundException
-	        SummonNotification summonNotification = summonNotificationRepository.findById(id)
-	                .orElseThrow(() -> new ResourceNotFoundException("SummonNotification not found with id: " + id));
+	        restTemplate.delete(url);  // Call to delete ApplicationInstance
+	        log.debug("Deleted ApplicationInstance associated with refId: {}", summonNotification.getApplicationNo());
 
-	        // First, try to delete the associated ApplicationInstance by calling the external microservice
-	        String url = applicationInstanceServiceUrl + "/deleteByApplicationNo/" + summonNotification.getApplicationNo();
-	        try {
-	            restTemplate.delete(url);
-	            log.debug("Deleted ApplicationInstance associated with refId: {}", summonNotification.getApplicationNo());
-	        } catch (Exception e) {
-	            log.error("Failed to delete ApplicationInstance: ", e);
-	            // Throw an exception here, preventing the SummonNotification deletion from happening
-	            throw new ExternalServiceException("Failed to delete ApplicationInstance", e);
-	        }
-
-	        // If ApplicationInstance deletion was successful, proceed to delete SummonNotification
+	        // If ApplicationInstance deletion is successful, proceed with deleting SummonNotification
 	        summonNotificationRepository.delete(summonNotification);
 	        log.debug("Deleted SummonNotification with ID: {}", id);
 
-	    } catch (ResourceNotFoundException e) {
-	        log.error("Resource not found during deleteSummonNotification: {}", e.getMessage());
-	        throw e; // Re-throw the exception for further handling by the caller
-	    } catch (ExternalServiceException e) {
-	        // Handle the custom exception for ApplicationInstance deletion failure
-	        log.error("Error during ApplicationInstance deletion: {}", e.getMessage());
-	        throw e;
+	    } catch (HttpClientErrorException.NotFound e) {
+	        log.error("ApplicationInstance not found for deletion: {}", e.getMessage());
+	        throw new ResourceNotFoundException("Failed to delete ApplicationInstance with refId: " + summonNotification.getApplicationNo());
+	    } catch (HttpClientErrorException e) {
+	        log.error("Failed to delete ApplicationInstance: {}", e.getMessage());
+	        throw new ExternalServiceException("Failed to delete ApplicationInstance", e);
 	    } catch (Exception e) {
-	        log.error("Error in deleteSummonNotification: ", e);
+	        log.error("Unexpected error in deleteSummonNotification: ", e);
 	        throw new RuntimeException("Failed to delete SummonNotification", e);
 	    }
 	}
-
 }
