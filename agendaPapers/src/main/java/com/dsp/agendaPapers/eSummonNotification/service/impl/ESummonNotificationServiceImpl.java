@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 @Service
 public class ESummonNotificationServiceImpl implements ESummonNotificationService {
-	 private static int lastIncrementValue = 0;
+	// private static int lastIncrementValue = 0;
 	private static final Logger log = LoggerFactory.getLogger(ESummonNotificationServiceImpl.class);
 
 	@Autowired
@@ -38,78 +38,83 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 	@Transactional
 	@Override
 	public ESummonNotificationDTO saveESummonNotification(ESummonNotificationDTO eSummonNotificationDTO) {
-		log.debug("Entering saveESummonNotification with ESummonNotificationDTO: {}", eSummonNotificationDTO);
+	    log.debug("Entering saveESummonNotification with ESummonNotificationDTO: {}", eSummonNotificationDTO);
 
-		try {
-			// Convert DTO to entity
-			ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
-			log.debug("Converted E-SummonNotificationDTO to entity: {}", summonNotification);
+	    try {
+	        // Convert DTO to entity
+	        ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
+	        log.debug("Converted E-SummonNotificationDTO to entity: {}", summonNotification);
 
-			 String applicationNo = generateApplicationNo(eSummonNotificationDTO.getLokSabhaNo(), eSummonNotificationDTO.getSessionNo());
-		        summonNotification.setApplicationNo(applicationNo);
-		        log.debug("Generated Application No: {}", applicationNo);
-			// Save SummonNotification entity
-			ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
-			log.debug("Saved E-SummonNotification entity: {}", savedNotification);
+	        // Save SummonNotification entity initially to generate the ID
+	        ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
+	        log.debug("Initial save of E-SummonNotification to generate ID: {}", savedNotification);
 
-			// Log saved attributes
-			log.info("Saved E-SummonNotification attributes: ID={}, LokSabhaNo={}, SessionNo={}, SummonIssuanceDate={}, Status={}, TemplateContent={}",
-				savedNotification.getId(), savedNotification.getLokSabhaNo(), savedNotification.getSessionNo(),
-				savedNotification.getSummonIssuanceDate(), savedNotification.getStatus(), savedNotification.getTemplateContent());
+	        // Generate Application No using the generated ID
+	        String applicationNo = generateApplicationNo(savedNotification.getLokSabhaNo(), savedNotification.getSessionNo(), savedNotification.getId());
+	        savedNotification.setApplicationNo(applicationNo);
+	        log.debug("Generated Application No: {}", applicationNo);
 
-			// Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
-			  ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-		                .applicationId(eSummonNotificationDTO.getApplicationId()) // From frontend
-		                .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-		                .currentStatus(savedNotification.getStatus()) // From frontend
-		                .publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
-		                .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-		                .build();
-			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
+	        // Save the SummonNotification entity again with the generated Application No
+	        savedNotification = eSummonNotificationRepository.save(savedNotification);
+	        log.debug("Saved E-SummonNotification entity with Application No: {}", savedNotification);
 
-			// Call ApplicationInstance microservice to save the application instance data
-			ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
-			log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+	        // Log saved attributes
+	        log.info("Saved E-SummonNotification attributes: ID={}, LokSabhaNo={}, SessionNo={}, SummonIssuanceDate={}, Status={}, TemplateContent={}",
+	            savedNotification.getId(), savedNotification.getLokSabhaNo(), savedNotification.getSessionNo(),
+	            savedNotification.getSummonIssuanceDate(), savedNotification.getStatus(), savedNotification.getTemplateContent());
 
-			// Convert saved entity back to DTO
-			ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(savedNotification);
-			responseDTO.setApplicationInstanceDTO(savedInstanceDTO); // Set the ApplicationInstanceDTO
-			log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
+	        // Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
+	        ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
+	                .applicationId(eSummonNotificationDTO.getApplicationId()) // From frontend
+	                .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+	                .currentStatus(savedNotification.getStatus()) // From frontend
+	                .publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
+	                .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+	                .build();
+	        log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
 
-			return responseDTO;
-		} catch (Exception e) {
-			log.error("Error in saveESummonNotification: ", e);
-			throw e;
-		}
+	        // Call ApplicationInstance microservice to save the application instance data
+	        ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+	        log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+
+	        // Convert saved entity back to DTO
+	        ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(savedNotification);
+	        responseDTO.setApplicationInstanceDTO(savedInstanceDTO); // Set the ApplicationInstanceDTO
+	        log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
+
+	        return responseDTO;
+	    } catch (Exception e) {
+	        log.error("Error in saveESummonNotification: ", e);
+	        throw e;
+	    }
 	}
-	
-	private String generateApplicationNo(String lokSabhaNo, String sessionNo) {
-        // Increment the last used value
-        lastIncrementValue++;
 
-        // Generate application number with formatting
-        return "Ref-ESLS" + lokSabhaNo + sessionNo + String.format("%02d", lastIncrementValue);
-    }
+	private String generateApplicationNo(String lokSabhaNo, String sessionNo, Long id) {
+	    // Generate application number with formatting, including the ID
+	    return "ESLS" + "/" + lokSabhaNo + "/" + sessionNo + "/" + id;
+	}
+
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
-		String url = applicationInstanceServiceUrl + "/create";
-		log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url, applicationInstanceDTO);
+	    String url = applicationInstanceServiceUrl + "/create";
+	    log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url, applicationInstanceDTO);
 
-		try {
-			ApplicationInstanceDTO savedInstance = restTemplate.postForObject(url, applicationInstanceDTO,
-					ApplicationInstanceDTO.class);
-			log.debug("Received response from ApplicationInstance service: {}", savedInstance);
+	    try {
+	        ApplicationInstanceDTO savedInstance = restTemplate.postForObject(url, applicationInstanceDTO,
+	                ApplicationInstanceDTO.class);
+	        log.debug("Received response from ApplicationInstance service: {}", savedInstance);
 
-			// Log saved attributes of ApplicationInstanceDTO
-			log.info("Saved ApplicationInstance attributes: RefId={}, ApplicationId={}, ApplicationNo={}, CurrentStatus={}, PublishedDocumentUrl={}",
-				savedInstance.getRefId(), savedInstance.getApplicationId(), savedInstance.getApplicationNo(),
-				savedInstance.getCurrentStatus(), savedInstance.getPublishedDocumentUrl());
+	        // Log saved attributes of ApplicationInstanceDTO
+	        log.info("Saved ApplicationInstance attributes: RefId={}, ApplicationId={}, ApplicationNo={}, CurrentStatus={}, PublishedDocumentUrl={}",
+	            savedInstance.getRefId(), savedInstance.getApplicationId(), savedInstance.getApplicationNo(),
+	            savedInstance.getCurrentStatus(), savedInstance.getPublishedDocumentUrl());
 
-			return savedInstance;
-		} catch (Exception e) {
-			log.error("Error calling ApplicationInstance service: ", e);
-			throw e;
-		}
+	        return savedInstance;
+	    } catch (Exception e) {
+	        log.error("Error calling ApplicationInstance service: ", e);
+	        throw e;
+	    }
 	}
+
 
 	@Override
 	public List<ESummonNotificationDTO> getAllESummonNotifications() {

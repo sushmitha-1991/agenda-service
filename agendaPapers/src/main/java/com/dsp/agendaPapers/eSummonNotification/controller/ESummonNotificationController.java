@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@RequestMapping("agendapapers/esummon")
+@RequestMapping("/agendapapers/esummon")
 public class ESummonNotificationController {
 
 	@Autowired

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("agendapapers/provisional-calendar")
+@RequestMapping("/agendapapers/provisional-calendar")
 public class ProvisionalCalendarController {
 
     @Autowired

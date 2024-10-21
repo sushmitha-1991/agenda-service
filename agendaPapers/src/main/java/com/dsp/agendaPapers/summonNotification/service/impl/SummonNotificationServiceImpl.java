@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 @Service
 public class SummonNotificationServiceImpl implements SummonNotificationService {
 	
-	 private static int lastIncrementValue = 0;
+
 
     private static final Logger log = LoggerFactory.getLogger(SummonNotificationServiceImpl.class);
 
@@ -52,19 +52,22 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
         try {
             // Convert DTO to entity
-            SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
-            log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
+        	 SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
+             log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
 
-            // Generate Application Number before saving
-            String applicationNo = generateApplicationNo(summonNotificationDTO.getLokSabhaNo(),
-                    summonNotificationDTO.getSessionNo());
-            summonNotification.setApplicationNo(applicationNo);
-            log.debug("Generated Application No: {}", applicationNo);
+             // Save SummonNotification entity first to generate the ID
+             SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
+             log.debug("First save - Generated SummonNotification ID: {}", savedNotification.getId());
 
-            // Save SummonNotification entity
-            SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
-            log.debug("Saved SummonNotification entity: {}", savedNotification);
+             // Generate Application Number using the generated ID
+             String applicationNo = generateApplicationNo(summonNotificationDTO.getLokSabhaNo(),
+                     summonNotificationDTO.getSessionNo(), savedNotification.getId());
+             savedNotification.setApplicationNo(applicationNo);
+             log.debug("Generated Application No: {}", applicationNo);
 
+             // Save SummonNotification again with the updated applicationNo
+             savedNotification = summonNotificationRepository.save(savedNotification);
+             log.debug("Saved SummonNotification entity with updated Application No: {}", savedNotification);
             // Create ApplicationInstanceDTO for external microservice
             ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
             		
@@ -98,12 +101,12 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
         }
     }
 
-    private String generateApplicationNo(String lokSabhaNo, String sessionNo) {
+    private String generateApplicationNo(String lokSabhaNo, String sessionNo, Long id) {
         // Increment the last used value
-        lastIncrementValue++;
+   
 
         // Generate application number with formatting
-        return "Ref-SNLS" + lokSabhaNo + sessionNo + String.format("%02d", lastIncrementValue);
+        return "SNLS" + lokSabhaNo + sessionNo + id;
     }
 
     private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
