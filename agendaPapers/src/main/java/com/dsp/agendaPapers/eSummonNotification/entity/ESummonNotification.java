@@ -58,6 +58,9 @@ public class ESummonNotification extends Auditable {
     @Column(name = "template_content", columnDefinition = "TEXT")
     private String templateContent;
     
+    @Column(name = "template_content_Hindi", columnDefinition = "TEXT")
+    private String templateContentHindi;
+    
     @OneToOne
     @JoinColumn(name = "parent_id")
     private SummonNotification parentNotification;

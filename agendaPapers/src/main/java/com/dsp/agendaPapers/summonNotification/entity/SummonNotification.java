@@ -20,54 +20,56 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
 @Table(name = "summon_notifications", schema = "agenda_papers")
-public class SummonNotification extends Auditable{
+public class SummonNotification extends Auditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "summon_notifications_seq")
 	@SequenceGenerator(name = "summon_notifications_seq", sequenceName = "summon_notifications_seq", allocationSize = 1)
 	private Long id;
 
-    @Column(name = "lok_sabha_no", nullable = false, length = 100)
-    private String lokSabhaNo;
+	@Column(name = "lok_sabha_no", nullable = false, length = 100)
+	private String lokSabhaNo;
 
-    @Column(name = "session_no", nullable = false, length = 100)
-    private String sessionNo;
+	@Column(name = "session_no", nullable = false, length = 100)
+	private String sessionNo;
 
-    @Column(name = "summon_issuance_date", nullable = false)
-    private LocalDate summonIssuanceDate;
+	@Column(name = "summon_issuance_date", nullable = false)
+	private LocalDate summonIssuanceDate;
 
-    @Column(name = "summon_issuance_date_hindi_en", nullable = false, length = 100)
-    private String summonIssuanceDateHindiEn;
-    
-    @Column(name = "summon_issuance_date_hindi", nullable = false, length = 100)
-    private String summonIssuanceDateHindi;
+	@Column(name = "summon_issuance_date_hindi_en", nullable = false, length = 100)
+	private String summonIssuanceDateHindiEn;
 
-    @Column(name = "notification_no", nullable = false, length = 100)
-    private String notificationNo;
+	@Column(name = "summon_issuance_date_hindi", nullable = false, length = 100)
+	private String summonIssuanceDateHindi;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    @Column(name = "summon_start_at")
-    private LocalDateTime summonStartAt;
+	@Column(name = "notification_no", nullable = false, length = 100)
+	private String notificationNo;
 
-    @Column(name = "application_no", length = 50)
-    private String applicationNo;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+	@Column(name = "summon_start_at")
+	private LocalDateTime summonStartAt;
 
-    @Column(name = "status", nullable = false, length = 50)
-    private String status;
+	@Column(name = "application_no", length = 50)
+	private String applicationNo;
 
-    @Column(name = "template_content", columnDefinition = "TEXT")
-    private String templateContent;
+	@Column(name = "status", nullable = false, length = 50)
+	private String status;
 
-   
-    @OneToOne
-    @JoinColumn(name = "parent_id")
-    private SummonNotification parentNotification;
+	@Column(name = "template_content", columnDefinition = "TEXT")
+	private String templateContent;
 
+	@Column(name = "template_content_Hindi", columnDefinition = "TEXT")
+	private String templateContentHindi;
+
+	@OneToOne
+	@JoinColumn(name = "parent_id")
+	private SummonNotification parentNotification;
 
 }
