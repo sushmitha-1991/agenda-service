@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -14,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.dsp.agendaPapers.applicationPapers.dto.ApplicationPapersDTO;
+import com.dsp.agendaPapers.applicationPapers.dto.TemplatesDTO;
+import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
@@ -39,7 +43,16 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 	@Autowired
 	private RestTemplate restTemplate;
 
-	private final String applicationInstanceServiceUrl = "http://10.247.128.16/master/application-instances";
+	@Autowired
+	private ApplicationPapersService applicationPapersService;
+
+	@Value("${template.service.url}") // URL to validate template ID
+	private String templateServiceUrl;
+
+	@Value("${application.instance.service.url}")
+	private String applicationInstanceServiceUrl;
+
+	
 
 	@Transactional
 	@Override
@@ -86,10 +99,29 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
 			log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
 
+			// Validate template ID
+			validateTemplateId(eSummonNotificationDTO.getTemplateId());
+
+			// Create ApplicationPapersDTO and save template content from SummonNotification
+			ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
+					.applicationId(eSummonNotificationDTO.getApplicationId())
+					.applicationInstanceId(savedInstanceDTO.getId()) // Correct way
+					.templateId(eSummonNotificationDTO.getTemplateId())
+					.templateContent(eSummonNotificationDTO.getTemplateContent()).build();
+			log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
+
+			// Save ApplicationPapers data
+			applicationPapersService.saveApplicationPapers(applicationPapersDTO);
+			log.debug("Saved ApplicationPapers data.");
+
 			// Convert saved entity back to DTO
 			ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(savedNotification);
 			responseDTO.setApplicationInstanceDTO(savedInstanceDTO); // Set the ApplicationInstanceDTO
 			log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
+
+			 responseDTO.setTemplateId(eSummonNotificationDTO.getTemplateId()); 
+
+	            log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
 
 			return responseDTO;
 		} catch (Exception e) {
@@ -130,6 +162,20 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			log.error("Error calling ApplicationInstance service: ", e);
 			throw new RuntimeException("Failed to create ApplicationInstance", e);
 		}
+	}
+
+	private TemplatesDTO validateTemplateId(Long templateId) {
+		String masterServiceUrl = templateServiceUrl + "/getById/" + templateId; // Use '/' to separate URL segments
+		ResponseEntity<TemplatesDTO> response = restTemplate.getForEntity(masterServiceUrl, TemplatesDTO.class);
+
+		if (!response.getStatusCode().is2xxSuccessful()) {
+			log.error("Failed to fetch Template from master service: {} - {}", response.getStatusCode(),
+					response.getBody());
+			throw new RuntimeException(
+					"Failed to fetch Template from master service. Status: " + response.getStatusCode());
+		}
+
+		return response.getBody();
 	}
 
 	@Override
@@ -316,7 +362,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 	@Override
 	public void deleteESummonNotification(Long id) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
