@@ -18,13 +18,14 @@ import java.util.Map;
 @Audited
 @Entity
 @Data
-@Table(name = "provisional_calendar", schema = "agenda_papers")
+@Table(name = "provisional_data", schema = "agenda_papers")
 public class ProvisionalCalendar extends Auditable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "provisional_calendar_seq")
-    @SequenceGenerator(name = "provisional_calendar_seq", sequenceName = "provisional_calendar_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "provisional_data_seq")
+    @SequenceGenerator(name = "provisional_data_seq", sequenceName = "agenda_papers.provisional_data_seq", allocationSize = 1)
     private Long id;
+
 
     @Column(name = "lok_sabha_no", nullable = false, length = 100)
     private String lokSabhaNo;
