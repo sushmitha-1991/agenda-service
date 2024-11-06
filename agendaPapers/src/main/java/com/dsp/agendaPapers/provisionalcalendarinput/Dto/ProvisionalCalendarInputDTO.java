@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.Map;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,7 +21,7 @@ public class ProvisionalCalendarInputDTO {
 
     @NotNull(message = "Date of input is required")
 //    private Date dateOfInput;
-    private java.sql.Date dateOfInput;
+    private Date dateOfInput;
     private String language;
     private String submittedBy;
     private String submittedByBranch;
@@ -28,5 +30,6 @@ public class ProvisionalCalendarInputDTO {
     private String footnoteText;
     private String approverName;
     private String approverDesignation;
+    private Map<String, Object> dateOfSittingInputs;
 
 }

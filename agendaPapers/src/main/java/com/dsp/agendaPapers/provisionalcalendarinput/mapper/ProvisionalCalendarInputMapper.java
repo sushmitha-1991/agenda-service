@@ -19,6 +19,7 @@ public class ProvisionalCalendarInputMapper {
                 .footnoteText(provisionalCalendarInputDTO.getFootnoteText())
                 .approverName(provisionalCalendarInputDTO.getApproverName())
                 .approverDesignation(provisionalCalendarInputDTO.getApproverDesignation())
+                .dateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs())
                 .build();
     }
 
@@ -36,6 +37,7 @@ public class ProvisionalCalendarInputMapper {
                 .footnoteText(provisionalCalendarInput.getFootnoteText())
                 .approverName(provisionalCalendarInput.getApproverName())
                 .approverDesignation(provisionalCalendarInput.getApproverDesignation())
+                .dateOfSittingInputs(provisionalCalendarInput.getDateOfSittingInputs())
                 .build();
     }
 

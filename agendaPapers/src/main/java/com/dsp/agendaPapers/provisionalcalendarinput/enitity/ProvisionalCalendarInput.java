@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.enitity;
 
+import com.dsp.agendaPapers.config.MapToJsonConverter;
 import com.dsp.agendaPapers.entity.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.Audited;
+
+import java.sql.Date;
+import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +34,7 @@ public class ProvisionalCalendarInput extends Auditable {
     private String sessionNo;
 
     @Column(name = "date_of_input", nullable = false)
-    private java.sql.Date dateOfInput;
+    private Date dateOfInput;
 
     @Column(name = "language", nullable = false, length = 30)
     private String language;
@@ -55,5 +59,13 @@ public class ProvisionalCalendarInput extends Auditable {
 
     @Column(name = "approver_designation", nullable = false, length = 128)
     private String approverDesignation;
+
+    @Convert(converter = MapToJsonConverter.class)
+    @Column(name = "dateOfSittingInputs", columnDefinition = "text")
+    private Map<String, Object> dateOfSittingInputs;
+
+
+
+
 }
 

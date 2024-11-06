@@ -17,6 +17,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
     @Autowired
     private ProvisionalCalendarInputRepository provisionalCalendarInputRepository;
 
+    // Handle creation of ProvisionalCalendarInputDTO
     @Override
     public ProvisionalCalendarInputDTO createProvisionalCalendarInput(ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
         ProvisionalCalendarInput provisionalCalendarInput = ProvisionalCalendarInput.builder()
@@ -31,6 +32,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
                 .footnoteText(provisionalCalendarInputDTO.getFootnoteText())
                 .approverName(provisionalCalendarInputDTO.getApproverName())
                 .approverDesignation(provisionalCalendarInputDTO.getApproverDesignation())
+                .dateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs()) // Ensure the map is set
                 .build();
 
         ProvisionalCalendarInput savedProvisionalCalendarInput = provisionalCalendarInputRepository.save(provisionalCalendarInput);
@@ -44,10 +46,24 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
         return mapToDto(provisionalCalendarInput);
     }
 
+//    @Override
+//    public List<ProvisionalCalendarInputDTO> getAllProvisionalCalendarInputs() {
+//        // Fetch all records and map to DTOs
+//        return provisionalCalendarInputRepository.findAll()
+//                .stream()
+//                .map(this::mapToDto) // Convert to DTO
+//                .collect(Collectors.toList());
+//    }
+
     @Override
     public List<ProvisionalCalendarInputDTO> getAllProvisionalCalendarInputs() {
-        return provisionalCalendarInputRepository.findAll()
-                .stream()
+        List<ProvisionalCalendarInput> inputs = provisionalCalendarInputRepository.findAll();
+
+        if (inputs == null || inputs.isEmpty()) {
+            throw new RuntimeException("No provisional calendar inputs found.");
+        }
+
+        return inputs.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
@@ -67,6 +83,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
                     existingProvisionalCalendarInput.setFootnoteText(provisionalCalendarInputDTO.getFootnoteText());
                     existingProvisionalCalendarInput.setApproverName(provisionalCalendarInputDTO.getApproverName());
                     existingProvisionalCalendarInput.setApproverDesignation(provisionalCalendarInputDTO.getApproverDesignation());
+                    existingProvisionalCalendarInput.setDateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs()); // Update the map
 
                     ProvisionalCalendarInput savedProvisionalCalendarInput = provisionalCalendarInputRepository.save(existingProvisionalCalendarInput);
                     return mapToDto(savedProvisionalCalendarInput);
@@ -96,8 +113,8 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
                 .footnoteText(provisionalCalendarInput.getFootnoteText())
                 .approverName(provisionalCalendarInput.getApproverName())
                 .approverDesignation(provisionalCalendarInput.getApproverDesignation())
+                .dateOfSittingInputs(provisionalCalendarInput.getDateOfSittingInputs())
                 .build();
     }
-
 
 }
