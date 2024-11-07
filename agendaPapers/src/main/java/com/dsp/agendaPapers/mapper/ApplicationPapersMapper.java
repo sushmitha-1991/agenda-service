@@ -14,7 +14,9 @@ public class ApplicationPapersMapper {
                 .applicationInstanceId(applicationPapersDTO.getApplicationInstanceId())
                 .applicationId(applicationPapersDTO.getApplicationId())
                 .templateId(applicationPapersDTO.getTemplateId())
+                .templateHindiId(applicationPapersDTO.getTemplateHindiId())
                 .templateContent(applicationPapersDTO.getTemplateContent())
+                .templateContentHindi(applicationPapersDTO.getTemplateContentHindi())
                 .build();
     }
 
@@ -24,7 +26,9 @@ public class ApplicationPapersMapper {
                 .applicationInstanceId(applicationPapers.getApplicationInstanceId())
                 .applicationId(applicationPapers.getApplicationId())
                 .templateId(applicationPapers.getTemplateId())
+                .templateHindiId(applicationPapers.getTemplateHindiId())
                 .templateContent(applicationPapers.getTemplateContent())
+                .templateContentHindi(applicationPapers.getTemplateContentHindi())
                 .build();
     }
 }

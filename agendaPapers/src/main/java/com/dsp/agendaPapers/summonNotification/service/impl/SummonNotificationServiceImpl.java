@@ -34,154 +34,157 @@ import com.dsp.agendaPapers.summonNotification.service.SummonNotificationService
 @Service
 public class SummonNotificationServiceImpl implements SummonNotificationService {
 
-    private static final Logger log = LoggerFactory.getLogger(SummonNotificationServiceImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(SummonNotificationServiceImpl.class);
 
-    @Autowired
-    private SummonNotificationRepository summonNotificationRepository;
-    
-    @Autowired
-    private ApplicationPapersService applicationPapersService;
+	@Autowired
+	private SummonNotificationRepository summonNotificationRepository;
 
-    @Autowired
-    private SummonNotificationMapper summonNotificationMapper;
+	@Autowired
+	private ApplicationPapersService applicationPapersService;
 
-    @Value("${application.instance.service.url}") 
-    private String applicationInstanceServiceUrl;
+	@Autowired
+	private SummonNotificationMapper summonNotificationMapper;
 
-    @Autowired
-    private RestTemplate restTemplate;
+	@Value("${application.instance.service.url}")
+	private String applicationInstanceServiceUrl;
 
-    @Value("${template.service.url}") // URL to validate template ID
-    private String templateServiceUrl;
+	@Autowired
+	private RestTemplate restTemplate;
 
-    @Transactional
-    @Override
-    public SummonNotificationDTO saveSummonNotification(SummonNotificationDTO summonNotificationDTO) {
-        log.debug("Entering saveSummonNotification with SummonNotificationDTO: {}", summonNotificationDTO);
+	@Value("${template.service.url}") // URL to validate template ID
+	private String templateServiceUrl;
 
-        try {
-           
+	@Transactional
+	@Override
+	public SummonNotificationDTO saveSummonNotification(SummonNotificationDTO summonNotificationDTO) {
+		log.debug("Entering saveSummonNotification with SummonNotificationDTO: {}", summonNotificationDTO);
 
-            // Convert DTO to entity
-            SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
-            log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
+		try {
 
-            // Save SummonNotification entity first to generate the ID
-            SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
-            log.debug("First save - Generated SummonNotification ID: {}", savedNotification.getId());
+			// Convert DTO to entity
+			SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
+			log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
 
-            // Generate Application Number using the generated ID
-            String applicationNo = generateApplicationNo(summonNotificationDTO.getLokSabhaNo(),
-                    summonNotificationDTO.getSessionNo(), savedNotification.getId());
-            savedNotification.setApplicationNo(applicationNo);
-            log.debug("Generated Application No: {}", applicationNo);
+			// Save SummonNotification entity first to generate the ID
+			SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
+			log.debug("First save - Generated SummonNotification ID: {}", savedNotification.getId());
 
-            // Save SummonNotification again with the updated applicationNo
-            savedNotification = summonNotificationRepository.save(savedNotification);
-            log.debug("Saved SummonNotification entity with updated Application No: {}", savedNotification);
+			// Generate Application Number using the generated ID
+			String applicationNo = generateApplicationNo(summonNotificationDTO.getLokSabhaNo(),
+					summonNotificationDTO.getSessionNo(), savedNotification.getId());
+			savedNotification.setApplicationNo(applicationNo);
+			log.debug("Generated Application No: {}", applicationNo);
 
-            // Create ApplicationInstanceDTO for external microservice
-            ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-                    .applicationId(summonNotificationDTO.getApplicationId()) // From frontend
-                    .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-                    .currentStatus(savedNotification.getStatus()) // From SummonNotification's status
-                    .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl()) // Optional from frontend
-                    .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-                    .build();
-            log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
+			// Save SummonNotification again with the updated applicationNo
+			savedNotification = summonNotificationRepository.save(savedNotification);
+			log.debug("Saved SummonNotification entity with updated Application No: {}", savedNotification);
 
-            // Call ApplicationInstance microservice to save the application instance data
-            ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
-            log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+			// Create ApplicationInstanceDTO for external microservice
+			ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
+					.applicationId(summonNotificationDTO.getApplicationId()) // From frontend
+					.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+					.currentStatus(savedNotification.getStatus()) // From SummonNotification's status
+					.publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl()) // Optional from frontend
+					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+					.build();
+			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
 
-            if (savedInstanceDTO == null) {
-                log.error("ApplicationInstanceDTO is null after the microservice call!");
-                throw new RuntimeException("ApplicationInstance creation failed");
-            }
+			// Call ApplicationInstance microservice to save the application instance data
+			ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+			log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
 
-            Long applicationInstanceId = savedInstanceDTO.getId();
-            log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
-            
-            // Validate template ID
-            validateTemplateId(summonNotificationDTO.getTemplateId());
+			if (savedInstanceDTO == null) {
+				log.error("ApplicationInstanceDTO is null after the microservice call!");
+				throw new RuntimeException("ApplicationInstance creation failed");
+			}
 
-            // Create ApplicationPapersDTO and save template content from SummonNotification
-            ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
-                    .applicationId(summonNotificationDTO.getApplicationId())
-                    .applicationInstanceId(applicationInstanceId)
-                    .templateId(summonNotificationDTO.getTemplateId())
-                    .templateContent(summonNotificationDTO.getTemplateContent())
-                    .build();
-            log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
+			Long applicationInstanceId = savedInstanceDTO.getId();
+			log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
 
-            // Save ApplicationPapers data
-            applicationPapersService.saveApplicationPapers(applicationPapersDTO);
-            log.debug("Saved ApplicationPapers data.");
+			// Validate template ID
+			validateTemplateId(summonNotificationDTO.getTemplateId());
 
-            // Convert saved entity back to DTO
-            SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
-            responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
-            log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
+			// Create ApplicationPapersDTO and save template content from SummonNotification
+			ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
+					.applicationId(summonNotificationDTO.getApplicationId())
+					.applicationInstanceId(applicationInstanceId)
+					.templateId(summonNotificationDTO.getTemplateId())
+					.templateContent(summonNotificationDTO.getTemplateContent())
+					.templateHindiId(summonNotificationDTO.getTemplateHindiId())
+					.templateContentHindi(summonNotificationDTO.getTemplateContentHindi()).build();
+			log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
 
-            responseDTO.setTemplateId(summonNotificationDTO.getTemplateId()); 
+			// Save ApplicationPapers data
+			applicationPapersService.saveApplicationPapers(applicationPapersDTO);
+			log.debug("Saved ApplicationPapers data.");
 
-            log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
+			// Convert saved entity back to DTO
+			SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
+			responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
+			log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
 
-            return responseDTO;
-        } catch (ResourceNotFoundException e) {
-            log.error("Resource not found during saveSummonNotification: {}", e.getMessage());
-            throw e; // Re-throw the exception for further handling
-        } catch (Exception e) {
-            log.error("Error in saveSummonNotification: ", e);
-            throw new RuntimeException("Failed to save SummonNotification", e);
-        }
-    }
+			responseDTO.setTemplateId(summonNotificationDTO.getTemplateId());
+			responseDTO.setTemplateHindiId(summonNotificationDTO.getTemplateHindiId());
+			
 
-    private String generateApplicationNo(String lokSabhaNo, String sessionNo, Long id) {
-        return "SNLS" + lokSabhaNo + sessionNo + id;
-    }
+			log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
 
-    private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
-        String url = applicationInstanceServiceUrl + "/create";
-        log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url, applicationInstanceDTO);
+			return responseDTO;
+		} catch (ResourceNotFoundException e) {
+			log.error("Resource not found during saveSummonNotification: {}", e.getMessage());
+			throw e; // Re-throw the exception for further handling
+		} catch (Exception e) {
+			log.error("Error in saveSummonNotification: ", e);
+			throw new RuntimeException("Failed to save SummonNotification", e);
+		}
+	}
 
-        try {
-            ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(url,
-                    HttpMethod.POST, new HttpEntity<>(applicationInstanceDTO),
-                    new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {});
+	private String generateApplicationNo(String lokSabhaNo, String sessionNo, Long id) {
+		return "SNLS" + lokSabhaNo + sessionNo + id;
+	}
 
-            if (response == null || response.getBody() == null || response.getBody().getData() == null) {
-                log.error("Response or body is null from ApplicationInstance service");
-                throw new RuntimeException("Failed to create ApplicationInstance, response is null");
-            }
+	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
+		String url = applicationInstanceServiceUrl + "/create";
+		log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url,
+				applicationInstanceDTO);
 
-            ApplicationInstanceDTO savedInstance = response.getBody().getData();
-            log.debug("Received ApplicationInstanceDTO from ApplicationInstance service: {}", savedInstance);
-            return savedInstance;
+		try {
+			ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(url,
+					HttpMethod.POST, new HttpEntity<>(applicationInstanceDTO),
+					new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
+					});
 
-        } catch (ResourceNotFoundException e) {
-            log.error("Resource not found when calling ApplicationInstance service: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Error calling ApplicationInstance service: ", e);
-            throw new RuntimeException("Failed to create ApplicationInstance", e);
-        }
-    }
+			if (response == null || response.getBody() == null || response.getBody().getData() == null) {
+				log.error("Response or body is null from ApplicationInstance service");
+				throw new RuntimeException("Failed to create ApplicationInstance, response is null");
+			}
 
-  
-    	private TemplatesDTO validateTemplateId(Long templateId) {
-    		String masterServiceUrl = templateServiceUrl + "/getById/" + templateId; // Use '/' to separate URL segments
-    	    ResponseEntity<TemplatesDTO> response = restTemplate.getForEntity(masterServiceUrl, TemplatesDTO.class);
+			ApplicationInstanceDTO savedInstance = response.getBody().getData();
+			log.debug("Received ApplicationInstanceDTO from ApplicationInstance service: {}", savedInstance);
+			return savedInstance;
 
-    	    if (!response.getStatusCode().is2xxSuccessful()) {
-    	        log.error("Failed to fetch Template from master service: {} - {}", response.getStatusCode(), response.getBody());
-    	        throw new RuntimeException("Failed to fetch Template from master service. Status: " + response.getStatusCode());
-    	    }
+		} catch (ResourceNotFoundException e) {
+			log.error("Resource not found when calling ApplicationInstance service: {}", e.getMessage());
+			throw e;
+		} catch (Exception e) {
+			log.error("Error calling ApplicationInstance service: ", e);
+			throw new RuntimeException("Failed to create ApplicationInstance", e);
+		}
+	}
 
-    	    return response.getBody();
-    	}
+	private TemplatesDTO validateTemplateId(Long templateId) {
+		String masterServiceUrl = templateServiceUrl + "/getById/" + templateId; // Use '/' to separate URL segments
+		ResponseEntity<TemplatesDTO> response = restTemplate.getForEntity(masterServiceUrl, TemplatesDTO.class);
 
+		if (!response.getStatusCode().is2xxSuccessful()) {
+			log.error("Failed to fetch Template from master service: {} - {}", response.getStatusCode(),
+					response.getBody());
+			throw new RuntimeException(
+					"Failed to fetch Template from master service. Status: " + response.getStatusCode());
+		}
 
+		return response.getBody();
+	}
 
 	@Override
 	public List<SummonNotificationDTO> getAllSummonNotifications() {

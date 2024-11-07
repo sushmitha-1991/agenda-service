@@ -43,6 +43,9 @@ private Long id;
     private String currentStatus;
     private String publishedDocumentUrl;
    private Long templateId;
+   private Long templateHindiId;
+   private String templateContentHindi;
+
     private Long refId;
 }
 

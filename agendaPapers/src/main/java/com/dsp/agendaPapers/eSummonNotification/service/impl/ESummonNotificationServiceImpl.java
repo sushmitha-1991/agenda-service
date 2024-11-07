@@ -101,13 +101,16 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 			// Validate template ID
 			validateTemplateId(eSummonNotificationDTO.getTemplateId());
+			validateTemplateId(eSummonNotificationDTO.getTemplateHindiId());
 
 			// Create ApplicationPapersDTO and save template content from SummonNotification
 			ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
 					.applicationId(eSummonNotificationDTO.getApplicationId())
-					.applicationInstanceId(savedInstanceDTO.getId()) // Correct way
+					.applicationInstanceId(savedInstanceDTO.getId()) 
 					.templateId(eSummonNotificationDTO.getTemplateId())
-					.templateContent(eSummonNotificationDTO.getTemplateContent()).build();
+					.templateContent(eSummonNotificationDTO.getTemplateContent())
+					.templateHindiId(eSummonNotificationDTO.getTemplateHindiId())
+					.templateContentHindi(eSummonNotificationDTO.getTemplateContentHindi()).build();
 			log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
 
 			// Save ApplicationPapers data
@@ -120,6 +123,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
 
 			 responseDTO.setTemplateId(eSummonNotificationDTO.getTemplateId()); 
+			 responseDTO.setTemplateHindiId(eSummonNotificationDTO.getTemplateHindiId());
 
 	            log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
 

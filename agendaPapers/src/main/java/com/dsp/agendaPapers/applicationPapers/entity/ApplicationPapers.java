@@ -25,13 +25,17 @@ public class ApplicationPapers {
 	@SequenceGenerator(name = "application_papers_seq", sequenceName = "application_papers_seq", allocationSize = 1)
 	
 	private Long id;
-	@Column(name ="application_Instance_Id")
+	@Column(name ="application_Instance_id")
 	private Long applicationInstanceId;
-	@Column(name ="application_Id")
+	@Column(name ="application_id")
 	private Long applicationId;
 	@Column(name ="template_Id")
 	private Long templateId;
+	@Column(name ="template_hindi_id")
+	 private Long templateHindiId;
 	@Column(name = "template_content", columnDefinition = "TEXT")
     private String templateContent;
+	@Column(name = "template_Content_hindi;", columnDefinition = "TEXT")
+	private String templateContentHindi;
 
 }

@@ -11,15 +11,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApplicationPapersDTO {
-	
+
 	private Long id;
-	
+
 	private Long applicationInstanceId;
-	
+
 	private Long applicationId;
-	
+
 	private Long templateId;
-	
-    private String templateContent;
+
+	private Long templateHindiId;
+
+	private String templateContentHindi;
+
+	private String templateContent;
 
 }
