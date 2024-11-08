@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.summonNotification.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -20,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.dsp.agendaPapers.applicationPapers.dto.ApplicationPapersDTO;
 import com.dsp.agendaPapers.applicationPapers.dto.TemplatesDTO;
+import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
+import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.exception.ExternalServiceException;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
@@ -50,6 +53,9 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 	@Autowired
 	private RestTemplate restTemplate;
+
+	@Autowired
+	private ApplicationPapersRepository applicationPapersRepository;
 
 	@Value("${template.service.url}") // URL to validate template ID
 	private String templateServiceUrl;
@@ -107,8 +113,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			// Create ApplicationPapersDTO and save template content from SummonNotification
 			ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
 					.applicationId(summonNotificationDTO.getApplicationId())
-					.applicationInstanceId(applicationInstanceId)
-					.templateId(summonNotificationDTO.getTemplateId())
+					.applicationInstanceId(applicationInstanceId).templateId(summonNotificationDTO.getTemplateId())
 					.templateContent(summonNotificationDTO.getTemplateContent())
 					.templateHindiId(summonNotificationDTO.getTemplateHindiId())
 					.templateContentHindi(summonNotificationDTO.getTemplateContentHindi()).build();
@@ -125,7 +130,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 			responseDTO.setTemplateId(summonNotificationDTO.getTemplateId());
 			responseDTO.setTemplateHindiId(summonNotificationDTO.getTemplateHindiId());
-			
 
 			log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
 
@@ -199,6 +203,15 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 				SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
 				ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getApplicationNo());
 				dto.setApplicationInstanceDTO(instanceDTO);
+
+				if (instanceDTO != null && instanceDTO.getId() != null) {
+					applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+							.ifPresent(applicationPapers -> {
+								dto.setTemplateId(applicationPapers.getTemplateId());
+								dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+							});
+				}
+
 				responseList.add(dto);
 			}
 
@@ -228,6 +241,14 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(summonNotification.getApplicationNo());
 			summonNotificationDTO.setApplicationInstanceDTO(instanceDTO);
 
+			// Retrieve ApplicationPapers by applicationInstanceId
+			if (instanceDTO != null && instanceDTO.getId() != null) {
+				applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+						.ifPresent(applicationPapers -> {
+							summonNotificationDTO.setTemplateId(applicationPapers.getTemplateId());
+							summonNotificationDTO.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+						});
+			}
 			log.debug("Returning SummonNotificationDTO: {}", summonNotificationDTO);
 			return summonNotificationDTO;
 
@@ -283,6 +304,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			existingNotification.setStatus(summonNotificationDTO.getStatus());
 			existingNotification.setSummonStartAt(summonNotificationDTO.getSummonStartAt());
 			existingNotification.setTemplateContent(summonNotificationDTO.getTemplateContent());
+			existingNotification.setTemplateContentHindi(summonNotificationDTO.getTemplateContentHindi());
 
 			// Save the updated SummonNotification
 			SummonNotification updatedNotification = summonNotificationRepository.save(existingNotification);
@@ -336,6 +358,25 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 				// You can choose to handle this case as needed
 			}
 
+			if (summonNotificationDTO.getTemplateContent() != null
+					|| summonNotificationDTO.getTemplateContentHindi() != null) {
+				Optional<ApplicationPapers> existingPapersOpt = applicationPapersRepository
+						.findByApplicationIdAndApplicationInstanceId(summonNotificationDTO.getApplicationId(),
+								responseDTO.getApplicationInstanceDTO().getId());
+
+				if (existingPapersOpt.isPresent()) {
+					ApplicationPapers existingPapers = existingPapersOpt.get();
+					existingPapers.setTemplateContent(summonNotificationDTO.getTemplateContent());
+					existingPapers.setTemplateContentHindi(summonNotificationDTO.getTemplateContentHindi());
+
+					applicationPapersRepository.save(existingPapers);
+					log.debug("Updated ApplicationPapers with new template content.");
+				} else {
+					log.warn("ApplicationPapers not found for ApplicationId: {} and ApplicationInstanceId: {}",
+							summonNotificationDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
+				}
+			}
+
 			log.debug("Returning updated SummonNotificationDTO with ApplicationInstance data: {}", responseDTO);
 			return responseDTO;
 
@@ -367,6 +408,13 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								summonNotification.getApplicationNo());
 						dto.setApplicationInstanceDTO(instanceDTO);
+						if (instanceDTO != null && instanceDTO.getId() != null) {
+							applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+									.ifPresent(applicationPapers -> {
+										dto.setTemplateId(applicationPapers.getTemplateId());
+										dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+									});
+						}
 						return dto;
 					}).collect(Collectors.toList());
 

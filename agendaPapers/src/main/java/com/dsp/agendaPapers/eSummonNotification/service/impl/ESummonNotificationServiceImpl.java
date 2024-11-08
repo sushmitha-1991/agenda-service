@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.eSummonNotification.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.dsp.agendaPapers.applicationPapers.dto.ApplicationPapersDTO;
 import com.dsp.agendaPapers.applicationPapers.dto.TemplatesDTO;
+import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
+import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
@@ -51,6 +54,9 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 	@Value("${application.instance.service.url}")
 	private String applicationInstanceServiceUrl;
+	
+	@Autowired
+	private ApplicationPapersRepository applicationPapersRepository;
 
 	
 
@@ -195,6 +201,14 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
 			ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getApplicationNo());
 			dto.setApplicationInstanceDTO(instanceDTO);
+			
+			 if (instanceDTO != null && instanceDTO.getId() != null) {
+	                applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+	                        .ifPresent(applicationPapers -> {
+	                            dto.setTemplateId(applicationPapers.getTemplateId());
+	                            dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+	                        });
+	            }
 			notificationDTOs.add(dto);
 		}
 
@@ -241,6 +255,14 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 		ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
 		ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getApplicationNo());
 		dto.setApplicationInstanceDTO(instanceDTO);
+		
+		 if (instanceDTO != null && instanceDTO.getId() != null) {
+             applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+                     .ifPresent(applicationPapers -> {
+                         dto.setTemplateId(applicationPapers.getTemplateId());
+                         dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+                     });
+         }
 
 		log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", dto);
 		return dto;
@@ -269,6 +291,14 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								summonNotification.getApplicationNo());
 						dto.setApplicationInstanceDTO(instanceDTO);
+						
+						 if (instanceDTO != null && instanceDTO.getId() != null) {
+				                applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+				                        .ifPresent(applicationPapers -> {
+				                            dto.setTemplateId(applicationPapers.getTemplateId());
+				                            dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+				                        });
+				            }
 
 						return dto;
 					}).collect(Collectors.toList());
@@ -298,6 +328,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			// Update only the fields you want to change
 			existingNotification.setStatus(eSummonNotificationDTO.getStatus());
 			existingNotification.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
+			existingNotification.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
 
 			// Save the updated ESummonNotification
 			ESummonNotification updatedNotification = eSummonNotificationRepository.save(existingNotification);
@@ -350,6 +381,24 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 				log.error("Failed to fetch ApplicationInstance: ", e);
 				// You can choose to handle this case as needed
 			}
+			
+			 if (eSummonNotificationDTO.getTemplateContent() != null || eSummonNotificationDTO.getTemplateContentHindi() != null) {
+		            Optional<ApplicationPapers> existingPapersOpt = applicationPapersRepository
+		                    .findByApplicationIdAndApplicationInstanceId(eSummonNotificationDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
+		            
+		            if (existingPapersOpt.isPresent()) {
+		                ApplicationPapers existingPapers = existingPapersOpt.get();
+		                existingPapers.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
+		                existingPapers.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
+
+		                applicationPapersRepository.save(existingPapers);
+		                log.debug("Updated ApplicationPapers with new template content.");
+		            } else {
+		                log.warn("ApplicationPapers not found for ApplicationId: {} and ApplicationInstanceId: {}",
+		                         eSummonNotificationDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
+		            }
+		        }
+
 
 			log.debug("Returning updated ESummonNotificationDTO with ApplicationInstance data: {}", responseDTO);
 			return responseDTO;
