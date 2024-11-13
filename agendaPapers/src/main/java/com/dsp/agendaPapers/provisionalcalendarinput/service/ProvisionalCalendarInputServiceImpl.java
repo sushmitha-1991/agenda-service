@@ -1,7 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.service;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
-import com.dsp.agendaPapers.provisionalcalendarinput.enitity.ProvisionalCalendarInput;
 import com.dsp.agendaPapers.provisionalcalendarinput.mapper.ProvisionalCalendarInputMapper;
 import com.dsp.agendaPapers.provisionalcalendarinput.repository.ProvisionalCalendarInputRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +30,16 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
                 .footnoteText(provisionalCalendarInputDTO.getFootnoteText())
                 .approverName(provisionalCalendarInputDTO.getApproverName())
                 .approverDesignation(provisionalCalendarInputDTO.getApproverDesignation())
-                .dateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs())
+                .dateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs()) // List<Map<String, Object>>
                 .status(provisionalCalendarInputDTO.getStatus())
-                .listOfDocument(provisionalCalendarInputDTO.getListOfDocument())
+                .listOfDocument(provisionalCalendarInputDTO.getListOfDocument()) // List<Map<String, Object>>
                 .draftStatus(provisionalCalendarInputDTO.getDraftStatus())
                 .build();
 
         ProvisionalCalendarInput savedProvisionalCalendarInput = provisionalCalendarInputRepository.save(provisionalCalendarInput);
         return mapToDto(savedProvisionalCalendarInput);
     }
+
 
     @Override
     public ProvisionalCalendarInputDTO getProvisionalCalendarInputById(Long id) {

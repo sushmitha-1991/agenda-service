@@ -29,17 +29,19 @@ public class ProvisionalCalendarInputController {
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> createProvisionalCalendarInput(@Valid @RequestBody ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
+    public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> createProvisionalCalendarInput(
+            @Valid @RequestBody ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
+
         ProvisionalCalendarInputDTO createdProvisionalCalendar = provisionalCalendarInputService.createProvisionalCalendarInput(provisionalCalendarInputDTO);
+
         GenericResponse<ProvisionalCalendarInputDTO> response = new GenericResponse<>(
-                true, // success should be a boolean
-                "Provisional calendar created successfully", // message should be a String
-                createdProvisionalCalendar, // data should be of type T (ProvisionalCalendarDTO)
-                HttpStatus.CREATED.value() // status code
+                true,
+                "Provisional calendar created successfully",
+                createdProvisionalCalendar,
+                HttpStatus.CREATED.value()
         );
         return new ResponseEntity<>(response, HttpStatus.CREATED);
-
-}
+    }
 
 
 

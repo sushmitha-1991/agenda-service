@@ -1,4 +1,4 @@
-package com.dsp.agendaPapers.provisionalcalendarinput.enitity;
+package com.dsp.agendaPapers.provisionalcalendarinput.entity;
 
 import com.dsp.agendaPapers.entity.Auditable;
 import com.dsp.agendaPapers.util.JsonMapConverter;
@@ -9,14 +9,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//@Audited
 @Entity
 @Data
 @Table(name = "provisional_calendar_input", schema = "agenda_papers")
@@ -26,7 +24,6 @@ public class ProvisionalCalendarInput extends Auditable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "provisional_calendar_seq")
     @SequenceGenerator(name = "provisional_calendar_seq", sequenceName = "agenda_papers.provisional_calendar_seq", allocationSize = 1)
     private Long id;
-
 
     @Column(name = "lok_sabha_no", nullable = false, length = 100)
     private String lokSabhaNo;
@@ -61,26 +58,17 @@ public class ProvisionalCalendarInput extends Auditable {
     @Column(name = "approver_designation", nullable = false, length = 128)
     private String approverDesignation;
 
-
     @Column(name = "date_of_sitting_inputs", columnDefinition = "jsonb")
     @Convert(converter = JsonMapConverter.class)
-    private Map<String, Object> dateOfSittingInputs = new HashMap<>();
+    private List<Map<String, Object>> dateOfSittingInputs;
 
-
-
-
-    @Column(name = "status",  length = 50)
+    @Column(name = "status", length = 50)
     private String status;
-
 
     @Column(name = "list_of_document", columnDefinition = "jsonb")
     @Convert(converter = JsonMapConverter.class)
-    private Map<String, Object> listOfDocument = new HashMap<>();
-
+    private List<Map<String, Object>> listOfDocument;
 
     @Column(name = "draft_status", nullable = true) // Nullable draftStatus
     private Boolean draftStatus;
-
-
 }
-

@@ -21,7 +21,6 @@ public class ProvisionalCalendarInputDTO {
     private String sessionNo;
 
     @NotNull(message = "Date of input is required")
-//    private Date dateOfInput;
     private Date dateOfInput;
     private String language;
     private String submittedBy;
@@ -32,13 +31,11 @@ public class ProvisionalCalendarInputDTO {
     private String approverName;
     private String approverDesignation;
 
-    private Map<String, Object> dateOfSittingInputs;
+    private List<Map<String, Object>> dateOfSittingInputs;
 
     private String status;
 
-    private Map<String, Object> listOfDocument;
-    
+    private List<Map<String, Object>> listOfDocument;
+
     private Boolean draftStatus;
-
-
 }
