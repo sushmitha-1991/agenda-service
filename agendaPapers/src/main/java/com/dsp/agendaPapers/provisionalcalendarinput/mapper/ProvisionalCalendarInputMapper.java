@@ -1,7 +1,7 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.mapper;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
-import com.dsp.agendaPapers.provisionalcalendarinput.enitity.ProvisionalCalendarInput;
+import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInput;
 
 public class ProvisionalCalendarInputMapper {
 
