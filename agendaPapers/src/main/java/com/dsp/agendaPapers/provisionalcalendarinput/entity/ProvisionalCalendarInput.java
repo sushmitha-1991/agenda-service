@@ -71,4 +71,8 @@ public class ProvisionalCalendarInput extends Auditable {
 
     @Column(name = "draft_status", nullable = true) // Nullable draftStatus
     private Boolean draftStatus;
+
+    // New content column for generated
+    @Column(name = "content", columnDefinition = "text")
+    private String content;
 }

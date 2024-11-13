@@ -23,6 +23,7 @@ public class ProvisionalCalendarInputMapper {
                 .status(provisionalCalendarInputDTO.getStatus())
                 .listOfDocument(provisionalCalendarInputDTO.getListOfDocument())
                 .draftStatus(provisionalCalendarInputDTO.getDraftStatus())
+                .content(provisionalCalendarInputDTO.getContent())
                 .build();
     }
 
@@ -44,6 +45,7 @@ public class ProvisionalCalendarInputMapper {
                 .status(provisionalCalendarInput.getStatus())
                 .listOfDocument(provisionalCalendarInput.getListOfDocument())
                 .draftStatus(provisionalCalendarInput.getDraftStatus())
+                .content(provisionalCalendarInput.getContent())
                 .build();
     }
 

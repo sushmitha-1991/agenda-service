@@ -38,4 +38,6 @@ public class ProvisionalCalendarInputDTO {
     private List<Map<String, Object>> listOfDocument;
 
     private Boolean draftStatus;
+
+    private String content;
 }

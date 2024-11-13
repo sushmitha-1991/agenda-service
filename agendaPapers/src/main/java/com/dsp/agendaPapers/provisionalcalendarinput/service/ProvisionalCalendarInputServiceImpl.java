@@ -35,7 +35,9 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.dateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs()) // List<Map<String, Object>>
 				.status(provisionalCalendarInputDTO.getStatus())
 				.listOfDocument(provisionalCalendarInputDTO.getListOfDocument()) // List<Map<String, Object>>
-				.draftStatus(provisionalCalendarInputDTO.getDraftStatus()).build();
+				.draftStatus(provisionalCalendarInputDTO.getDraftStatus())
+				.content(provisionalCalendarInputDTO.getContent())
+				.build();
 
 		ProvisionalCalendarInput savedProvisionalCalendarInput = provisionalCalendarInputRepository
 				.save(provisionalCalendarInput);
@@ -77,6 +79,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 			existingEntity.setStatus(provisionalCalendarInputDTO.getStatus());
 			existingEntity.setListOfDocument(provisionalCalendarInputDTO.getListOfDocument());
 			existingEntity.setDraftStatus(provisionalCalendarInputDTO.getDraftStatus());
+			existingEntity.setContent(provisionalCalendarInputDTO.getContent());
 
 			ProvisionalCalendarInput updatedProvisionalCalendarInput = provisionalCalendarInputRepository
 					.save(existingEntity);
@@ -115,7 +118,9 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.dateOfSittingInputs(provisionalCalendarInput.getDateOfSittingInputs())
 				.status(provisionalCalendarInput.getStatus())
 				.listOfDocument(provisionalCalendarInput.getListOfDocument())
-				.draftStatus(provisionalCalendarInput.getDraftStatus()).build();
+				.draftStatus(provisionalCalendarInput.getDraftStatus())
+				.content(provisionalCalendarInput.getContent())
+				.build();
 	}
 
 	// Helper method to map DTO to Entity
@@ -126,6 +131,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.footnoteText(dto.getFootnoteText()).approverName(dto.getApproverName())
 				.approverDesignation(dto.getApproverDesignation()).dateOfSittingInputs(dto.getDateOfSittingInputs())
 				.status(dto.getStatus()).listOfDocument(dto.getListOfDocument()).draftStatus(dto.getDraftStatus())
+				.content(dto.getContent())
 				.build();
 	}
 }
