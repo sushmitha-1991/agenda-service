@@ -1,7 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.controller;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
-import com.dsp.agendaPapers.provisionalcalendarinput.enitity.ProvisionalCalendarInput;
 import com.dsp.agendaPapers.provisionalcalendarinput.service.ProvisionalCalendarInputService;
 import com.dsp.agendaPapers.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,25 +22,6 @@ public class ProvisionalCalendarInputController {
     private ProvisionalCalendarInputService provisionalCalendarInputService;
 
 
-//    @PostMapping("/create")
-//    @Operation(summary = "Create a new provisional calendar input")
-//    @ApiResponses({
-//            @ApiResponse(responseCode = "201", description = "Provisional calendar input created successfully"),
-//            @ApiResponse(responseCode = "400", description = "Invalid input data"),
-//            @ApiResponse(responseCode = "500", description = "Internal server error")
-//    })
-//    public ResponseEntity<GenericResponse<ProvisionalCalendarInput>> createProvisionalCalendarInput(@Valid @RequestBody ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
-//        ProvisionalCalendarInput createdProvisionalCalendar = provisionalCalendarInputService.createProvisionalCalendarInput(provisionalCalendarInputDTO);
-//        GenericResponse<ProvisionalCalendarInput> response = new GenericResponse<>(
-//                true, // success should be a boolean
-//                "Provisional calendar created successfully", // message should be a String
-//                createdProvisionalCalendar, // data should be of type T (ProvisionalCalendarDTO)
-//                HttpStatus.CREATED.value() // status code
-//        );
-//        return new ResponseEntity<>(response, HttpStatus.CREATED);
-//
-//}
-
     @PostMapping("/create")
     @Operation(summary = "Create a new provisional calendar input")
     @ApiResponses({
@@ -50,20 +30,18 @@ public class ProvisionalCalendarInputController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> createProvisionalCalendarInput(@Valid @RequestBody ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
-        // Convert DTO to Entity
         ProvisionalCalendarInputDTO createdProvisionalCalendar = provisionalCalendarInputService.createProvisionalCalendarInput(provisionalCalendarInputDTO);
-
-        // Create a response object
         GenericResponse<ProvisionalCalendarInputDTO> response = new GenericResponse<>(
                 true, // success should be a boolean
                 "Provisional calendar created successfully", // message should be a String
-                createdProvisionalCalendar, // data should be of type ProvisionalCalendarInput (entity)
+                createdProvisionalCalendar, // data should be of type T (ProvisionalCalendarDTO)
                 HttpStatus.CREATED.value() // status code
         );
-
-        // Return response
         return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
+
+}
+
+
 
     @GetMapping("/{id}")
     @Operation(summary = "Get provisional calendar input by ID")
