@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.response;
 
+import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 @Data
@@ -17,5 +18,6 @@ public class GenericResponse<T> {
 		this.message = message;
 		this.data = data;
 	}
+
 }
 

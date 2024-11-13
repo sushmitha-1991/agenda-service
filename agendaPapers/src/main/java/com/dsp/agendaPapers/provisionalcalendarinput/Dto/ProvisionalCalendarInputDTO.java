@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -30,6 +31,14 @@ public class ProvisionalCalendarInputDTO {
     private String footnoteText;
     private String approverName;
     private String approverDesignation;
+
     private Map<String, Object> dateOfSittingInputs;
+
+    private String status;
+
+    private Map<String, Object> listOfDocument;
+    
+    private Boolean draftStatus;
+
 
 }

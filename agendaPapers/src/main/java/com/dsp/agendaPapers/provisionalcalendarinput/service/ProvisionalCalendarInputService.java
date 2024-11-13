@@ -15,4 +15,7 @@ public interface ProvisionalCalendarInputService {
     ProvisionalCalendarInputDTO updateProvisionalCalendarInput(Long id, ProvisionalCalendarInputDTO provisionalCalendarInputDTO);
 
     void deleteProvisionalCalendarInput(Long id);
+
+    ProvisionalCalendarInputDTO saveProvisionalCalendarInput(ProvisionalCalendarInputDTO dto, Boolean draftStatus);
+
 }

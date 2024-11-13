@@ -1,21 +1,22 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.enitity;
 
-import com.dsp.agendaPapers.config.MapToJsonConverter;
 import com.dsp.agendaPapers.entity.Auditable;
+import com.dsp.agendaPapers.util.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.envers.Audited;
 
 import java.sql.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Audited
+//@Audited
 @Entity
 @Data
 @Table(name = "provisional_calendar_input", schema = "agenda_papers")
@@ -60,11 +61,25 @@ public class ProvisionalCalendarInput extends Auditable {
     @Column(name = "approver_designation", nullable = false, length = 128)
     private String approverDesignation;
 
-    @Convert(converter = MapToJsonConverter.class)
-    @Column(name = "dateOfSittingInputs", columnDefinition = "text")
-    private Map<String, Object> dateOfSittingInputs;
+
+    @Column(name = "date_of_sitting_inputs", columnDefinition = "jsonb")
+    @Convert(converter = JsonMapConverter.class)
+    private Map<String, Object> dateOfSittingInputs = new HashMap<>();
 
 
+
+
+    @Column(name = "status",  length = 50)
+    private String status;
+
+
+    @Column(name = "list_of_document", columnDefinition = "jsonb")
+    @Convert(converter = JsonMapConverter.class)
+    private Map<String, Object> listOfDocument = new HashMap<>();
+
+
+    @Column(name = "draft_status", nullable = true) // Nullable draftStatus
+    private Boolean draftStatus;
 
 
 }

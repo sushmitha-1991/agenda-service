@@ -20,6 +20,9 @@ public class ProvisionalCalendarInputMapper {
                 .approverName(provisionalCalendarInputDTO.getApproverName())
                 .approverDesignation(provisionalCalendarInputDTO.getApproverDesignation())
                 .dateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs())
+                .status(provisionalCalendarInputDTO.getStatus())
+                .listOfDocument(provisionalCalendarInputDTO.getListOfDocument())
+                .draftStatus(provisionalCalendarInputDTO.getDraftStatus())
                 .build();
     }
 
@@ -38,6 +41,9 @@ public class ProvisionalCalendarInputMapper {
                 .approverName(provisionalCalendarInput.getApproverName())
                 .approverDesignation(provisionalCalendarInput.getApproverDesignation())
                 .dateOfSittingInputs(provisionalCalendarInput.getDateOfSittingInputs())
+                .status(provisionalCalendarInput.getStatus())
+                .listOfDocument(provisionalCalendarInput.getListOfDocument())
+                .draftStatus(provisionalCalendarInput.getDraftStatus())
                 .build();
     }
 
