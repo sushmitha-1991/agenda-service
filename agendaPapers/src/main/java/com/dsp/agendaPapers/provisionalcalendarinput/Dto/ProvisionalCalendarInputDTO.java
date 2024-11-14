@@ -40,4 +40,6 @@ public class ProvisionalCalendarInputDTO {
     private Boolean draftStatus;
 
     private String content;
+
+    private Boolean generatedFlag;
 }

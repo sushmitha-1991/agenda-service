@@ -37,6 +37,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.listOfDocument(provisionalCalendarInputDTO.getListOfDocument()) // List<Map<String, Object>>
 				.draftStatus(provisionalCalendarInputDTO.getDraftStatus())
 				.content(provisionalCalendarInputDTO.getContent())
+				.generatedFlag(provisionalCalendarInputDTO.getGeneratedFlag())
 				.build();
 
 		ProvisionalCalendarInput savedProvisionalCalendarInput = provisionalCalendarInputRepository
@@ -80,6 +81,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 			existingEntity.setListOfDocument(provisionalCalendarInputDTO.getListOfDocument());
 			existingEntity.setDraftStatus(provisionalCalendarInputDTO.getDraftStatus());
 			existingEntity.setContent(provisionalCalendarInputDTO.getContent());
+			existingEntity.setGeneratedFlag(provisionalCalendarInputDTO.getGeneratedFlag());
 
 			ProvisionalCalendarInput updatedProvisionalCalendarInput = provisionalCalendarInputRepository
 					.save(existingEntity);
@@ -120,6 +122,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.listOfDocument(provisionalCalendarInput.getListOfDocument())
 				.draftStatus(provisionalCalendarInput.getDraftStatus())
 				.content(provisionalCalendarInput.getContent())
+				.generatedFlag(provisionalCalendarInput.getGeneratedFlag())
 				.build();
 	}
 
@@ -132,6 +135,7 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.approverDesignation(dto.getApproverDesignation()).dateOfSittingInputs(dto.getDateOfSittingInputs())
 				.status(dto.getStatus()).listOfDocument(dto.getListOfDocument()).draftStatus(dto.getDraftStatus())
 				.content(dto.getContent())
+				.generatedFlag(dto.getGeneratedFlag())
 				.build();
 	}
 }
