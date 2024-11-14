@@ -1,6 +1,7 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.controller;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
+import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInput;
 import com.dsp.agendaPapers.provisionalcalendarinput.service.ProvisionalCalendarInputService;
 import com.dsp.agendaPapers.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/agendapapers/provisional-input")
 public class ProvisionalCalendarInputController {
@@ -96,6 +100,38 @@ public class ProvisionalCalendarInputController {
         GenericResponse<Void> response = new GenericResponse<>(true, "Input deleted successfully", null, HttpStatus.NO_CONTENT.value());
         return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/inputfilter")
+    @Operation(summary = "Get provisional calendar inputs based on filters")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Filtered provisional calendar inputs retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<GenericResponse<List<ProvisionalCalendarInputDTO>>> getProvisionalData(
+            @RequestParam String submittedByBranch,
+            @RequestParam String status,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+
+        // Convert input date strings to Date objects
+        Date start = Date.valueOf(startDate);
+        Date end = Date.valueOf(endDate);
+
+        // Fetch the filtered data from the service as a List of DTOs
+        List<ProvisionalCalendarInputDTO> inputs = provisionalCalendarInputService.getProvisionalData(submittedByBranch, status, start, end);
+
+        // Wrap the data in a GenericResponse
+        GenericResponse<List<ProvisionalCalendarInputDTO>> response = new GenericResponse<>(
+                true,
+                "Filtered Provisional Calendar based on branch date and status fetch  successfully",
+                inputs,
+                HttpStatus.OK.value()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 
 
 }

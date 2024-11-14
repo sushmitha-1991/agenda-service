@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -105,6 +106,15 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.save(provisionalCalendarInput);
 		return mapToDto(savedProvisionalCalendarInput);
 	}
+	@Override
+	public List<ProvisionalCalendarInputDTO> getProvisionalData(String submittedByBranch, String status, Date startDate, Date endDate) {
+		List<ProvisionalCalendarInput> inputs = provisionalCalendarInputRepository.findByBranchAndStatusAndDateRange(submittedByBranch, status, startDate, endDate);
+
+		// Convert List<ProvisionalCalendarInput> to List<ProvisionalCalendarInputDTO> using mapToDto
+		return inputs.stream().map(this::mapToDto).collect(Collectors.toList());
+	}
+
+
 
 	// Helper method to map entity to DTO
 	private ProvisionalCalendarInputDTO mapToDto(ProvisionalCalendarInput provisionalCalendarInput) {
