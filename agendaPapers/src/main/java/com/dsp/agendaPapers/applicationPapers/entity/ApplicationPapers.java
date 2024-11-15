@@ -1,5 +1,7 @@
 package com.dsp.agendaPapers.applicationPapers.entity;
 
+import com.dsp.agendaPapers.entity.Auditable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,23 +20,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "application_Papers", schema = "agenda_papers")
-public class ApplicationPapers {
-	
+public class ApplicationPapers extends Auditable {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "application_papers_seq")
 	@SequenceGenerator(name = "application_papers_seq", sequenceName = "application_papers_seq", allocationSize = 1)
-	
+
 	private Long id;
-	@Column(name ="application_instance_id")
+	@Column(name = "application_instance_id")
 	private Long applicationInstanceId;
-	@Column(name ="application_id")
+	@Column(name = "application_id")
 	private Long applicationId;
-	@Column(name ="template_id")
+	@Column(name = "template_id")
 	private Long templateId;
-	@Column(name ="template_hindi_id")
-	 private Long templateHindiId;
+	@Column(name = "template_hindi_id")
+	private Long templateHindiId;
 	@Column(name = "template_content", columnDefinition = "TEXT")
-    private String templateContent;
+	private String templateContent;
 	@Column(name = "template_content_hindi", columnDefinition = "TEXT")
 	private String templateContentHindi;
 
