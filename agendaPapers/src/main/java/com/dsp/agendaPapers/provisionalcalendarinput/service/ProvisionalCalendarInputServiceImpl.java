@@ -114,6 +114,18 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 		return inputs.stream().map(this::mapToDto).collect(Collectors.toList());
 	}
 
+	@Override
+	public List<ProvisionalCalendarInputDTO> getProvisionalInputsByStatus(List<String> statuses) {
+		// Fetch entities from the repository
+		List<ProvisionalCalendarInput> inputs = provisionalCalendarInputRepository.findByStatusIn(statuses);
+
+		// Convert entities to DTOs using the custom mapping method
+		return inputs.stream()
+				.map(this::mapToDto) // Use the custom mapping method
+				.collect(Collectors.toList());
+	}
+
+
 
 
 	// Helper method to map entity to DTO

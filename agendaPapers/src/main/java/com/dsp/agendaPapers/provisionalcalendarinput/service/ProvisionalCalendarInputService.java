@@ -1,6 +1,7 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.service;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
+import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInput;
 
 import java.sql.Date;
 import java.util.List;
@@ -20,5 +21,8 @@ public interface ProvisionalCalendarInputService {
     ProvisionalCalendarInputDTO saveProvisionalCalendarInput(ProvisionalCalendarInputDTO dto, Boolean draftStatus);
 
     List<ProvisionalCalendarInputDTO> getProvisionalData(String submittedByBranch, String status, Date startDate, Date endDate);
+
+    // Method to fetch Provisional Calendar Inputs by statuses
+    List<ProvisionalCalendarInputDTO> getProvisionalInputsByStatus(List<String> statuses);
 
 }

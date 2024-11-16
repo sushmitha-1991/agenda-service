@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.provisionalcalendarinput.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInput;
@@ -17,4 +18,8 @@ public interface ProvisionalCalendarInputRepository extends JpaRepository<Provis
             "AND p.dateOfInput BETWEEN :startDate AND :endDate")
     List<ProvisionalCalendarInput> findByBranchAndStatusAndDateRange(
             String submittedByBranch, String status, Date startDate, Date endDate);
+
+
+    // Method to fetch records by a single status or multiple statuses
+    List<ProvisionalCalendarInput> findByStatusIn(List<String> statuses);
 }

@@ -15,22 +15,16 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
     @Autowired
     private ProvisionalCalendarRepository provisionalCalendarRepository;
 
+
     @Override
     public ProvisionalCalendarDTO createProvisionalCalendar(ProvisionalCalendarDTO provisionalCalendarDTO) {
         ProvisionalCalendar provisionalCalendar = ProvisionalCalendar.builder()
                 .lokSabhaNo(provisionalCalendarDTO.getLokSabhaNo())
                 .sessionNo(provisionalCalendarDTO.getSessionNo())
-                .branchId(provisionalCalendarDTO.getBranchId())
-                .provisionalCalendarDate(provisionalCalendarDTO.getProvisionalCalendarDate())
-                .applicationNo(provisionalCalendarDTO.getApplicationNo())
-                .status(provisionalCalendarDTO.getStatus())
-                .note(provisionalCalendarDTO.getNote())
-                .footNote(provisionalCalendarDTO.getFootNote())
-                .approverName(provisionalCalendarDTO.getApproverName())
-                .approverDesignation(provisionalCalendarDTO.getApproverDesignation())
-                .parentId(provisionalCalendarDTO.getParentId())
-                .additionalDetails(provisionalCalendarDTO.getAdditionalDetails())
-                .balloutsDetails(provisionalCalendarDTO.getBalloutsDetails())
+                .rajyaSabhaSessionNo(provisionalCalendarDTO.getRajyaSabhaSessionNo())  // New field
+                .content(provisionalCalendarDTO.getContent())  // New field
+                .generatedDocId(provisionalCalendarDTO.getGeneratedDocId())  // New field
+                .draftStatus(provisionalCalendarDTO.getDraftStatus())
                 .build();
 
         ProvisionalCalendar savedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
@@ -59,17 +53,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
                 .map(existingProvisionalCalendar -> {
                     existingProvisionalCalendar.setLokSabhaNo(provisionalCalendarDTO.getLokSabhaNo());
                     existingProvisionalCalendar.setSessionNo(provisionalCalendarDTO.getSessionNo());
-                    existingProvisionalCalendar.setBranchId(provisionalCalendarDTO.getBranchId());
-                    existingProvisionalCalendar.setProvisionalCalendarDate(provisionalCalendarDTO.getProvisionalCalendarDate());
-                    existingProvisionalCalendar.setApplicationNo(provisionalCalendarDTO.getApplicationNo());
-                    existingProvisionalCalendar.setStatus(provisionalCalendarDTO.getStatus());
-                    existingProvisionalCalendar.setNote(provisionalCalendarDTO.getNote());
-                    existingProvisionalCalendar.setFootNote(provisionalCalendarDTO.getFootNote());
-                    existingProvisionalCalendar.setApproverName(provisionalCalendarDTO.getApproverName());
-                    existingProvisionalCalendar.setApproverDesignation(provisionalCalendarDTO.getApproverDesignation());
-                    existingProvisionalCalendar.setParentId(provisionalCalendarDTO.getParentId());
-                    existingProvisionalCalendar.setAdditionalDetails(provisionalCalendarDTO.getAdditionalDetails());
-                    existingProvisionalCalendar.setBalloutsDetails(provisionalCalendarDTO.getBalloutsDetails());
+                    existingProvisionalCalendar.setRajyaSabhaSessionNo(provisionalCalendarDTO.getRajyaSabhaSessionNo());  // New field
+                    existingProvisionalCalendar.setContent(provisionalCalendarDTO.getContent());  // New field
+                    existingProvisionalCalendar.setGeneratedDocId(provisionalCalendarDTO.getGeneratedDocId());  // New field
+                    existingProvisionalCalendar.setDraftStatus(provisionalCalendarDTO.getDraftStatus());  // New field
 
                     ProvisionalCalendar savedProvisionalCalendar = provisionalCalendarRepository.save(existingProvisionalCalendar);
                     return mapToDto(savedProvisionalCalendar);
@@ -85,22 +72,47 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
         }
     }
 
+    @Override
+    public List<ProvisionalCalendarDTO> getProvisionalCalendarsByLokSabhaNo(String lokSabhaNo) {
+        return provisionalCalendarRepository.findByLokSabhaNo(lokSabhaNo)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProvisionalCalendarDTO> getProvisionalCalendarsBySessionNo(String sessionNo) {
+        return provisionalCalendarRepository.findBySessionNo(sessionNo)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProvisionalCalendarDTO> getProvisionalCalendarsByRajyaSabhaSessionNo(String rajyaSabhaSessionNo) {
+        return provisionalCalendarRepository.findByRajyaSabhaSessionNo(rajyaSabhaSessionNo)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProvisionalCalendarDTO> getProvisionalCalendarsByDraftStatus(Boolean draftStatus) {
+        return provisionalCalendarRepository.findByDraftStatus(draftStatus)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
     private ProvisionalCalendarDTO mapToDto(ProvisionalCalendar provisionalCalendar) {
         return ProvisionalCalendarDTO.builder()
                 .id(provisionalCalendar.getId())
                 .lokSabhaNo(provisionalCalendar.getLokSabhaNo())
                 .sessionNo(provisionalCalendar.getSessionNo())
-                .branchId(provisionalCalendar.getBranchId())
-                .provisionalCalendarDate(provisionalCalendar.getProvisionalCalendarDate())
-                .applicationNo(provisionalCalendar.getApplicationNo())
-                .status(provisionalCalendar.getStatus())
-                .note(provisionalCalendar.getNote())
-                .footNote(provisionalCalendar.getFootNote())
-                .approverName(provisionalCalendar.getApproverName())
-                .approverDesignation(provisionalCalendar.getApproverDesignation())
-                .parentId(provisionalCalendar.getParentId())
-                .additionalDetails(provisionalCalendar.getAdditionalDetails())
-                .balloutsDetails(provisionalCalendar.getBalloutsDetails())
+                .rajyaSabhaSessionNo(provisionalCalendar.getRajyaSabhaSessionNo())  // New field
+                .content(provisionalCalendar.getContent())  // New field
+                .generatedDocId(provisionalCalendar.getGeneratedDocId())  // New field
+                .draftStatus(provisionalCalendar.getDraftStatus())  // New field
                 .build();
     }
 

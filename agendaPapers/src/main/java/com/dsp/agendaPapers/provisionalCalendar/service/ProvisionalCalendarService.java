@@ -6,14 +6,36 @@ import java.util.List;
 
 public interface ProvisionalCalendarService {
 
-    ProvisionalCalendarDTO createProvisionalCalendar(ProvisionalCalendarDTO provisionalCalendarDTO);
 
-    ProvisionalCalendarDTO getProvisionalCalendarById(Long id);
+        // Create a new Provisional Calendar
+        ProvisionalCalendarDTO createProvisionalCalendar(ProvisionalCalendarDTO provisionalCalendarDTO);
 
-    List<ProvisionalCalendarDTO> getAllProvisionalCalendars();
+        // Get Provisional Calendar by ID
+        ProvisionalCalendarDTO getProvisionalCalendarById(Long id);
 
-    ProvisionalCalendarDTO updateProvisionalCalendar(Long id, ProvisionalCalendarDTO provisionalCalendarDTO);
+        // Get all Provisional Calendars
+        List<ProvisionalCalendarDTO> getAllProvisionalCalendars();
 
-    void deleteProvisionalCalendar(Long id);
 
-}
+        // Update an existing Provisional Calendar
+        ProvisionalCalendarDTO updateProvisionalCalendar(Long id, ProvisionalCalendarDTO provisionalCalendarDTO);
+
+        // Delete Provisional Calendar by ID
+        void deleteProvisionalCalendar(Long id);
+
+        // Get Provisional Calendar by Lok Sabha No.
+        List<ProvisionalCalendarDTO> getProvisionalCalendarsByLokSabhaNo(String lokSabhaNo);
+
+        // Get Provisional Calendar by Session No.
+        List<ProvisionalCalendarDTO> getProvisionalCalendarsBySessionNo(String sessionNo);
+
+        // Get Provisional Calendar by Rajya Sabha Session No.
+        List<ProvisionalCalendarDTO> getProvisionalCalendarsByRajyaSabhaSessionNo(String rajyaSabhaSessionNo);
+
+        // Get Provisional Calendars by draft status
+        List<ProvisionalCalendarDTO> getProvisionalCalendarsByDraftStatus(Boolean draftStatus);
+    }
+
+
+
+

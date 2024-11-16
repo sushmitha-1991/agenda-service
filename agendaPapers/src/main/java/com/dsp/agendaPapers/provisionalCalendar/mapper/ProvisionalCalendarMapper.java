@@ -7,19 +7,13 @@
     public class ProvisionalCalendarMapper {
         public static ProvisionalCalendar toEntity(ProvisionalCalendarDTO provisionalCalendarDTO) {
             return ProvisionalCalendar.builder()
+                    .id(provisionalCalendarDTO.getId())
                     .lokSabhaNo(provisionalCalendarDTO.getLokSabhaNo())
                     .sessionNo(provisionalCalendarDTO.getSessionNo())
-                    .branchId(provisionalCalendarDTO.getBranchId())
-                    .provisionalCalendarDate(provisionalCalendarDTO.getProvisionalCalendarDate())
-                    .applicationNo(provisionalCalendarDTO.getApplicationNo())
-                    .status(provisionalCalendarDTO.getStatus())
-                    .note(provisionalCalendarDTO.getNote())
-                    .footNote(provisionalCalendarDTO.getFootNote())
-                    .approverName(provisionalCalendarDTO.getApproverName())
-                    .approverDesignation(provisionalCalendarDTO.getApproverDesignation())
-                    .parentId(provisionalCalendarDTO.getParentId())
-                    .additionalDetails(provisionalCalendarDTO.getAdditionalDetails())
-                    .balloutsDetails(provisionalCalendarDTO.getBalloutsDetails())
+                    .rajyaSabhaSessionNo(provisionalCalendarDTO.getRajyaSabhaSessionNo())
+                    .content(provisionalCalendarDTO.getContent())
+                    .generatedDocId(provisionalCalendarDTO.getGeneratedDocId())
+                    .draftStatus(provisionalCalendarDTO.getDraftStatus())
                     .build();
         }
 
@@ -28,17 +22,10 @@
                     .id(provisionalCalendar.getId())
                     .lokSabhaNo(provisionalCalendar.getLokSabhaNo())
                     .sessionNo(provisionalCalendar.getSessionNo())
-                    .branchId(provisionalCalendar.getBranchId())
-                    .provisionalCalendarDate(provisionalCalendar.getProvisionalCalendarDate())
-                    .applicationNo(provisionalCalendar.getApplicationNo())
-                    .status(provisionalCalendar.getStatus())
-                    .note(provisionalCalendar.getNote())
-                    .footNote(provisionalCalendar.getFootNote())
-                    .approverName(provisionalCalendar.getApproverName())
-                    .approverDesignation(provisionalCalendar.getApproverDesignation())
-                    .parentId(provisionalCalendar.getParentId())
-                    .additionalDetails(provisionalCalendar.getAdditionalDetails())
-                    .balloutsDetails(provisionalCalendar.getBalloutsDetails())
+                    .rajyaSabhaSessionNo(provisionalCalendar.getRajyaSabhaSessionNo())
+                    .content(provisionalCalendar.getContent())
+                    .generatedDocId(provisionalCalendar.getGeneratedDocId())
+                    .draftStatus(provisionalCalendar.getDraftStatus())
                     .build();
         }
     }

@@ -48,7 +48,6 @@ public class ProvisionalCalendarInputController {
     }
 
 
-
     @GetMapping("/{id}")
     @Operation(summary = "Get provisional calendar input by ID")
     @ApiResponses({
@@ -62,7 +61,7 @@ public class ProvisionalCalendarInputController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // working fine 
+    // working fine
 //    @GetMapping("/getAll")
 //    @Operation(summary = "Get all provisional calendar inputs")
 //    @ApiResponses({
@@ -168,5 +167,33 @@ public class ProvisionalCalendarInputController {
     }
 
 
-}
+
+        @GetMapping("/generatestatus")
+        @Operation(summary = "Generate data by status")
+        @ApiResponses({
+                @ApiResponse(responseCode = "200", description = "Data fetched successfully"),
+                @ApiResponse(responseCode = "400", description = "Invalid request"),
+                @ApiResponse(responseCode = "500", description = "Internal server error")
+        })
+        public ResponseEntity<GenericResponse<List<ProvisionalCalendarInputDTO>>> generateByStatus(
+                @RequestParam List<String> statuses) {
+
+            // Fetch data by statuses
+            List<ProvisionalCalendarInputDTO> inputs = provisionalCalendarInputService.getProvisionalInputsByStatus(statuses);
+
+            // Wrap response in GenericResponse
+            GenericResponse<List<ProvisionalCalendarInputDTO>> response = new GenericResponse<>(
+                    true,
+                    "Data fetched successfully",
+                    inputs,
+                    HttpStatus.OK.value()
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+
+
+
 
