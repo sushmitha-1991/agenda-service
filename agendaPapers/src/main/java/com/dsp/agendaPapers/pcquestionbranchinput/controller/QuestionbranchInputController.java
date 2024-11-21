@@ -24,7 +24,7 @@ public class QuestionbranchInputController {
     @PostMapping("/create")
     @Operation(summary = "Create a new question branch input entry")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Question branch input created successfully"),
+            @ApiResponse(responseCode = "201", description = "Table office input created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -32,7 +32,7 @@ public class QuestionbranchInputController {
         QuestionbranchInputDTO createdQuestionbranchInput = questionbranchInputService.createQuestionbranchInput(questionbranchInputDTO);
         GenericResponse<QuestionbranchInputDTO> response = new GenericResponse<>(
                 true, // success should be a boolean
-                "Question branch input created successfully", // message should be a String
+                "Table office input created successfully", // message should be a String
                 createdQuestionbranchInput, // data should be of type T (QuestionbranchInputDTO)
                 HttpStatus.CREATED.value() // status code
         );
@@ -42,7 +42,7 @@ public class QuestionbranchInputController {
     @GetMapping("/{id}")
     @Operation(summary = "Get question branch input by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Question branch input retrieved successfully"),
+            @ApiResponse(responseCode = "200", description = "Table office input retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Question branch input not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -50,7 +50,7 @@ public class QuestionbranchInputController {
         QuestionbranchInputDTO questionbranchInputDTO = questionbranchInputService.getQuestionbranchInputById(id);
         GenericResponse<QuestionbranchInputDTO> response = new GenericResponse<>(
                 true, // success should be a boolean
-                "Question branch input retrieved successfully", // message should be a String
+                "Table office input retrieved successfully", // message should be a String
                 questionbranchInputDTO, // data should be of type T (QuestionbranchInputDTO)
                 HttpStatus.OK.value() // status code
         );
@@ -60,14 +60,14 @@ public class QuestionbranchInputController {
     @GetMapping("/getAll")
     @Operation(summary = "Get all question branch inputs")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Question branch inputs retrieved successfully"),
+            @ApiResponse(responseCode = "200", description = "Table office all inputs retrieved successfully"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<GenericResponse<List<QuestionbranchInputDTO>>> getAllQuestionbranchInputs() {
         List<QuestionbranchInputDTO> questionbranchInputDTOs = questionbranchInputService.getAllQuestionbranchInputs();
         GenericResponse<List<QuestionbranchInputDTO>> response = new GenericResponse<>(
                 true, // success should be a boolean
-                "Question branch inputs retrieved successfully", // message should be a String
+                "Table office all inputs retrieved successfully", // message should be a String
                 questionbranchInputDTOs, // data should be of type T (List<QuestionbranchInputDTO>)
                 HttpStatus.OK.value() // status code
         );
@@ -77,7 +77,7 @@ public class QuestionbranchInputController {
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing question branch input")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Question branch input updated successfully"),
+            @ApiResponse(responseCode = "200", description = "Table office input updated successfully"),
             @ApiResponse(responseCode = "404", description = "Question branch input not found"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -86,7 +86,7 @@ public class QuestionbranchInputController {
         QuestionbranchInputDTO updatedQuestionbranchInput = questionbranchInputService.updateQuestionbranchInput(id, questionbranchInputDTO);
         GenericResponse<QuestionbranchInputDTO> response = new GenericResponse<>(
                 true, // success should be a boolean
-                "Question branch input updated successfully", // message should be a String
+                "Table office input updated successfully", // message should be a String
                 updatedQuestionbranchInput, // data should be of type T (QuestionbranchInputDTO)
                 HttpStatus.OK.value() // status code
         );
@@ -96,7 +96,7 @@ public class QuestionbranchInputController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a question branch input by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Question branch input deleted successfully"),
+            @ApiResponse(responseCode = "204", description = "Table Office input deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Question branch input not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -104,7 +104,7 @@ public class QuestionbranchInputController {
         questionbranchInputService.deleteQuestionbranchInput(id);
         GenericResponse<Void> response = new GenericResponse<>(
                 true, // success should be a boolean
-                "Question branch input deleted successfully", // message should be a String
+                "Table Office input deleted successfully", // message should be a String
                 null, // data is null for delete response
                 HttpStatus.NO_CONTENT.value() // status code
         );

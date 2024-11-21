@@ -62,5 +62,7 @@ public class QuestionbranchInput extends ApplicationInstance {
     @Column(name = "submitted_by_branch_tableoffice", nullable = false, length = 100)
     private String submittedByBranch;
 
+
+
 }
 
