@@ -5,12 +5,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInputTest;
+import com.dsp.agendaPapers.provisionalcalendarinput.mapper.ProvisionalCalendarInputMapper;
+import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
-import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInput;
-import com.dsp.agendaPapers.provisionalcalendarinput.mapper.ProvisionalCalendarInputMapper;
+
+
 import com.dsp.agendaPapers.provisionalcalendarinput.repository.ProvisionalCalendarInputRepository;
 
 @Service
@@ -19,55 +23,69 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 	@Autowired
 	ProvisionalCalendarInputRepository provisionalCalendarInputRepository;
 
-	@Override
+	@Autowired
+	ApplicationInstanceRepository applicationInstanceRepository;
+
+	@Transactional
 	public ProvisionalCalendarInputDTO createProvisionalCalendarInput(
 			ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
-		ProvisionalCalendarInput provisionalCalendarInput = ProvisionalCalendarInput.builder()
-				.lokSabhaNo(provisionalCalendarInputDTO.getLokSabhaNo())
-				.sessionNo(provisionalCalendarInputDTO.getSessionNo())
+
+		// Build and save ProvisionalCalendarInputTest entity
+		ProvisionalCalendarInputTest provisionalCalendarInput = ProvisionalCalendarInputTest.builder()
 				.dateOfInput(provisionalCalendarInputDTO.getDateOfInput())
 				.language(provisionalCalendarInputDTO.getLanguage())
 				.submittedBy(provisionalCalendarInputDTO.getSubmittedBy())
 				.submittedByBranch(provisionalCalendarInputDTO.getSubmittedByBranch())
-				.subject(provisionalCalendarInputDTO.getSubject()).inputText(provisionalCalendarInputDTO.getInputText())
+				.subject(provisionalCalendarInputDTO.getSubject())
+				.inputText(provisionalCalendarInputDTO.getInputText())
 				.footnoteText(provisionalCalendarInputDTO.getFootnoteText())
 				.approverName(provisionalCalendarInputDTO.getApproverName())
 				.approverDesignation(provisionalCalendarInputDTO.getApproverDesignation())
-				.dateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs()) // List<Map<String, Object>>
-				.status(provisionalCalendarInputDTO.getStatus())
-				.listOfDocument(provisionalCalendarInputDTO.getListOfDocument()) // List<Map<String, Object>>
+				.dateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs())
+				.listOfDocument(provisionalCalendarInputDTO.getListOfDocument())
 				.draftStatus(provisionalCalendarInputDTO.getDraftStatus())
 				.content(provisionalCalendarInputDTO.getContent())
 				.generatedFlag(provisionalCalendarInputDTO.getGeneratedFlag())
+				.lokSabhaSessionNumber(provisionalCalendarInputDTO.getLokSabhaNo()) // ApplicationInstance fields
+				.lokSabhaSession(provisionalCalendarInputDTO.getSessionNo())
+				.currentStatus(provisionalCalendarInputDTO.getStatus())
 				.build();
 
-		ProvisionalCalendarInput savedProvisionalCalendarInput = provisionalCalendarInputRepository
-				.save(provisionalCalendarInput);
+		ProvisionalCalendarInputTest savedProvisionalCalendarInput =
+				provisionalCalendarInputRepository.save(provisionalCalendarInput);
+
 		return mapToDto(savedProvisionalCalendarInput);
 	}
 
+
+     // get by Id is working fine
+
 	@Override
 	public ProvisionalCalendarInputDTO getProvisionalCalendarInputById(Long id) {
-		Optional<ProvisionalCalendarInput> provisionalCalendarInputOpt = provisionalCalendarInputRepository
+		Optional<ProvisionalCalendarInputTest> provisionalCalendarInputOpt = provisionalCalendarInputRepository
 				.findById(id);
 		return provisionalCalendarInputOpt.map(this::mapToDto).orElse(null);
 	}
 
+	// Get All is Also working
+
 	@Override
 	public List<ProvisionalCalendarInputDTO> getAllProvisionalCalendarInputs() {
-		List<ProvisionalCalendarInput> provisionalCalendarInputs = provisionalCalendarInputRepository.findAll();
+		List<ProvisionalCalendarInputTest> provisionalCalendarInputs = provisionalCalendarInputRepository.findAll();
 		return provisionalCalendarInputs.stream().map(this::mapToDto).collect(Collectors.toList());
 	}
 
+
+// update is working with Application Instance
+
 	@Override
-	public ProvisionalCalendarInputDTO updateProvisionalCalendarInput(Long id,
-			ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
-		Optional<ProvisionalCalendarInput> existingEntityOpt = provisionalCalendarInputRepository.findById(id);
+	public ProvisionalCalendarInputDTO updateProvisionalCalendarInput(Long id, ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
+		Optional<ProvisionalCalendarInputTest> existingEntityOpt = provisionalCalendarInputRepository.findById(id);
+
 		if (existingEntityOpt.isPresent()) {
-			ProvisionalCalendarInput existingEntity = existingEntityOpt.get();
-			// Update fields
-			existingEntity.setLokSabhaNo(provisionalCalendarInputDTO.getLokSabhaNo());
-			existingEntity.setSessionNo(provisionalCalendarInputDTO.getSessionNo());
+			ProvisionalCalendarInputTest existingEntity = existingEntityOpt.get();
+
+			// Update fields specific to ProvisionalCalendarInputTest
 			existingEntity.setDateOfInput(provisionalCalendarInputDTO.getDateOfInput());
 			existingEntity.setLanguage(provisionalCalendarInputDTO.getLanguage());
 			existingEntity.setSubmittedBy(provisionalCalendarInputDTO.getSubmittedBy());
@@ -78,18 +96,28 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 			existingEntity.setApproverName(provisionalCalendarInputDTO.getApproverName());
 			existingEntity.setApproverDesignation(provisionalCalendarInputDTO.getApproverDesignation());
 			existingEntity.setDateOfSittingInputs(provisionalCalendarInputDTO.getDateOfSittingInputs());
-			existingEntity.setStatus(provisionalCalendarInputDTO.getStatus());
 			existingEntity.setListOfDocument(provisionalCalendarInputDTO.getListOfDocument());
 			existingEntity.setDraftStatus(provisionalCalendarInputDTO.getDraftStatus());
 			existingEntity.setContent(provisionalCalendarInputDTO.getContent());
 			existingEntity.setGeneratedFlag(provisionalCalendarInputDTO.getGeneratedFlag());
 
-			ProvisionalCalendarInput updatedProvisionalCalendarInput = provisionalCalendarInputRepository
-					.save(existingEntity);
+			// Update ApplicationInstance-related fields
+			existingEntity.setLokSabhaSessionNumber(provisionalCalendarInputDTO.getLokSabhaNo());
+			existingEntity.setLokSabhaSession(provisionalCalendarInputDTO.getSessionNo());
+			existingEntity.setCurrentStatus(provisionalCalendarInputDTO.getStatus());
+
+			// Save the updated entity
+			ProvisionalCalendarInputTest updatedProvisionalCalendarInput = provisionalCalendarInputRepository.save(existingEntity);
+
+			// Map to DTO and return
 			return mapToDto(updatedProvisionalCalendarInput);
 		}
-		return null;
+
+		return null; // Return null if the entity with the given ID is not found
 	}
+
+
+
 
 	@Override
 	public void deleteProvisionalCalendarInput(Long id) {
@@ -100,38 +128,28 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 	@Override
 	public ProvisionalCalendarInputDTO saveProvisionalCalendarInput(ProvisionalCalendarInputDTO dto,
 			Boolean draftStatus) {
-		ProvisionalCalendarInput provisionalCalendarInput = ProvisionalCalendarInputMapper.toEntity(dto);
+		ProvisionalCalendarInputTest provisionalCalendarInput = ProvisionalCalendarInputMapper.toEntity(dto);
 		provisionalCalendarInput.setDraftStatus(draftStatus);
-		ProvisionalCalendarInput savedProvisionalCalendarInput = provisionalCalendarInputRepository
+		ProvisionalCalendarInputTest savedProvisionalCalendarInput = provisionalCalendarInputRepository
 				.save(provisionalCalendarInput);
 		return mapToDto(savedProvisionalCalendarInput);
 	}
+
 	@Override
 	public List<ProvisionalCalendarInputDTO> getProvisionalData(String submittedByBranch, String status, Date startDate, Date endDate) {
-		List<ProvisionalCalendarInput> inputs = provisionalCalendarInputRepository.findByBranchAndStatusAndDateRange(submittedByBranch, status, startDate, endDate);
-
-		// Convert List<ProvisionalCalendarInput> to List<ProvisionalCalendarInputDTO> using mapToDto
-		return inputs.stream().map(this::mapToDto).collect(Collectors.toList());
+		return List.of();
 	}
 
 	@Override
 	public List<ProvisionalCalendarInputDTO> getProvisionalInputsByStatus(List<String> statuses) {
-		// Fetch entities from the repository
-		List<ProvisionalCalendarInput> inputs = provisionalCalendarInputRepository.findByStatusIn(statuses);
-
-		// Convert entities to DTOs using the custom mapping method
-		return inputs.stream()
-				.map(this::mapToDto) // Use the custom mapping method
-				.collect(Collectors.toList());
+		return List.of();
 	}
 
 
 
-
 	// Helper method to map entity to DTO
-	private ProvisionalCalendarInputDTO mapToDto(ProvisionalCalendarInput provisionalCalendarInput) {
+	private ProvisionalCalendarInputDTO mapToDto(ProvisionalCalendarInputTest provisionalCalendarInput) {
 		return ProvisionalCalendarInputDTO.builder().id(provisionalCalendarInput.getId())
-				.lokSabhaNo(provisionalCalendarInput.getLokSabhaNo()).sessionNo(provisionalCalendarInput.getSessionNo())
 				.dateOfInput(provisionalCalendarInput.getDateOfInput()).language(provisionalCalendarInput.getLanguage())
 				.submittedBy(provisionalCalendarInput.getSubmittedBy())
 				.submittedByBranch(provisionalCalendarInput.getSubmittedByBranch())
@@ -140,24 +158,22 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.approverName(provisionalCalendarInput.getApproverName())
 				.approverDesignation(provisionalCalendarInput.getApproverDesignation())
 				.dateOfSittingInputs(provisionalCalendarInput.getDateOfSittingInputs())
-				.status(provisionalCalendarInput.getStatus())
 				.listOfDocument(provisionalCalendarInput.getListOfDocument())
 				.draftStatus(provisionalCalendarInput.getDraftStatus())
 				.content(provisionalCalendarInput.getContent())
 				.generatedFlag(provisionalCalendarInput.getGeneratedFlag())
 				.build();
-	}
-
-	// Helper method to map DTO to Entity
-	private ProvisionalCalendarInput mapToEntity(ProvisionalCalendarInputDTO dto) {
-		return ProvisionalCalendarInput.builder().lokSabhaNo(dto.getLokSabhaNo()).sessionNo(dto.getSessionNo())
-				.dateOfInput(dto.getDateOfInput()).language(dto.getLanguage()).submittedBy(dto.getSubmittedBy())
-				.submittedByBranch(dto.getSubmittedByBranch()).subject(dto.getSubject()).inputText(dto.getInputText())
-				.footnoteText(dto.getFootnoteText()).approverName(dto.getApproverName())
-				.approverDesignation(dto.getApproverDesignation()).dateOfSittingInputs(dto.getDateOfSittingInputs())
-				.status(dto.getStatus()).listOfDocument(dto.getListOfDocument()).draftStatus(dto.getDraftStatus())
-				.content(dto.getContent())
-				.generatedFlag(dto.getGeneratedFlag())
-				.build();
-	}
-}
+	}}
+//
+////	// Helper method to map DTO to Entity
+//	private ProvisionalCalendarInputTest mapToEntity(ProvisionalCalendarInputDTO dto) {
+//		return ProvisionalCalendarInputTest.builder().lokSabhaNo(dto.getLokSabhaNo()).sessionNo(dto.getSessionNo())
+//				.dateOfInput(dto.getDateOfInput()).language(dto.getLanguage()).submittedBy(dto.getSubmittedBy())
+//				.submittedByBranch(dto.getSubmittedByBranch()).subject(dto.getSubject()).inputText(dto.getInputText())
+//				.footnoteText(dto.getFootnoteText()).approverName(dto.getApproverName())
+//				.approverDesignation(dto.getApproverDesignation()).dateOfSittingInputs(dto.getDateOfSittingInputs())
+//				.status(dto.getStatus()).listOfDocument(dto.getListOfDocument()).draftStatus(dto.getDraftStatus())
+//				.content(dto.getContent())
+//				.generatedFlag(dto.getGeneratedFlag())
+//				.build();
+//	}

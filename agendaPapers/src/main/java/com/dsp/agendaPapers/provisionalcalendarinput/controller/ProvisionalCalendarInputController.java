@@ -1,7 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.controller;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
-import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInput;
 import com.dsp.agendaPapers.provisionalcalendarinput.service.ProvisionalCalendarInputService;
 import com.dsp.agendaPapers.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,18 +60,7 @@ public class ProvisionalCalendarInputController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // working fine
-//    @GetMapping("/getAll")
-//    @Operation(summary = "Get all provisional calendar inputs")
-//    @ApiResponses({
-//            @ApiResponse(responseCode = "200", description = "Provisional calendar inputs retrieved successfully"),
-//            @ApiResponse(responseCode = "500", description = "Internal server error")
-//    })
-//    public ResponseEntity<GenericResponse<List<ProvisionalCalendarInputDTO>>> getAllProvisionalCalendarInputs() {
-//        List<ProvisionalCalendarInputDTO> inputs = provisionalCalendarInputService.getAllProvisionalCalendarInputs();
-//        GenericResponse<List<ProvisionalCalendarInputDTO>> response = new GenericResponse<>(true, "Inputs retrieved successfully", inputs, HttpStatus.OK.value());
-//        return new ResponseEntity<>(response, HttpStatus.OK);
-//    }
+
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing provisional calendar input")
@@ -88,6 +76,7 @@ public class ProvisionalCalendarInputController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a provisional calendar input by ID")
     @ApiResponses({
@@ -101,36 +90,6 @@ public class ProvisionalCalendarInputController {
         return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/inputfilter")
-    @Operation(summary = "Get provisional calendar inputs based on filters")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Filtered provisional calendar inputs retrieved successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request parameters"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<GenericResponse<List<ProvisionalCalendarInputDTO>>> getProvisionalData(
-            @RequestParam String submittedByBranch,
-            @RequestParam String status,
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
-
-        // Convert input date strings to Date objects
-        Date start = Date.valueOf(startDate);
-        Date end = Date.valueOf(endDate);
-
-        // Fetch the filtered data from the service as a List of DTOs
-        List<ProvisionalCalendarInputDTO> inputs = provisionalCalendarInputService.getProvisionalData(submittedByBranch, status, start, end);
-
-        // Wrap the data in a GenericResponse
-        GenericResponse<List<ProvisionalCalendarInputDTO>> response = new GenericResponse<>(
-                true,
-                "Filtered Provisional Calendar based on branch date and status fetch  successfully",
-                inputs,
-                HttpStatus.OK.value()
-        );
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 
     @GetMapping("/getAll")
     @Operation(summary = "Get all or filtered provisional calendar inputs")

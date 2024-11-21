@@ -42,4 +42,17 @@ public class ProvisionalCalendarInputDTO {
     private String content;
 
     private Boolean generatedFlag;
+
+    // Fields inherited from ApplicationInstance
+    private String applicationNo;
+    private Long refId;
+    private String currentStatus;
+    private String publishedDocumentUrl;
+    private String processInstanceId;
+    private String taskId;
+    private Boolean isPublished;
+    private String lokSabhaSessionNumber;
+    private String lokSabhaSession;
+    private String rajyaSabhaSession;
+    private Map<String, Object> otherInfo;
 }
