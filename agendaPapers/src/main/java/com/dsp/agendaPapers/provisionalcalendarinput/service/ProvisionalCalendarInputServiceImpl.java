@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ApplicationProvisionalQuestionDTO;
 import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInputTest;
 import com.dsp.agendaPapers.provisionalcalendarinput.mapper.ProvisionalCalendarInputMapper;
 import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
@@ -117,6 +118,10 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 	}
 
 
+	@Override
+	public List<ApplicationProvisionalQuestionDTO> fetchAllCombinedData() {
+		return provisionalCalendarInputRepository.fetchAllCombinedData();
+	}
 
 
 	@Override

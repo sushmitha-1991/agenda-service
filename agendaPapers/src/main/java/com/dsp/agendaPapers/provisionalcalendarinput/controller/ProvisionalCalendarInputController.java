@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.controller;
 
+import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ApplicationProvisionalQuestionDTO;
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
 import com.dsp.agendaPapers.provisionalcalendarinput.service.ProvisionalCalendarInputService;
 import com.dsp.agendaPapers.response.GenericResponse;
@@ -150,6 +151,20 @@ public class ProvisionalCalendarInputController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
+
+    @GetMapping("/getAllCombinedData")
+    public ResponseEntity<GenericResponse<List<ApplicationProvisionalQuestionDTO>>> getAllCombinedData() {
+        List<ApplicationProvisionalQuestionDTO> combinedData = provisionalCalendarInputService.fetchAllCombinedData();
+
+        GenericResponse<List<ApplicationProvisionalQuestionDTO>> response = new GenericResponse<>(
+                true,
+                "Combined data retrieved successfully",
+                combinedData,
+                HttpStatus.OK.value()
+        );
+
+        return ResponseEntity.ok(response);
+    }
     }
 
 
