@@ -29,6 +29,7 @@ public class ESummonNotificationMapper {
 				.applicationNo(eSummonNotification.getApplicationNo()).status(eSummonNotification.getStatus())
 				.templateContent(eSummonNotification.getTemplateContent())
 				.templateContentHindi(eSummonNotification.getTemplateContentHindi())
+				.templateType(eSummonNotification.getTemplateType())
 				// .parentNotification(toDTO(eSummonNotification.getParentNotification())) //
 				// Recursively map parent notification
 				.build();
@@ -46,6 +47,7 @@ public class ESummonNotificationMapper {
 				.summonIssuanceDateHindi(dto.getSummonIssuanceDateHindi())
 				.applicationNo(dto.getApplicationNo()).status(dto.getStatus()).templateContent(dto.getTemplateContent())
 				.templateContentHindi(dto.getTemplateContentHindi())
+				.templateType(dto.getTemplateType())
 				// .parentNotification(toEntity(dto.getParentNotification())) // Recursively map
 				// parent notification
 				.build();

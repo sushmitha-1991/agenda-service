@@ -13,40 +13,39 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ESummonNotificationDTO {
 
-private Long id;
-	
-    private String lokSabhaNo;
-   
-    private String sessionNo;
+	private Long id;
 
-    private LocalDate summonIssuanceDate;
-   
-    private String summonIssuanceDateHindiEn;
-   
-    private String summonIssuanceDateHindi;
+	private String lokSabhaNo;
 
-    private LocalDateTime summonStartAt;
-   private Long applicationId;
-    private String applicationNo;
-   
-    private String status;
-    private SummonNotificationDTO parentNotification;
-   
-    private String templateContent;
-    private ApplicationInstanceDTO applicationInstanceDTO;
-    private String currentStatus;
-    private String publishedDocumentUrl;
-   private Long templateId;
-   private Long templateHindiId;
-   private String templateContentHindi;
+	private String sessionNo;
 
-    private Long refId;
+	private LocalDate summonIssuanceDate;
+
+	private String summonIssuanceDateHindiEn;
+
+	private String summonIssuanceDateHindi;
+
+	private LocalDateTime summonStartAt;
+	private Long applicationId;
+	private String applicationNo;
+
+	private String status;
+	private SummonNotificationDTO parentNotification;
+
+	private String templateContent;
+	private ApplicationInstanceDTO applicationInstanceDTO;
+	private String currentStatus;
+	private String publishedDocumentUrl;
+	private Long templateId;
+	private Long templateHindiId;
+	private String templateContentHindi;
+	private String templateType;
+	private Long refId;
 }
-
-

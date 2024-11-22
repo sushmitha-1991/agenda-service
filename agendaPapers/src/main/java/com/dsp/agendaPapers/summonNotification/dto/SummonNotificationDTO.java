@@ -15,34 +15,34 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SummonNotificationDTO {
 
-	 private Long id;
-	 @NotEmpty
-	    private String lokSabhaNo;
-	 @NotEmpty
-	    private String sessionNo;
-	 @NotEmpty
-	    private LocalDate summonIssuanceDate;
-	 @NotEmpty
-	 private String summonIssuanceDateHindiEn;
-	 @NotEmpty
-	    private String summonIssuanceDateHindi;
-	 @NotEmpty
-	    private String notificationNo;
-	 
-	    private LocalDateTime summonStartAt;
-	    private Long applicationId;
-	 
-	    private String applicationNo;
-	 @NotEmpty
-	    private String status;
-	    private String templateContent;
-	    private SummonNotificationDTO parentNotification;
-	    private ApplicationInstanceDTO applicationInstanceDTO;
-	    private String currentStatus;
-	    private String publishedDocumentUrl;
-	 private Long templateId;
-	 private Long templateHindiId;
-		private String templateContentHindi;
+	private Long id;
+	@NotEmpty
+	private String lokSabhaNo;
+	@NotEmpty
+	private String sessionNo;
+	@NotEmpty
+	private LocalDate summonIssuanceDate;
+	@NotEmpty
+	private String summonIssuanceDateHindiEn;
+	@NotEmpty
+	private String summonIssuanceDateHindi;
+	@NotEmpty
+	private String notificationNo;
 
-	    private Long refId;
+	private LocalDateTime summonStartAt;
+	private Long applicationId;
+
+	private String applicationNo;
+	@NotEmpty
+	private String status;
+	private String templateContent;
+	private SummonNotificationDTO parentNotification;
+	private ApplicationInstanceDTO applicationInstanceDTO;
+	private String currentStatus;
+	private String publishedDocumentUrl;
+	private Long templateId;
+	private Long templateHindiId;
+	private String templateContentHindi;
+	private String TemplateType;
+	private Long refId;
 }
