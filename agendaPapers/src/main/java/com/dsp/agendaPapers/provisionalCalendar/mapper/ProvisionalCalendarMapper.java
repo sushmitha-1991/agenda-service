@@ -4,6 +4,9 @@
     import com.dsp.agendaPapers.provisionalCalendar.Dto.ProvisionalCalendarDTO;
     import com.dsp.agendaPapers.provisionalCalendar.entity.ProvisionalCalendar;
 
+    import java.util.List;
+    import java.util.Map;
+
     public class ProvisionalCalendarMapper {
         public static ProvisionalCalendar toEntity(ProvisionalCalendarDTO provisionalCalendarDTO) {
             return ProvisionalCalendar.builder()
@@ -14,6 +17,17 @@
                     .content(provisionalCalendarDTO.getContent())
                     .generatedDocId(provisionalCalendarDTO.getGeneratedDocId())
                     .draftStatus(provisionalCalendarDTO.getDraftStatus())
+                    .applicationNo(provisionalCalendarDTO.getApplicationNo())
+                    .refId(provisionalCalendarDTO.getRefId())
+                    .currentStatus(provisionalCalendarDTO.getCurrentStatus())
+                    .publishedDocumentUrl(provisionalCalendarDTO.getPublishedDocumentUrl())
+                    .processInstanceId(provisionalCalendarDTO.getProcessInstanceId())
+                    .taskId(provisionalCalendarDTO.getTaskId())
+                    .isPublished(provisionalCalendarDTO.getIsPublished())
+                    .lokSabhaSessionNumber(provisionalCalendarDTO.getLokSabhaSessionNumber())
+                    .lokSabhaSession(provisionalCalendarDTO.getLokSabhaSession())
+                    .rajyaSabhaSessionNo(provisionalCalendarDTO.getRajyaSabhaSessionNo())
+                    .otherInfo((Map<String, Object>) provisionalCalendarDTO.getOtherInfo())
                     .build();
         }
 
@@ -26,6 +40,18 @@
                     .content(provisionalCalendar.getContent())
                     .generatedDocId(provisionalCalendar.getGeneratedDocId())
                     .draftStatus(provisionalCalendar.getDraftStatus())
+                    .applicationNo(provisionalCalendar.getApplicationNo())
+                    .refId(provisionalCalendar.getRefId())
+                    .currentStatus(provisionalCalendar.getCurrentStatus())
+                    .publishedDocumentUrl(provisionalCalendar.getPublishedDocumentUrl())
+                    .processInstanceId(provisionalCalendar.getProcessInstanceId())
+                    .taskId(provisionalCalendar.getTaskId())
+                    .isPublished(provisionalCalendar.getIsPublished())
+                    .lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
+                    .lokSabhaSession(provisionalCalendar.getLokSabhaSession())
+                    .rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
+                    .otherInfo((List<Map<String, Object>>) provisionalCalendar.getOtherInfo())
+
                     .build();
         }
     }

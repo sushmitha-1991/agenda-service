@@ -20,6 +20,8 @@ import java.util.Map;
 @Table(name = "question_branch_table", schema = "agenda_papers")
 public class QuestionbranchInput extends ApplicationInstance {
 
+
+
     @Column(name = "groupcharts_ls", columnDefinition = "jsonb")
     @Convert(converter = JsonMapConverter.class)
     private List<Map<String, Object> > groupchartsLS;

@@ -1,6 +1,7 @@
 package com.dsp.agendaPapers.provisionalCalendar.entity;
 
 import com.dsp.agendaPapers.config.MapToJsonConverter;
+import com.dsp.agendaPapers.entity.ApplicationInstance;
 import com.dsp.agendaPapers.entity.Auditable;
 import com.dsp.agendaPapers.util.ListToJsonConverter;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDate;
@@ -16,12 +18,12 @@ import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 //@Audited
 @Entity
 @Data
 @Table(name = "provisional_data", schema = "agenda_papers")
-public class ProvisionalCalendar extends Auditable {
+public class ProvisionalCalendar extends ApplicationInstance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "provisional_data_seq")
@@ -43,7 +45,6 @@ public class ProvisionalCalendar extends Auditable {
     @Column(name = "generated_doc_ids", columnDefinition = "jsonb")
     @Convert(converter = ListToJsonConverter.class)
     private List<Integer> generatedDocId;
-
 
     @Column(name = "draft_status")
     private Boolean draftStatus;

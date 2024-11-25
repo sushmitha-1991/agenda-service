@@ -34,9 +34,6 @@ public class QuestionbranchInputDTO {
     private List< Map<String, Object>>listOfDocumentTableOffice;
     private String listOfDocumentTableOfficeFootnote;
     private String listOfDocumentTableOfficeNote;
-
-    // I am adding to requirement by Negi is given below
-
     private List<Map<String, Object>> dateOfSittingInputs;
     private Date dateOfInput;
     private Boolean draftStatus;
