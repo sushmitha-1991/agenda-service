@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.provisionalcalendarinput.controller;
 
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ApplicationProvisionalQuestionDTO;
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
+import com.dsp.agendaPapers.provisionalcalendarinput.service.DataService;
 import com.dsp.agendaPapers.provisionalcalendarinput.service.ProvisionalCalendarInputService;
 import com.dsp.agendaPapers.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,6 +26,9 @@ public class ProvisionalCalendarInputController {
 
     @Autowired
     private ProvisionalCalendarInputService provisionalCalendarInputService;
+
+    @Autowired
+    private DataService dataService;
 
 
     @PostMapping("/create")
@@ -163,6 +168,12 @@ public class ProvisionalCalendarInputController {
                 HttpStatus.OK.value()
         );
 
+        return ResponseEntity.ok(response);
+    }
+// for new Implemention
+    @GetMapping("/alltable")
+    public ResponseEntity<Map<String, Object>> getAllData() {
+        Map<String, Object> response = dataService.getAllData();
         return ResponseEntity.ok(response);
     }
     }

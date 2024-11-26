@@ -40,7 +40,6 @@ public class QuestionbranchInput extends ApplicationInstance {
     @Column(name = "list_of_document_tableoffice_note")
     private String listOfDocumentTableOfficeNote;
 
-   // According to requirment by negi
 
     @Column(name = "date_of_sitting_inputs_tableoffice", columnDefinition = "jsonb")
     @Convert(converter = JsonMapConverter.class)

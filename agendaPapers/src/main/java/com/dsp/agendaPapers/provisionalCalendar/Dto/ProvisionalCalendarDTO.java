@@ -36,6 +36,7 @@ public class ProvisionalCalendarDTO {
     private String lokSabhaSession;
     private String rajyaSabhaSession;
     private List< Map<String, Object> >otherInfo;
+//    private Long applicationId;
 
 
 
