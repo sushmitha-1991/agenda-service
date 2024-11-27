@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.pcquestionbranchinput.Dto;
 
+import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import jdk.jshell.Snippet;
 import lombok.Builder;
 import lombok.Data;
@@ -16,19 +17,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class QuestionbranchInputDTO {
 
-    private Long id;
-    private String applicationNo;
-    private Long refId;
-    private String currentStatus;
-    private String publishedDocumentUrl;
-    private String processInstanceId;
-    private String taskId;
-    private Boolean isPublished;
-    private String lokSabhaSessionNumber;
-    private String lokSabhaSession;
-    private String rajyaSabhaSession;
-    private List< Map<String, Object> >otherInfo;
 
+    private Long id;
     private  List<Map<String, Object>> groupchartsLS;
     private  List<Map<String, Object>> groupchartsRS;
     private List< Map<String, Object>>listOfDocumentTableOffice;
@@ -41,6 +31,21 @@ public class QuestionbranchInputDTO {
     private String inputText;
     private String status;
     private String submittedByBranch;
+
+    // Application Instance
+    private String applicationNo;
+    private String currentStatus;
+    private String publishedDocumentUrl;
+    private String processInstanceId;
+    private String taskId;
+    private Boolean isPublished;
+    private String lokSabhaSessionNumber;
+    private String lokSabhaSession;
+    private String rajyaSabhaSession;
+//    private List< Map<String, Object> >otherInfo;
+    private Long applicationId;
+
+    private ApplicationInstanceDTO applicationInstanceDTO;
 
 
 }

@@ -18,16 +18,15 @@
                     .generatedDocId(provisionalCalendarDTO.getGeneratedDocId())
                     .draftStatus(provisionalCalendarDTO.getDraftStatus())
                     .applicationNo(provisionalCalendarDTO.getApplicationNo())
-                    .refId(provisionalCalendarDTO.getRefId())
                     .currentStatus(provisionalCalendarDTO.getCurrentStatus())
                     .publishedDocumentUrl(provisionalCalendarDTO.getPublishedDocumentUrl())
                     .processInstanceId(provisionalCalendarDTO.getProcessInstanceId())
-                    .taskId(provisionalCalendarDTO.getTaskId())
                     .isPublished(provisionalCalendarDTO.getIsPublished())
                     .lokSabhaSessionNumber(provisionalCalendarDTO.getLokSabhaSessionNumber())
                     .lokSabhaSession(provisionalCalendarDTO.getLokSabhaSession())
                     .rajyaSabhaSessionNo(provisionalCalendarDTO.getRajyaSabhaSessionNo())
                     .otherInfo((Map<String, Object>) provisionalCalendarDTO.getOtherInfo())
+                    .applicationId(provisionalCalendarDTO.getApplicationId())
                     .build();
         }
 
@@ -41,16 +40,15 @@
                     .generatedDocId(provisionalCalendar.getGeneratedDocId())
                     .draftStatus(provisionalCalendar.getDraftStatus())
                     .applicationNo(provisionalCalendar.getApplicationNo())
-                    .refId(provisionalCalendar.getRefId())
                     .currentStatus(provisionalCalendar.getCurrentStatus())
                     .publishedDocumentUrl(provisionalCalendar.getPublishedDocumentUrl())
                     .processInstanceId(provisionalCalendar.getProcessInstanceId())
-                    .taskId(provisionalCalendar.getTaskId())
                     .isPublished(provisionalCalendar.getIsPublished())
                     .lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
                     .lokSabhaSession(provisionalCalendar.getLokSabhaSession())
                     .rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
                     .otherInfo((List<Map<String, Object>>) provisionalCalendar.getOtherInfo())
+                    .applicationId(provisionalCalendar.getApplicationId())
 
                     .build();
         }

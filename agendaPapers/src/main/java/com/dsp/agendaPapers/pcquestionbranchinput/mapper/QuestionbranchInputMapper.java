@@ -11,18 +11,24 @@ public class QuestionbranchInputMapper {
 
     public static QuestionbranchInput toEntity(QuestionbranchInputDTO dto) {
         return QuestionbranchInput.builder()
+
+                // Application instance
+
                 .id(dto.getId())
                 .applicationNo(dto.getApplicationNo())
-                .refId(dto.getRefId())
                 .currentStatus(dto.getCurrentStatus())
                 .publishedDocumentUrl(dto.getPublishedDocumentUrl())
                 .processInstanceId(dto.getProcessInstanceId())
-                .taskId(dto.getTaskId())
                 .isPublished(dto.getIsPublished())
                 .lokSabhaSessionNumber(dto.getLokSabhaSessionNumber())
                 .lokSabhaSession(dto.getLokSabhaSession())
                 .rajyaSabhaSession(dto.getRajyaSabhaSession())
-                .otherInfo((Map<String, Object>) dto.getOtherInfo())
+//                .otherInfo((Map<String, Object>) dto.getOtherInfo())
+                .applicationId(dto.getApplicationId())
+
+
+                // table office
+
                 .groupchartsLS(dto.getGroupchartsLS())
                 .groupchartsRS(dto.getGroupchartsRS())
                 .listOfDocumentTableOffice(dto.getListOfDocumentTableOffice())
@@ -42,16 +48,16 @@ public class QuestionbranchInputMapper {
         return QuestionbranchInputDTO.builder()
                 .id(entity.getId())
                 .applicationNo(entity.getApplicationNo())
-                .refId(entity.getRefId())
                 .currentStatus(entity.getCurrentStatus())
                 .publishedDocumentUrl(entity.getPublishedDocumentUrl())
                 .processInstanceId(entity.getProcessInstanceId())
-                .taskId(entity.getTaskId())
                 .isPublished(entity.getIsPublished())
                 .lokSabhaSessionNumber(entity.getLokSabhaSessionNumber())
                 .lokSabhaSession(entity.getLokSabhaSession())
                 .rajyaSabhaSession(entity.getRajyaSabhaSession())
-                .otherInfo((List<Map<String, Object>>) entity.getOtherInfo())
+//                .otherInfo((List<Map<String, Object>>) entity.getOtherInfo())
+                .applicationId(entity.getApplicationId())
+
                 .groupchartsLS((List<Map<String, Object>>) entity.getGroupchartsLS())
                 .groupchartsRS((List<Map<String, Object>>) entity.getGroupchartsRS())
                 .listOfDocumentTableOffice((List<Map<String, Object>>) entity.getListOfDocumentTableOffice())

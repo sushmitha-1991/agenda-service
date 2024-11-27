@@ -7,6 +7,8 @@ import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
+
 
 import java.util.List;
 import java.util.Map;
@@ -32,16 +34,14 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
                 .generatedDocId(provisionalCalendarDTO.getGeneratedDocId())  // New field
                 .draftStatus(provisionalCalendarDTO.getDraftStatus())
                 // for application instance
-                .applicationNo(provisionalCalendarDTO.getApplicationNo())
-                .refId(provisionalCalendarDTO.getRefId())
-                .currentStatus(provisionalCalendarDTO.getCurrentStatus())
+                .applicationNo(provisionalCalendarDTO.getApplicationNo()) //NOT NULL
+                .currentStatus(provisionalCalendarDTO.getCurrentStatus())//NOT NULL
                 .publishedDocumentUrl(provisionalCalendarDTO.getPublishedDocumentUrl())
                 .processInstanceId(provisionalCalendarDTO.getProcessInstanceId())
-                .taskId(provisionalCalendarDTO.getTaskId())
-                .isPublished(provisionalCalendarDTO.getIsPublished())
                 .lokSabhaSessionNumber(provisionalCalendarDTO.getLokSabhaSessionNumber())
                 .lokSabhaSession(provisionalCalendarDTO.getLokSabhaSession())
                 .rajyaSabhaSession(provisionalCalendarDTO.getRajyaSabhaSessionNo())
+                .applicationId(provisionalCalendarDTO.getApplicationId())//NOT NULL
                 .build();
 
         ProvisionalCalendar savedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
@@ -77,16 +77,15 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
                     // for Application Instance
                     existingProvisionalCalendar.setApplicationNo(provisionalCalendarDTO.getApplicationNo());
-                    existingProvisionalCalendar.setRefId(provisionalCalendarDTO.getRefId());
                     existingProvisionalCalendar.setCurrentStatus(provisionalCalendarDTO.getCurrentStatus());
                     existingProvisionalCalendar.setPublishedDocumentUrl(provisionalCalendarDTO.getPublishedDocumentUrl());
                     existingProvisionalCalendar.setProcessInstanceId(provisionalCalendarDTO.getProcessInstanceId());
-                    existingProvisionalCalendar.setTaskId(provisionalCalendarDTO.getTaskId());
                     existingProvisionalCalendar.setIsPublished(provisionalCalendarDTO.getIsPublished());
                     existingProvisionalCalendar.setLokSabhaSessionNumber(provisionalCalendarDTO.getLokSabhaSessionNumber());
                     existingProvisionalCalendar.setLokSabhaSession(provisionalCalendarDTO.getLokSabhaSession());
                     existingProvisionalCalendar.setRajyaSabhaSessionNo(provisionalCalendarDTO.getRajyaSabhaSessionNo());
                     existingProvisionalCalendar.setOtherInfo((Map<String, Object>) provisionalCalendarDTO.getOtherInfo());
+                    existingProvisionalCalendar.setApplicationId(provisionalCalendarDTO.getApplicationId());
 
 
                     ProvisionalCalendar savedProvisionalCalendar = provisionalCalendarRepository.save(existingProvisionalCalendar);
@@ -147,16 +146,22 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
                 // New field
 
                 .applicationNo(provisionalCalendar.getApplicationNo())
-                .refId(provisionalCalendar.getRefId())
                 .currentStatus(provisionalCalendar.getCurrentStatus())
                 .publishedDocumentUrl(provisionalCalendar.getPublishedDocumentUrl())
                 .processInstanceId(provisionalCalendar.getProcessInstanceId())
-                .taskId(provisionalCalendar.getTaskId())
                 .isPublished(provisionalCalendar.getIsPublished())
                 .lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
                 .lokSabhaSession(provisionalCalendar.getLokSabhaSession())
                 .rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
                 .otherInfo((List<Map<String, Object>>) provisionalCalendar.getOtherInfo())
+                .applicationId(provisionalCalendar.getApplicationId())
+                .applicationInstanceDTO(ApplicationInstanceDTO.builder()
+                        .id(provisionalCalendar.getId())
+                        .applicationId(provisionalCalendar.getApplicationId())
+                        .applicationNo(provisionalCalendar.getApplicationNo())
+                        .currentStatus(provisionalCalendar.getCurrentStatus())
+                        .build()
+                )
                 .build();
     }
 

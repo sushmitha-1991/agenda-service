@@ -3,13 +3,14 @@ package com.dsp.agendaPapers.provisionalcalendarinput.mapper;
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
 import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInputTest;
 
+import java.util.Map;
+
 public class ProvisionalCalendarInputMapper {
 
 
     public static ProvisionalCalendarInputTest toEntity(ProvisionalCalendarInputDTO provisionalCalendarInputDTO) {
         return ProvisionalCalendarInputTest.builder()
-                .lokSabhaSessionNumber(provisionalCalendarInputDTO.getLokSabhaNo()) // Matches ApplicationInstance field
-                .lokSabhaSession(provisionalCalendarInputDTO.getSessionNo()) // Matches ApplicationInstance field
+                .id(provisionalCalendarInputDTO.getId())
                 .dateOfInput(provisionalCalendarInputDTO.getDateOfInput())
                 .language(provisionalCalendarInputDTO.getLanguage())
                 .submittedBy(provisionalCalendarInputDTO.getSubmittedBy())
@@ -24,8 +25,19 @@ public class ProvisionalCalendarInputMapper {
                 .draftStatus(provisionalCalendarInputDTO.getDraftStatus())
                 .content(provisionalCalendarInputDTO.getContent())
                 .generatedFlag(provisionalCalendarInputDTO.getGeneratedFlag())
-                .currentStatus(provisionalCalendarInputDTO.getStatus()) // Matches ApplicationInstance field
+                .currentStatus(provisionalCalendarInputDTO.getStatus())
+                .applicationNo(provisionalCalendarInputDTO.getApplicationNo())
+                .currentStatus(provisionalCalendarInputDTO.getCurrentStatus())
+                .publishedDocumentUrl(provisionalCalendarInputDTO.getPublishedDocumentUrl())
+                .processInstanceId(provisionalCalendarInputDTO.getProcessInstanceId())
+                .isPublished(provisionalCalendarInputDTO.getIsPublished())
+                .lokSabhaSessionNumber(provisionalCalendarInputDTO.getLokSabhaSessionNumber())
+                .lokSabhaSession(provisionalCalendarInputDTO .getLokSabhaSession())
+                .rajyaSabhaSession(provisionalCalendarInputDTO.getRajyaSabhaSession())
+                .otherInfo((Map<String, Object>) provisionalCalendarInputDTO.getOtherInfo())
+                .applicationId(provisionalCalendarInputDTO.getApplicationId())
                 .build();
+
     }
 
 }

@@ -2,10 +2,12 @@ package com.dsp.agendaPapers.provisionalcalendarinput.service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ApplicationProvisionalQuestionDTO;
+
+import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.provisionalcalendarinput.entity.ProvisionalCalendarInputTest;
 import com.dsp.agendaPapers.provisionalcalendarinput.mapper.ProvisionalCalendarInputMapper;
 import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
@@ -47,9 +49,18 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.draftStatus(provisionalCalendarInputDTO.getDraftStatus())
 				.content(provisionalCalendarInputDTO.getContent())
 				.generatedFlag(provisionalCalendarInputDTO.getGeneratedFlag())
-				.lokSabhaSessionNumber(provisionalCalendarInputDTO.getLokSabhaNo()) // ApplicationInstance fields
-				.lokSabhaSession(provisionalCalendarInputDTO.getSessionNo())
-				.currentStatus(provisionalCalendarInputDTO.getStatus())
+				.applicationNo(provisionalCalendarInputDTO.getApplicationNo())
+				.currentStatus(provisionalCalendarInputDTO.getCurrentStatus())
+				.publishedDocumentUrl(provisionalCalendarInputDTO.getPublishedDocumentUrl())
+				.processInstanceId(provisionalCalendarInputDTO.getProcessInstanceId())
+				.isPublished(provisionalCalendarInputDTO.getIsPublished())
+				.lokSabhaSessionNumber(provisionalCalendarInputDTO.getLokSabhaSessionNumber())
+				.lokSabhaSession(provisionalCalendarInputDTO .getLokSabhaSession())
+				.rajyaSabhaSession(provisionalCalendarInputDTO.getRajyaSabhaSession())
+				.otherInfo((Map<String, Object>) provisionalCalendarInputDTO.getOtherInfo())
+				.applicationId(provisionalCalendarInputDTO.getApplicationId())
+
+
 				.build();
 
 		ProvisionalCalendarInputTest savedProvisionalCalendarInput =
@@ -103,9 +114,19 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 			existingEntity.setGeneratedFlag(provisionalCalendarInputDTO.getGeneratedFlag());
 
 			// Update ApplicationInstance-related fields
-			existingEntity.setLokSabhaSessionNumber(provisionalCalendarInputDTO.getLokSabhaNo());
-			existingEntity.setLokSabhaSession(provisionalCalendarInputDTO.getSessionNo());
-			existingEntity.setCurrentStatus(provisionalCalendarInputDTO.getStatus());
+			existingEntity.setApplicationNo(provisionalCalendarInputDTO.getApplicationNo());
+			existingEntity.setCurrentStatus(provisionalCalendarInputDTO.getCurrentStatus());
+			existingEntity.setPublishedDocumentUrl(provisionalCalendarInputDTO.getPublishedDocumentUrl());
+			existingEntity.setProcessInstanceId(provisionalCalendarInputDTO.getProcessInstanceId());
+			existingEntity.setIsPublished(provisionalCalendarInputDTO.getIsPublished());
+			existingEntity.setLokSabhaSessionNumber(provisionalCalendarInputDTO.getLokSabhaSessionNumber());
+			existingEntity.setLokSabhaSession(provisionalCalendarInputDTO.getLokSabhaSession());
+			existingEntity.setRajyaSabhaSession(provisionalCalendarInputDTO.getRajyaSabhaSession());
+			existingEntity.setOtherInfo(provisionalCalendarInputDTO.getOtherInfo());
+			existingEntity.setApplicationId(provisionalCalendarInputDTO.getApplicationId());
+
+
+
 
 			// Save the updated entity
 			ProvisionalCalendarInputTest updatedProvisionalCalendarInput = provisionalCalendarInputRepository.save(existingEntity);
@@ -118,10 +139,6 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 	}
 
 
-	@Override
-	public List<ApplicationProvisionalQuestionDTO> fetchAllCombinedData() {
-		return provisionalCalendarInputRepository.fetchAllCombinedData();
-	}
 
 
 	@Override
@@ -167,7 +184,27 @@ public class ProvisionalCalendarInputServiceImpl implements ProvisionalCalendarI
 				.draftStatus(provisionalCalendarInput.getDraftStatus())
 				.content(provisionalCalendarInput.getContent())
 				.generatedFlag(provisionalCalendarInput.getGeneratedFlag())
+
+				// application insatnce
+				.applicationNo(provisionalCalendarInput.getApplicationNo())
+				.currentStatus(provisionalCalendarInput.getCurrentStatus())
+				.publishedDocumentUrl(provisionalCalendarInput.getPublishedDocumentUrl())
+				.processInstanceId(provisionalCalendarInput.getProcessInstanceId())
+				.isPublished(provisionalCalendarInput.getIsPublished())
+				.lokSabhaSessionNumber(provisionalCalendarInput.getLokSabhaSessionNumber())
+				.lokSabhaSession(provisionalCalendarInput.getLokSabhaSession())
+				.rajyaSabhaSession(provisionalCalendarInput.getRajyaSabhaSession())
+				.otherInfo((Map<String, Object>) provisionalCalendarInput.getOtherInfo())
+				.applicationId(provisionalCalendarInput.getApplicationId())
+				.applicationInstanceDTO(ApplicationInstanceDTO.builder()
+						.id(provisionalCalendarInput.getId())
+						.applicationId(provisionalCalendarInput.getApplicationId())
+						.applicationNo(provisionalCalendarInput.getApplicationNo())
+						.currentStatus(provisionalCalendarInput.getCurrentStatus())
+						.build()
+				)
 				.build();
+
 	}}
 //
 ////	// Helper method to map DTO to Entity

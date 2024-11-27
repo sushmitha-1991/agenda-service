@@ -1,33 +1,26 @@
 package com.dsp.agendaPapers.provisionalCalendar.entity;
 
-import com.dsp.agendaPapers.config.MapToJsonConverter;
 import com.dsp.agendaPapers.entity.ApplicationInstance;
-import com.dsp.agendaPapers.entity.Auditable;
 import com.dsp.agendaPapers.util.ListToJsonConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.envers.Audited;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-//@Audited
 @Entity
 @Data
-@Table(name = "provisional_data", schema = "agenda_papers")
+@Table(name = "provisional_calendar", schema = "agenda_papers")
 public class ProvisionalCalendar extends ApplicationInstance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "provisional_data_seq")
-    @SequenceGenerator(name = "provisional_data_seq", sequenceName = "agenda_papers.provisional_data_seq", allocationSize = 1)
+    @SequenceGenerator(name = "provisional_calendar_seq", sequenceName = "agenda_papers.provisional_calendar_seq", allocationSize = 1)
     private Long id;
 
     @Column(name = "lok_sabha_no", nullable = false, length = 100)

@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.provisionalCalendar.Dto;
 
+import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +27,6 @@ public class ProvisionalCalendarDTO {
 
     // Application Instance
     private String applicationNo;
-    private Long refId;
     private String currentStatus;
     private String publishedDocumentUrl;
     private String processInstanceId;
@@ -35,8 +35,11 @@ public class ProvisionalCalendarDTO {
     private String lokSabhaSessionNumber;
     private String lokSabhaSession;
     private String rajyaSabhaSession;
+    private Long applicationId;
     private List< Map<String, Object> >otherInfo;
 //    private Long applicationId;
+    private ApplicationInstanceDTO applicationInstanceDTO;
+
 
 
 

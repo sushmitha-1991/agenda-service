@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.Dto;
 
+import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,10 +17,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class ProvisionalCalendarInputDTO {
 
+    // latest code
     private Long id;
-    private String lokSabhaNo;
-    private String sessionNo;
-
+//    private String lokSabhaNo;
+//    private String sessionNo;
     @NotNull(message = "Date of input is required")
     private Date dateOfInput;
     private String language;
@@ -30,17 +31,11 @@ public class ProvisionalCalendarInputDTO {
     private String footnoteText;
     private String approverName;
     private String approverDesignation;
-
     private List<Map<String, Object>> dateOfSittingInputs;
-
     private String status;
-
     private List<Map<String, Object>> listOfDocument;
-
     private Boolean draftStatus;
-
     private String content;
-
     private Boolean generatedFlag;
 
     // Fields inherited from ApplicationInstance
@@ -55,4 +50,9 @@ public class ProvisionalCalendarInputDTO {
     private String lokSabhaSession;
     private String rajyaSabhaSession;
     private Map<String, Object> otherInfo;
+    private Long applicationId;
+
+    private ApplicationInstanceDTO applicationInstanceDTO;
+
+
 }

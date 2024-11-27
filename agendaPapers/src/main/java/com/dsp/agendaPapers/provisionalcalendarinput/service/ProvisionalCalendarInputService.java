@@ -1,6 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarinput.service;
 
-import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ApplicationProvisionalQuestionDTO;
+
 import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
 
 
@@ -27,6 +27,5 @@ public interface ProvisionalCalendarInputService {
     List<ProvisionalCalendarInputDTO> getProvisionalInputsByStatus(List<String> statuses);
 
     // all the three pc input and table input and application instance
-    List<ApplicationProvisionalQuestionDTO> fetchAllCombinedData();
 
 }

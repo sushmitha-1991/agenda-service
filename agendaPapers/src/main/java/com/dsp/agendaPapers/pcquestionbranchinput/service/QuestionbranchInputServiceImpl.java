@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.pcquestionbranchinput.service;
 
+import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.pcquestionbranchinput.Dto.QuestionbranchInputDTO;
 
 import java.util.List;
@@ -7,11 +8,13 @@ import java.util.List;
 
 import com.dsp.agendaPapers.pcquestionbranchinput.entity.QuestionbranchInput;
 import com.dsp.agendaPapers.pcquestionbranchinput.repository.QuestionbranchInputRepository;
+import com.dsp.agendaPapers.provisionalcalendarinput.repository.ProvisionalCalendarInputRepository;
 import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +25,8 @@ public class QuestionbranchInputServiceImpl implements QuestionbranchInputServic
 
     @Autowired
     ApplicationInstanceRepository applicationInstanceRepository;
+    @Autowired
+    private ProvisionalCalendarInputRepository provisionalCalendarInputRepository;
 
     @Transactional
     @Override
@@ -39,18 +44,19 @@ public class QuestionbranchInputServiceImpl implements QuestionbranchInputServic
                 .inputText(questionbranchInputDTO.getInputText())
                 .status(questionbranchInputDTO.getStatus())
                 .submittedByBranch(questionbranchInputDTO.getSubmittedByBranch())
+
                 // application instance class
                 .id(questionbranchInputDTO.getId())
                 .applicationNo(questionbranchInputDTO.getApplicationNo())
-                .refId(questionbranchInputDTO.getRefId())
                 .currentStatus(questionbranchInputDTO.getCurrentStatus())
                 .publishedDocumentUrl(questionbranchInputDTO.getPublishedDocumentUrl())
                 .processInstanceId(questionbranchInputDTO.getProcessInstanceId())
-                .taskId(questionbranchInputDTO.getTaskId())
                 .isPublished(questionbranchInputDTO.getIsPublished())
                 .lokSabhaSession(questionbranchInputDTO.getLokSabhaSession())
                 .lokSabhaSessionNumber(questionbranchInputDTO.getLokSabhaSessionNumber())
                 .rajyaSabhaSession(questionbranchInputDTO.getRajyaSabhaSession())
+//                .otherInfo((Map<String, Object>) questionbranchInputDTO.getOtherInfo())
+                .applicationId(questionbranchInputDTO.getApplicationId())
                 .build();
 
         QuestionbranchInput savedEntity = questionbranchInputRepository.save(questionbranchInput);
@@ -92,15 +98,15 @@ public class QuestionbranchInputServiceImpl implements QuestionbranchInputServic
                     // for application instance
                     existingEntity.setId(questionbranchInputDTO.getId());
                     existingEntity.setApplicationNo(questionbranchInputDTO.getApplicationNo());
-                    existingEntity.setRefId(questionbranchInputDTO.getRefId());
                     existingEntity.setCurrentStatus(questionbranchInputDTO.getCurrentStatus());
                     existingEntity.setPublishedDocumentUrl(questionbranchInputDTO.getPublishedDocumentUrl());
                     existingEntity.setProcessInstanceId(questionbranchInputDTO.getProcessInstanceId());
-                    existingEntity.setTaskId(questionbranchInputDTO.getTaskId());
                     existingEntity.setIsPublished(questionbranchInputDTO.getIsPublished());
                     existingEntity.setLokSabhaSessionNumber(questionbranchInputDTO.getLokSabhaSessionNumber());
                     existingEntity.setLokSabhaSession(questionbranchInputDTO.getLokSabhaSession());
                     existingEntity.setRajyaSabhaSession(questionbranchInputDTO.getRajyaSabhaSession());
+//                    existingEntity.setOtherInfo((Map<String, Object>) questionbranchInputDTO.getOtherInfo());
+                    existingEntity.setApplicationId(questionbranchInputDTO.getApplicationId());
 
 
                     QuestionbranchInput updatedEntity = questionbranchInputRepository.save(existingEntity);
@@ -148,19 +154,28 @@ public class QuestionbranchInputServiceImpl implements QuestionbranchInputServic
                 .inputText(questionbranchInput.getInputText())
                 .status(questionbranchInput.getStatus())
                 .submittedByBranch(questionbranchInput.getSubmittedByBranch())
+
                 // for application instance
                 .id(questionbranchInput.getId())
                 .applicationNo(questionbranchInput.getApplicationNo())
-                .refId(questionbranchInput.getRefId())
                 .currentStatus(questionbranchInput.getCurrentStatus())
                 .publishedDocumentUrl(questionbranchInput.getPublishedDocumentUrl())
                 .processInstanceId(questionbranchInput.getProcessInstanceId())
-                .taskId(questionbranchInput.getTaskId())
                 .isPublished(questionbranchInput.getIsPublished())
                 .lokSabhaSessionNumber(questionbranchInput.getLokSabhaSessionNumber())
                 .lokSabhaSession(questionbranchInput.getLokSabhaSession())
                 .rajyaSabhaSession(questionbranchInput.getRajyaSabhaSession())
-
+//                .otherInfo((List<Map<String, Object>>) questionbranchInput.getOtherInfo())
+                .applicationId(questionbranchInput.getApplicationId())
+                .applicationInstanceDTO(ApplicationInstanceDTO.builder()
+                        .id(questionbranchInput.getId())
+                        .applicationId(questionbranchInput.getApplicationId())
+                        .applicationNo(questionbranchInput.getApplicationNo())
+                        .currentStatus(questionbranchInput.getCurrentStatus())
+                        .build()
+                )
                 .build();
+
+
     }
 }

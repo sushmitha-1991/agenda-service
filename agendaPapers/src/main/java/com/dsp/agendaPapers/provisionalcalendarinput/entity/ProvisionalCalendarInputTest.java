@@ -4,6 +4,7 @@ import com.dsp.agendaPapers.entity.ApplicationInstance;
 import com.dsp.agendaPapers.entity.Auditable;
 import com.dsp.agendaPapers.util.JsonMapConverter;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,20 @@ import java.util.Map;
 @Data
 @Table(name = "provisional_calendar_input_test", schema = "agenda_papers")
 public class ProvisionalCalendarInputTest extends ApplicationInstance {
+
+ // latest code
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "provisional_calendar_input_seq")
+//    @SequenceGenerator(name = "provisional_calendar_input_seq", sequenceName = "agenda_papers.provisional_calendar_input_seq",
+//            allocationSize = 1)
+//
+//    private Long id;
+
+//    @Column(name = "lok_sabha_no", nullable = false)
+//    private String lokSabhaNo;
+//
+//    @Column(name = "session_no", nullable = false, length = 100)
+//    private String sessionNo;
 
     @Column(name = "date_of_input", nullable = false)
     private Date dateOfInput;
@@ -53,7 +68,7 @@ public class ProvisionalCalendarInputTest extends ApplicationInstance {
     @Convert(converter = JsonMapConverter.class)
     private List<Map<String, Object>> dateOfSittingInputs;
 
-    @Column(name = "list_of_document", columnDefinition = "jsonb")
+    @Column(name = "list_of_document", columnDefinition = "jsonb",nullable = true)
     @Convert(converter = JsonMapConverter.class)
     private List<Map<String, Object>> listOfDocument;
 
@@ -66,5 +81,7 @@ public class ProvisionalCalendarInputTest extends ApplicationInstance {
 
     @Column(name = "generated_flag", nullable = false)
     private Boolean generatedFlag;
+
+
 
 }
