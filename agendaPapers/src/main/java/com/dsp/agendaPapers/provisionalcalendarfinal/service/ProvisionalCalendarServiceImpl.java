@@ -9,12 +9,15 @@ import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarGene
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarInputDTO;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarTableOfficeDTO;
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.ProvisionalCalendar;
+import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.ProvisionalCalendarDTOMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.repository.ProvisionalCalendarRepository;
 import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -266,6 +269,28 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
                 .build();
     }
 
+// getAll
+
+    @Override
+    public List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            // If no dates are provided, fetch all records
+            return provisionalCalendarRepository.findAll()
+                    .stream()
+                    .map(ProvisionalCalendarDTOMapper::toDTO)
+                    .toList();
+        }
+
+        // Convert LocalDate to LocalDateTime for precise filtering
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+        // Fetch records between the date range
+        return provisionalCalendarRepository.findByDateOfInputBetween(startDateTime, endDateTime)
+                .stream()
+                .map(ProvisionalCalendarDTOMapper::toDTO)
+                .toList();
+    }
 
 
 

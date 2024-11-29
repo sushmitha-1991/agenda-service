@@ -11,10 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -174,6 +176,27 @@ public class ProvisionalCalendarFinalController {
                 .status(HttpStatus.CREATED)
                 .body(new GenericResponse<>(true, "Provisional Calendar generated successfully", createdGenerate, HttpStatus.CREATED.value()));
     }
+
+    // for filter and all data
+
+    @GetMapping("/getAllfilter")
+    @Operation(summary = "Get all Provisional Calendar entries between specific dates")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All Provisional Calendar entries retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<GenericResponse<List<ProvisionalCalendarDTO>>> getAllProvisionalCalendars(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        // Fetch records between startDate and endDate using service
+        List<ProvisionalCalendarDTO> calendarDTOs = provisionalCalendarService.getAllProvisionalCalendarsBetweenDates(startDate, endDate);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new GenericResponse<>(true, "All Provisional Calendar entries retrieved successfully", calendarDTOs, HttpStatus.OK.value()));
+    }
+
 
 
 }

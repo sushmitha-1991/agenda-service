@@ -7,6 +7,7 @@ import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarInpu
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarTableOfficeDTO;
 import jakarta.validation.Valid;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -36,6 +37,5 @@ public interface ProvisionalCalendarService {
     ProvisionalCalendarGenerateDTO createProvisionalCalendarGenerate(ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO);
 
 
-
-
+    List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate endDate);
 }
