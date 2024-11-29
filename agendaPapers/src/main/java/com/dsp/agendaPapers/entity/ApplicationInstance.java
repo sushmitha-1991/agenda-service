@@ -1,13 +1,23 @@
 package com.dsp.agendaPapers.entity;
 
+import java.util.Map;
+
 import com.dsp.agendaPapers.util.MapJsonConverter;
-import jakarta.persistence.*;
-import lombok.experimental.SuperBuilder;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Data
@@ -16,7 +26,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "ApplicationInstance", schema = "master")
-public class ApplicationInstance extends Auditable  {
+public class ApplicationInstance extends Auditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "application_Instance_seq")
@@ -53,7 +63,14 @@ public class ApplicationInstance extends Auditable  {
 	@Column(name = "rajya_sabha_session", length = 30)
 	private String rajyaSabhaSession;
 
+	@Column(name = "task_id", length = 255)
+	private String taskId;
+
 	@Convert(converter = MapJsonConverter.class)
 	@Column(name = "other_info", columnDefinition = "jsonb")
 	private Map<String, Object> otherInfo;
+
+	@Column(name = "draft")
+	private Boolean draft;
+
 }
