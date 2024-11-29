@@ -124,14 +124,10 @@ public class ProvisionalCalendarFinalController {
         return provisionalCalendarService.createProvisionalCalendarTableOffice(provisionalCalendarTableOfficeDTO);
     }
 
-//    @PostMapping("/generate")
-//    public ProvisionalCalendarGenerateDTO provisionalCalendarTableOfficeDTO(@RequestBody ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
-//        return provisionalCalendarService.createProvisionalCalendarTableOffice(provisionalCalendarGenerateDTO);
-//    }
-
-
-
-
+    @PostMapping("/generate")
+    public ProvisionalCalendarGenerateDTO provisionalCalendarTableOfficeDTO(@RequestBody ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
+        return provisionalCalendarService.createProvisionalCalendarGenerate(provisionalCalendarGenerateDTO);
+    }
 
 }
 
