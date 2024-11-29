@@ -212,9 +212,37 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
                 .build();
     }
 
+//    @Override
+//    public ProvisionalCalendarGenerateDTO createProvisionalCalendarGenerate(ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
+//
+//        Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository.findById(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId());
+//
+//        if (optionalProvisionalCalendar.isEmpty()) {
+//            throw new ResourceNotFoundException("ProvisionalCalendar with ID " + provisionalCalendarGenerateDTO.getProvisionalCalendarInputId() + " not found");
+//        }
+//
+//        // Retrieve the existing ProvisionalCalendar entity
+//        ProvisionalCalendar provisionalCalendar = optionalProvisionalCalendar.get();
+//
+//        // Update the fields with values from the DTO
+//        provisionalCalendar.setContent(provisionalCalendarGenerateDTO.getContent());
+//
+//        // Save the updated entity
+//        ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
+//
+//        // Map the updated entity back to a DTO
+//        // Map the updated entity back to a ProvisionalCalendarTableOfficeDTO
+//        return ProvisionalCalendarGenerateDTO.builder()
+//                .id(updatedProvisionalCalendar.getId())
+//                .content(updatedProvisionalCalendar.getContent())
+//
+//                .provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId())
+//                .build();
+//    }
+
     @Override
     public ProvisionalCalendarGenerateDTO createProvisionalCalendarGenerate(ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
-
+        // Check if ProvisionalCalendar with the given ID exists
         Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository.findById(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId());
 
         if (optionalProvisionalCalendar.isEmpty()) {
@@ -224,21 +252,20 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
         // Retrieve the existing ProvisionalCalendar entity
         ProvisionalCalendar provisionalCalendar = optionalProvisionalCalendar.get();
 
-        // Update the fields with values from the DTO
+        // Update the content field with the value from the DTO
         provisionalCalendar.setContent(provisionalCalendarGenerateDTO.getContent());
 
         // Save the updated entity
         ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 
-        // Map the updated entity back to a DTO
-        // Map the updated entity back to a ProvisionalCalendarTableOfficeDTO
+        // Map the updated entity back to a ProvisionalCalendarGenerateDTO
         return ProvisionalCalendarGenerateDTO.builder()
                 .id(updatedProvisionalCalendar.getId())
                 .content(updatedProvisionalCalendar.getContent())
-
                 .provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId())
                 .build();
     }
+
 
 
 
