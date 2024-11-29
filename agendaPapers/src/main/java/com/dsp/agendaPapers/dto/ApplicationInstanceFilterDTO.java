@@ -13,5 +13,5 @@ public class ApplicationInstanceFilterDTO {
 	private String lokSabhaSession;
 	private String lokSabhaSessionNumber;
 	private String rajyaSabhaSession;
-	private String applicationNo;
+	private Long applicationId;
 }

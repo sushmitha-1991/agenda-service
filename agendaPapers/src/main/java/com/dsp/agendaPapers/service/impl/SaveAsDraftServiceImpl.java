@@ -61,14 +61,14 @@ public class SaveAsDraftServiceImpl implements SaveAsDraftService {
 		// Case 1: lokSabhaSession, lokSabhaSessionNumber, and applicationNo are
 		// provided
 		if (filterDTO.getLokSabhaSession() != null && filterDTO.getLokSabhaSessionNumber() != null
-				&& filterDTO.getApplicationNo() != null) {
+				&& filterDTO.getApplicationId() != null) {
 			entities = applicationInstanceRepository.findByLokSabhaFilters(filterDTO.getLokSabhaSession(),
-					filterDTO.getLokSabhaSessionNumber(), filterDTO.getApplicationNo());
+					filterDTO.getLokSabhaSessionNumber(), filterDTO.getApplicationId());
 		}
 		// Case 2: rajyaSabhaSession and applicationNo are provided
-		else if (filterDTO.getRajyaSabhaSession() != null && filterDTO.getApplicationNo() != null) {
+		else if (filterDTO.getRajyaSabhaSession() != null && filterDTO.getApplicationId() != null) {
 			entities = applicationInstanceRepository.findByRajyaSabhaFilters(filterDTO.getRajyaSabhaSession(),
-					filterDTO.getApplicationNo());
+					filterDTO.getApplicationId());
 		}
 		// If neither case matches, return empty list or throw an exception
 		else {

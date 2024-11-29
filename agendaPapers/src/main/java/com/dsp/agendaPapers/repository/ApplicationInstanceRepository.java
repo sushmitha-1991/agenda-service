@@ -13,13 +13,13 @@ import com.dsp.agendaPapers.entity.ApplicationInstance;
 public interface ApplicationInstanceRepository extends JpaRepository<ApplicationInstance, Long> {
 
 	@Query("SELECT ai FROM ApplicationInstance ai WHERE " + "ai.lokSabhaSession = :lokSabhaSession AND "
-			+ "ai.lokSabhaSessionNumber = :lokSabhaSessionNumber AND " + "ai.applicationNo = :applicationNo AND "
+			+ "ai.lokSabhaSessionNumber = :lokSabhaSessionNumber AND " + "ai.applicationId = :applicationId AND "
 			+ "ai.draft = true")
 	List<ApplicationInstance> findByLokSabhaFilters(@Param("lokSabhaSession") String lokSabhaSession,
-			@Param("lokSabhaSessionNumber") String lokSabhaSessionNumber, @Param("applicationNo") String applicationNo);
+			@Param("lokSabhaSessionNumber") String lokSabhaSessionNumber, @Param("applicationId") Long applicationId);
 
 	@Query("SELECT ai FROM ApplicationInstance ai WHERE " + "ai.rajyaSabhaSession = :rajyaSabhaSession AND "
-			+ "ai.applicationNo = :applicationNo AND " + "ai.draft = true")
+			+ "ai.applicationId = :applicationId AND " + "ai.draft = true")
 	List<ApplicationInstance> findByRajyaSabhaFilters(@Param("rajyaSabhaSession") String rajyaSabhaSession,
-			@Param("applicationNo") String applicationNo);
+			@Param("applicationId") Long applicationId);
 }
