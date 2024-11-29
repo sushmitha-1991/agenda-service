@@ -1,6 +1,6 @@
 package com.dsp.agendaPapers.response;
 
-import com.dsp.agendaPapers.provisionalcalendarinput.Dto.ProvisionalCalendarInputDTO;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 @Data
