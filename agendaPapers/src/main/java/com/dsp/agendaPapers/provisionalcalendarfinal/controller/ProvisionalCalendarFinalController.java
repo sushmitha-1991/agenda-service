@@ -114,20 +114,67 @@ public class ProvisionalCalendarFinalController {
                 .body(new GenericResponse<>(true, "Provisional Calendar soft deleted successfully", null, HttpStatus.NO_CONTENT.value()));
     }
 
+    // working apis for input
+//    @PostMapping("/input")
+//    public ProvisionalCalendarInputDTO createProvisionalCalendarInput(@RequestBody ProvisionalCalendarInputDTO inputDTO) {
+//        return provisionalCalendarService.createProvisionalCalendarInput(inputDTO);
+//    }
+//
+//    @PostMapping("/table-office")
+//    public ProvisionalCalendarTableOfficeDTO createProvisionalCalendarTableOffice(@RequestBody ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
+//        return provisionalCalendarService.createProvisionalCalendarTableOffice(provisionalCalendarTableOfficeDTO);
+//    }
+//
+//    @PostMapping("/generate")
+//    public ProvisionalCalendarGenerateDTO provisionalCalendarTableOfficeDTO(@RequestBody ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
+//        return provisionalCalendarService.createProvisionalCalendarGenerate(provisionalCalendarGenerateDTO);
+//    }
+
     @PostMapping("/input")
-    public ProvisionalCalendarInputDTO createProvisionalCalendarInput(@RequestBody ProvisionalCalendarInputDTO inputDTO) {
-        return provisionalCalendarService.createProvisionalCalendarInput(inputDTO);
+    @Operation(summary = "Create a new Provisional Calendar Input entry")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Provisional Calendar Input created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> createProvisionalCalendarInput(
+            @Valid @RequestBody ProvisionalCalendarInputDTO inputDTO) {
+        ProvisionalCalendarInputDTO createdInput = provisionalCalendarService.createProvisionalCalendarInput(inputDTO);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new GenericResponse<>(true, "Provisional Calendar Input created successfully", createdInput, HttpStatus.CREATED.value()));
     }
 
     @PostMapping("/table-office")
-    public ProvisionalCalendarTableOfficeDTO createProvisionalCalendarTableOffice(@RequestBody ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
-        return provisionalCalendarService.createProvisionalCalendarTableOffice(provisionalCalendarTableOfficeDTO);
+    @Operation(summary = "Create a new Provisional Calendar Table Office entry")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Provisional Calendar Table Office created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<GenericResponse<ProvisionalCalendarTableOfficeDTO>> createProvisionalCalendarTableOffice(
+            @Valid @RequestBody ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
+        ProvisionalCalendarTableOfficeDTO createdTableOffice = provisionalCalendarService.createProvisionalCalendarTableOffice(provisionalCalendarTableOfficeDTO);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new GenericResponse<>(true, "Provisional Calendar Table Office created successfully", createdTableOffice, HttpStatus.CREATED.value()));
     }
 
     @PostMapping("/generate")
-    public ProvisionalCalendarGenerateDTO provisionalCalendarTableOfficeDTO(@RequestBody ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
-        return provisionalCalendarService.createProvisionalCalendarGenerate(provisionalCalendarGenerateDTO);
+    @Operation(summary = "Generate a new Provisional Calendar entry")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Provisional Calendar generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<GenericResponse<ProvisionalCalendarGenerateDTO>> createProvisionalCalendarGenerate(
+            @Valid @RequestBody ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
+        ProvisionalCalendarGenerateDTO createdGenerate = provisionalCalendarService.createProvisionalCalendarGenerate(provisionalCalendarGenerateDTO);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new GenericResponse<>(true, "Provisional Calendar generated successfully", createdGenerate, HttpStatus.CREATED.value()));
     }
+
 
 }
 
