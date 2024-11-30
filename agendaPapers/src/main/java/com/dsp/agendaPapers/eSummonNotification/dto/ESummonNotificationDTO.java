@@ -25,6 +25,8 @@ public class ESummonNotificationDTO {
 	private String lokSabhaNo;
 
 	private String sessionNo;
+	
+	private String rajyasabhaSessionNo;
 
 	private LocalDate summonIssuanceDate;
 

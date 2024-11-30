@@ -34,11 +34,14 @@ public class SummonNotification extends Auditable {
 	@SequenceGenerator(name = "summon_notifications_seq", sequenceName = "summon_notifications_seq", allocationSize = 1)
 	private Long id;
 
-	@Column(name = "lok_sabha_no", nullable = false, length = 100)
+	@Column(name = "lok_sabha_no", length = 100)
 	private String lokSabhaNo;
 
-	@Column(name = "session_no", nullable = false, length = 100)
+	@Column(name = "session_no", length = 100)
 	private String sessionNo;
+	
+	@Column(name = "rajyasabha_SessionNo", length = 100)
+	private String rajyasabhaSessionNo;
 
 	@Column(name = "summon_issuance_date", nullable = false)
 	private LocalDate summonIssuanceDate;

@@ -1,33 +1,59 @@
 package com.dsp.agendaPapers.prorogationnotice.mapper;
 
+import org.springframework.stereotype.Component;
+
 import com.dsp.agendaPapers.prorogationnotice.Dto.ProrogationNoticeDTO;
 import com.dsp.agendaPapers.prorogationnotice.entity.ProrogationNotice;
 
+@Component
 public class ProrogationNoticeMapper {
-
-    public static ProrogationNotice toEntity (ProrogationNoticeDTO prorogationNoticeDTO){
-
-        return ProrogationNotice.builder()
-                .id(prorogationNoticeDTO.getId())
-                .lokSabhaNo(prorogationNoticeDTO .getLokSabhaNo())
-                .lobSabhaSessionNo(prorogationNoticeDTO.getLobSabhaSessionNo())
-                .rajyaSabhaSessionNo(prorogationNoticeDTO.getRajyaSabhaSessionNo())
-                .issuanceDate(prorogationNoticeDTO.getIssuanceDate())
-                .issuanceDateSakaEra(prorogationNoticeDTO.getIssuanceDateSakaEra())
-                .issuanceDateSakaEraHindi(prorogationNoticeDTO.getIssuanceDateSakaEraHindi())
-                .notificationNo(prorogationNoticeDTO.getNotificationNo())
-                .refNo(prorogationNoticeDTO.getRefNo())
-                .templateContent(prorogationNoticeDTO.getTemplateContent())
-                .templateContentHindi(prorogationNoticeDTO.getTemplateContentHindi())
-                .draftFlag(prorogationNoticeDTO.getDraftFlag())
-                .status(prorogationNoticeDTO.getStatus())
-                .build();
-    }
-
-    public static ProrogationNoticeDTO toDTO(ProrogationNotice prorogationNotice){
+	
+	  // Method to convert ProrogationNotice entity to ProrogationNoticeDTO
+    public ProrogationNoticeDTO toDto(ProrogationNotice prorogationNotice) {
+        if (prorogationNotice == null) {
+            return null;
+        }
 
         return ProrogationNoticeDTO.builder()
-
+                .id(prorogationNotice.getId())
+                .lokSabhaNo(prorogationNotice.getLokSabhaNo())
+                .lobSabhaSessionNo(prorogationNotice.getLobSabhaSessionNo())
+                .rajyaSabhaSessionNo(prorogationNotice.getRajyaSabhaSessionNo())
+                .issuanceDate(prorogationNotice.getIssuanceDate())
+                .issuanceDateSakaEra(prorogationNotice.getIssuanceDateSakaEra())
+                .issuanceDateSakaEraHindi(prorogationNotice.getIssuanceDateSakaEraHindi())
+                .notificationNo(prorogationNotice.getNotificationNo())
+                .applicationNo(prorogationNotice.getApplicationNo())
+                .status(prorogationNotice.getStatus())
+                .templateContent(prorogationNotice.getTemplateContent())
+                .templateContentHindi(prorogationNotice.getTemplateContentHindi())
+                .templateType(prorogationNotice.getTemplateType())
                 .build();
     }
+
+    // Method to convert ProrogationNoticeDTO to ProrogationNotice entity
+    public ProrogationNotice toEntity(ProrogationNoticeDTO prorogationNoticeDTO) {
+        if (prorogationNoticeDTO == null) {
+            return null;
+        }
+
+        ProrogationNotice prorogationNotice = new ProrogationNotice();
+        prorogationNotice.setId(prorogationNoticeDTO.getId());
+        prorogationNotice.setLokSabhaNo(prorogationNoticeDTO.getLokSabhaNo());
+        prorogationNotice.setLobSabhaSessionNo(prorogationNoticeDTO.getLobSabhaSessionNo());
+        prorogationNotice.setRajyaSabhaSessionNo(prorogationNoticeDTO.getRajyaSabhaSessionNo());
+        prorogationNotice.setIssuanceDate(prorogationNoticeDTO.getIssuanceDate());
+        prorogationNotice.setIssuanceDateSakaEra(prorogationNoticeDTO.getIssuanceDateSakaEra());
+        prorogationNotice.setIssuanceDateSakaEraHindi(prorogationNoticeDTO.getIssuanceDateSakaEraHindi());
+        prorogationNotice.setNotificationNo(prorogationNoticeDTO.getNotificationNo());
+        prorogationNotice.setApplicationNo(prorogationNoticeDTO.getApplicationNo());
+        prorogationNotice.setStatus(prorogationNoticeDTO.getStatus());
+        prorogationNotice.setTemplateContent(prorogationNoticeDTO.getTemplateContent());
+        prorogationNotice.setTemplateContentHindi(prorogationNoticeDTO.getTemplateContentHindi());
+        prorogationNotice.setTemplateType(prorogationNoticeDTO.getTemplateType());
+
+        return prorogationNotice;
+    }
+
+
 }

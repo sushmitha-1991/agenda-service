@@ -20,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -28,44 +29,48 @@ import lombok.NoArgsConstructor;
 @Table(name = "e_summon", schema = "agenda_papers")
 
 public class ESummonNotification extends Auditable {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eSummon_notifications_seq")
 	@SequenceGenerator(name = "eSummon_notifications_seq", sequenceName = "eSummon_notifications_seq", allocationSize = 1)
 	private Long id;
-	
-	@Column(name = "lok_sabha_no", nullable = false, length = 100)
-    private String lokSabhaNo;
 
-    @Column(name = "session_no", nullable = false, length = 100)
-    private String sessionNo;
+	@Column(name = "lok_sabha_no", length = 100)
+	private String lokSabhaNo;
 
-    @Column(name = "summon_issuance_date", nullable = false)
-    private LocalDate summonIssuanceDate;
+	@Column(name = "session_no", length = 100)
+	private String sessionNo;
 
-    @Column(name = "summon_issuance_date_hindi_en", nullable = false, length = 100)
-    private String summonIssuanceDateHindiEn;
-    
-    @Column(name = "summon_issuance_date_hindi", nullable = false, length = 100)
-    private String summonIssuanceDateHindi;
+	@Column(name = "rajya_sabha_SessionNo", length = 100)
 
-    @Column(name = "application_no", length = 50)
-    private String applicationNo;
+	private String rajyasabhaSessionNo;
 
-    @Column(name = "status", nullable = false, length = 50)
-    private String status;
+	@Column(name = "summon_issuance_date", nullable = false)
+	private LocalDate summonIssuanceDate;
 
-    @Column(name = "template_content", columnDefinition = "TEXT")
-    private String templateContent;
-    
-    @Column(name = "template_content_Hindi", columnDefinition = "TEXT")
-    private String templateContentHindi;
-    
-    @Column(name = "template_type")
-    private String templateType;
-    
-    @OneToOne
-    @JoinColumn(name = "parent_id")
-    private ESummonNotification parentNotification;
+	@Column(name = "summon_issuance_date_hindi_en", nullable = false, length = 100)
+	private String summonIssuanceDateHindiEn;
+
+	@Column(name = "summon_issuance_date_hindi", nullable = false, length = 100)
+	private String summonIssuanceDateHindi;
+
+	@Column(name = "application_no", length = 50)
+	private String applicationNo;
+
+	@Column(name = "status", nullable = false, length = 50)
+	private String status;
+
+	@Column(name = "template_content", columnDefinition = "TEXT")
+	private String templateContent;
+
+	@Column(name = "template_content_Hindi", columnDefinition = "TEXT")
+	private String templateContentHindi;
+
+	@Column(name = "template_type")
+	private String templateType;
+
+	@OneToOne
+	@JoinColumn(name = "parent_id")
+	private ESummonNotification parentNotification;
 
 }

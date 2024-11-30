@@ -74,9 +74,12 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
 			log.debug("Initial save of E-SummonNotification to generate ID: {}", savedNotification);
 
-			// Generate Application No using the generated ID
-			String applicationNo = generateApplicationNo(savedNotification.getLokSabhaNo(),
-					savedNotification.getSessionNo(), savedNotification.getId());
+			 String applicationNo = generateApplicationNo(
+					 eSummonNotificationDTO.getLokSabhaNo(),
+					 eSummonNotificationDTO.getSessionNo(),
+					 eSummonNotificationDTO.getRajyasabhaSessionNo(),
+			            savedNotification.getId()
+			        );
 			savedNotification.setApplicationNo(applicationNo);
 			log.debug("Generated Application No: {}", applicationNo);
 
@@ -140,9 +143,14 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 		}
 	}
 
-	private String generateApplicationNo(String lokSabhaNo, String sessionNo, Long id) {
-		// Generate application number with formatting, including the ID
-		return "ESLS" + lokSabhaNo + sessionNo + id;
+	private String generateApplicationNo(String lokSabhaNo, String sessionNo, String rajyaSabhaSessionNo, Long id) {
+	    if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
+	        return "ESLS" + lokSabhaNo + sessionNo + id;
+	    } else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
+	        return "ESRS" + rajyaSabhaSessionNo + id;
+	    } else {
+	        throw new IllegalArgumentException("Insufficient data to generate application number");
+	    }
 	}
 
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {

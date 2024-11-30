@@ -1,6 +1,7 @@
 package com.dsp.agendaPapers.summonNotification.dto;
 
 import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -16,10 +17,12 @@ import lombok.NoArgsConstructor;
 public class SummonNotificationDTO {
 
 	private Long id;
-	@NotEmpty
+
 	private String lokSabhaNo;
-	@NotEmpty
+
 	private String sessionNo;
+	
+	private String rajyasabhaSessionNo;
 	@NotEmpty
 	private LocalDate summonIssuanceDate;
 	@NotEmpty
