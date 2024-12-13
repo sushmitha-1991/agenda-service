@@ -29,6 +29,9 @@ public class ProvisionalCalendarDTOMapper {
                 .inputText(dto.getInputTextTableOffice())
                 .generatedFlag(dto.getGeneratedFlag())
                 .content(dto.getContent())
+              // adding the new field input status
+                .inputStatus(dto.getInputStatus())
+
 
                 // Application instance
                 .id(dto.getId())
@@ -69,6 +72,9 @@ public class ProvisionalCalendarDTOMapper {
                 .inputTextTableOffice(entity.getInputText())
                 .generatedFlag(entity.getGeneratedFlag())
                 .content(entity.getContent())
+
+                //adding the new field input status
+                .inputStatus(entity.getInputStatus())
 
 
                 // application Instance

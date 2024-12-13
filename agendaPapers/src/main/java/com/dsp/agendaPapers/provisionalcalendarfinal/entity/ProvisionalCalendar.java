@@ -98,5 +98,11 @@ public class ProvisionalCalendar extends ApplicationInstance {
 
         @Column(name = "content", columnDefinition = "TEXT", nullable = true)
         private String content;
-    }
+
+        // adding the new fields for input for the input status
+        @Column(name = "input_status",columnDefinition = "TEXT",nullable = true)
+        private String inputStatus;
+
+
+}
 

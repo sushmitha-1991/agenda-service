@@ -38,4 +38,7 @@ public interface ProvisionalCalendarService {
 
 
     List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate endDate);
+
+    // for the input status
+    ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus);
 }

@@ -34,6 +34,9 @@ public class ProvisionalCalendarInputDTO {
     private String lokSabhaSessionNumber;
     private String rajyaSabhaSession;
     private String status;
+    // adding the only input status field
+    private String inputStatus;
+
     private ApplicationInstanceDTO applicationInstanceDTO;
 
 

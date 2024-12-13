@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -110,6 +111,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			existingEntity.setRajyaSabhaSession(provisionalCalendarDTO.getRajyaSabhaSessionNo());
 			existingEntity.setGeneratedFlag(provisionalCalendarDTO.getGeneratedFlag());
 			existingEntity.setContent(provisionalCalendarDTO.getContent());
+			// adding the new field inputstaus
+			existingEntity.setInputStatus(provisionalCalendarDTO.getInputStatus());
 
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
 			return mapToDto(updatedEntity);
@@ -305,6 +308,34 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		return provisionalCalendarRepository.findByDateOfInputBetween(startDateTime, endDateTime).stream()
 				.map(ProvisionalCalendarDTOMapper::toDTO).toList();
 	}
+
+	// update for the input status
+	@Override
+	public ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus) {
+		Optional<ProvisionalCalendar> optionalEntity = provisionalCalendarRepository.findById(id);
+		if (optionalEntity.isPresent()) {
+			ProvisionalCalendar existingEntity = optionalEntity.get();
+			existingEntity.setInputStatus(inputStatus); // Ensure the field name is consistent
+			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
+			return mapToInputDto(updatedEntity);
+		} else {
+			throw new RuntimeException("ProvisionalCalendar not found with id " + id);
+		}
+	}
+
+	private ProvisionalCalendarInputDTO mapToInputDto(ProvisionalCalendar entity) {
+		return ProvisionalCalendarInputDTO.builder()
+				.id(entity.getId())
+				.inputStatus(entity.getInputStatus()) // Ensure the field name is consistent
+				.build();
+	}
+
+
+	// // for input status
+
+
+
+
 
 	private ProvisionalCalendarInputDTO mapToDtoPCinput(ProvisionalCalendar provisionalCalendar) {
 		return ProvisionalCalendarInputDTO.builder().id(provisionalCalendar.getId())

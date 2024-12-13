@@ -197,7 +197,26 @@ public class ProvisionalCalendarFinalController {
                 .body(new GenericResponse<>(true, "All Provisional Calendar entries retrieved successfully", calendarDTOs, HttpStatus.OK.value()));
     }
 
+    // for the input status will be update
 
+    @PutMapping("/update-inputstatus/{id}")
+    @Operation(summary = "Update input status of a Provisional Calendar entry")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Input status updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Provisional Calendar entry not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> updateInputStatus(
+            @PathVariable Long id,
+            @RequestParam String inputStatus) {
+
+        // Update input status using service
+        ProvisionalCalendarInputDTO updatedDTO = provisionalCalendarService.updateInputStatus(id, inputStatus);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new GenericResponse<>(true, "  Provisional Calendar Input  returned successfully", updatedDTO, HttpStatus.OK.value()));
+    }
 
 }
 

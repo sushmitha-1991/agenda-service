@@ -41,6 +41,8 @@ public class ProvisionalCalendarDTO {
     private String rajyaSabhaSessionNo;
     private Boolean generatedFlag;
     private String content;
+    // adding new field for return
+    private String inputStatus;
 
 
 
