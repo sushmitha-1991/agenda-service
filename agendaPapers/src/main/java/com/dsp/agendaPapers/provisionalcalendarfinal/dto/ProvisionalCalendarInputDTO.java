@@ -36,6 +36,7 @@ public class ProvisionalCalendarInputDTO {
     private String status;
     // adding the only input status field
     private String inputStatus;
+    private String remarks;
 
     private ApplicationInstanceDTO applicationInstanceDTO;
 

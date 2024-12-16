@@ -43,6 +43,7 @@ public class ProvisionalCalendarDTO {
     private String content;
     // adding new field for return
     private String inputStatus;
+    private String remarks;
 
 
 

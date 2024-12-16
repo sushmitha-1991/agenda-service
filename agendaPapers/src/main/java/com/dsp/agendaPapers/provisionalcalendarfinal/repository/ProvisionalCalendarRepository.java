@@ -13,11 +13,41 @@ import java.util.Optional;
 @Repository
 public interface ProvisionalCalendarRepository extends JpaRepository<ProvisionalCalendar, Long> {
 
-    @Query("SELECT p FROM ProvisionalCalendar p WHERE p.dateOfInput BETWEEN :startDate AND :endDate")
-    List<ProvisionalCalendar> findByDateOfInputBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+//    @Query("SELECT p FROM ProvisionalCalendar p WHERE p.dateOfInput BETWEEN :startDate AND :endDate")
+//    List<ProvisionalCalendar> findByDateOfInputBetween(@Param("startDate") LocalDateTime startDate,
+//                                                       @Param("endDate") LocalDateTime endDate);
+//
+//    // for inputstatus by application id
+////    Optional<ProvisionalCalendar> findByApplicationId(Long applicationId);
+////    @Query("SELECT p FROM ProvisionalCalendar p WHERE p.inputStatus= : inputStatus")
+////    List<ProvisionalCalendar> findByInputStatus(@Param("inputStatus") String inputStatus);
+//
+//    @Query("SELECT p FROM ProvisionalCalendar p WHERE (:inputStatus IS NULL OR p.inputStatus = :inputStatus)")
+//    List<ProvisionalCalendar> findByInputStatus(@Param("inputStatus") String inputStatus);
+//
+//
+//
+//
+//    @Query("SELECT p FROM ProvisionalCalendar p WHERE (:inputStatus IS NULL OR p.inputStatus = :inputStatus) AND p.dateOfInput BETWEEN :startDate AND :endDate")
+//    List<ProvisionalCalendar> findByInputStatusAndDateOfInputBetween(
+//            @Param("inputStatus") String inputStatus,
+//            @Param("startDate") LocalDateTime startDate,
+//            @Param("endDate") LocalDateTime endDate);
 
-    // for inputstatus by application id
-    Optional<ProvisionalCalendar> findByApplicationId(Long applicationId);
+//    working code above all code
 
+//    List<ProvisionalCalendar> findByInputStatusAndDateOfInputBetween(String inputStatus, LocalDateTime startDate, LocalDateTime endDate);
 
+    // new Implemention
+
+    List<ProvisionalCalendar> findByInputStatus(String inputStatus);
+
+    List<ProvisionalCalendar> findByDateOfInputBetween(LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("SELECT p FROM ProvisionalCalendar p WHERE (:inputStatus IS NULL OR p.inputStatus = :inputStatus) AND p.dateOfInput BETWEEN :startDate AND :endDate")
+    List<ProvisionalCalendar> findByInputStatusAndDateOfInputBetween(
+            @Param("inputStatus") String inputStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }

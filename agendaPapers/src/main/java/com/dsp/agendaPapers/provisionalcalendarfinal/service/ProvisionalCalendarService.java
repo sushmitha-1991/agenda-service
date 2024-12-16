@@ -30,15 +30,11 @@ public interface ProvisionalCalendarService {
     // Create a new Provisional Calendar Input
     ProvisionalCalendarInputDTO createProvisionalCalendarInput(ProvisionalCalendarInputDTO inputDTO);
 
-
     ProvisionalCalendarTableOfficeDTO createProvisionalCalendarTableOffice(ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO);
-
 
     ProvisionalCalendarGenerateDTO createProvisionalCalendarGenerate(ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO);
 
-
-    List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate endDate);
-
+    List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate endDate,String inputStatus);
     // for the input status
     ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus);
 }

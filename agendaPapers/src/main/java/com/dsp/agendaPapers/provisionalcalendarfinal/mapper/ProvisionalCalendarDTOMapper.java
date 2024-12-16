@@ -31,6 +31,7 @@ public class ProvisionalCalendarDTOMapper {
                 .content(dto.getContent())
               // adding the new field input status
                 .inputStatus(dto.getInputStatus())
+                .remarks(dto.getRemarks())
 
 
                 // Application instance
@@ -75,6 +76,8 @@ public class ProvisionalCalendarDTOMapper {
 
                 //adding the new field input status
                 .inputStatus(entity.getInputStatus())
+                .remarks(entity.getRemarks())
+                
 
 
                 // application Instance
