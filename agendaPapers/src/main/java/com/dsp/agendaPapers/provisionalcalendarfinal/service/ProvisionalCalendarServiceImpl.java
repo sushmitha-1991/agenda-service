@@ -76,6 +76,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.applicationId(provisionalCalendarDTO.getApplicationId()).draft(false).build();
 
 		ProvisionalCalendar savedEntity = provisionalCalendarRepository.save(provisionalCalendar);
+		savedEntity.setRefId(savedEntity.getId());
+		savedEntity=provisionalCalendarRepository.save(savedEntity);
 		return mapToDto(savedEntity);
 	}
 
@@ -123,6 +125,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			existingEntity.setInputStatus(provisionalCalendarDTO.getInputStatus());
 			existingEntity.setRemarks(provisionalCalendarDTO.getRemarks());
 			existingEntity.setDocumentDate(provisionalCalendarDTO.getDateOfInput());
+			existingEntity.setRefId(provisionalCalendarDTO.getId());
 
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
 			return mapToDto(updatedEntity);
@@ -176,6 +179,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.currentStatus(inputDTO.getStatus())
 				.inputStatus(inputDTO.getInputStatus())
 				.remarks(inputDTO.getRemarks())
+				.refId(inputDTO.getId())
 				.build();
 
 		System.out.println("############################ pc");
@@ -183,7 +187,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		System.out.println("############################ pc");
 		System.out.println(provisionalCalendar);
 		ProvisionalCalendar savedEntity = provisionalCalendarRepository.save(provisionalCalendar);
-
+		savedEntity.setRefId(savedEntity.getId());
+		savedEntity=provisionalCalendarRepository.save(savedEntity);
 		System.out.println("#######################################");
 
 		return mapToDtoPCinput(savedEntity);
@@ -219,7 +224,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		provisionalCalendar.setDateOfInputTableOffice(provisionalCalendarTableOfficeDTO.getDateOfInputTableOffice());
 		provisionalCalendar.setInputTextTableOffice(provisionalCalendarTableOfficeDTO.getInputTextTableOffice());
 		provisionalCalendar.setGeneratedFlag(provisionalCalendarTableOfficeDTO.getGeneratedFlag());
-
+//		provisionalCalendar.setRefId(provisionalCalendarTableOfficeDTO.getId());
 		// Save the updated entity
 		System.out.println("@@@@@@@@@@@@@@@@ TO");
 		System.out.println(provisionalCalendar);
@@ -281,7 +286,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.applicationId(provisionalCalendar.getApplicationId())
 						.applicationNo(provisionalCalendar.getApplicationNo())
 						.currentStatus(provisionalCalendar.getCurrentStatus())
-						.documentDate(provisionalCalendar.getDateOfInput()).build())
+						.documentDate(provisionalCalendar.getDateOfInput())
+						.refId(provisionalCalendar.getRefId()).build())
 				.build();
 	}
 
@@ -408,7 +414,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		System.out.println(optionalEntity);
 		if (optionalEntity.isPresent()) {
 			ProvisionalCalendar existingEntity = optionalEntity.get();
-			existingEntity.setInputStatus(inputStatus); // Ensure the field name is consistent
+			existingEntity.setInputStatus(inputStatus);
+			existingEntity.setRefId(existingEntity.getId());// Ensure the field name is consistent
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
 			return mapToInputDto(updatedEntity);
 		} else {
@@ -518,7 +525,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 	private ProvisionalCalendarInputDTO mapToDtoPCinput(ProvisionalCalendar provisionalCalendar) {
 		return ProvisionalCalendarInputDTO.builder().id(provisionalCalendar.getId())
-				.dateOfInput(provisionalCalendar.getDateOfInput()).language(provisionalCalendar.getLanguage())
+				.dateOfInput(provisionalCalendar.getDateOfInput())
+				.language(provisionalCalendar.getLanguage())
 				.submittedBy(provisionalCalendar.getSubmittedBy())
 				.submittedByBranch(provisionalCalendar.getSubmittedByBranch()).subject(provisionalCalendar.getSubject())
 				.inputText(provisionalCalendar.getInputText()).footnoteText(provisionalCalendar.getFootnoteText())
@@ -535,6 +543,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.applicationNo(provisionalCalendar.getApplicationNo())
 						.currentStatus(provisionalCalendar.getCurrentStatus())
 						.documentDate(provisionalCalendar.getDateOfInput())
+						.refId(provisionalCalendar.getRefId())
 						.build())
 				.build();
 	}

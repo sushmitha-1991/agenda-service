@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarfinal.mapper;
 
+import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarDTO;
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.ProvisionalCalendar;
 
@@ -92,6 +93,14 @@ public class ProvisionalCalendarDTOMapper {
                 .lokSabhaSession(entity.getLokSabhaSession())
                 .rajyaSabhaSession(entity.getRajyaSabhaSession())
                 .applicationId(entity.getApplicationId())
+                .applicationInstanceDTO(ApplicationInstanceDTO.builder()
+                        .id(entity.getId())
+                        .applicationNo(entity.getApplicationNo())
+                        .applicationId(entity.getApplicationId())
+                        .currentStatus(entity.getCurrentStatus())
+                        .refId(entity.getRefId())
+                        .documentDate(entity.getDocumentDate())
+                        .build())
                 .build();
     }
 }

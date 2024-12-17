@@ -18,6 +18,7 @@ public class ApplicationInstanceDTO {
       private  Long   applicationId;
       private String  applicationNo;
       private   String  currentStatus;
+      private Long refId;
       // adding the date
       private Date documentDate;
 }
