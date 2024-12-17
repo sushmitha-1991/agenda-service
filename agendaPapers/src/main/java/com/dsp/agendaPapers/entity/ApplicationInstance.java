@@ -1,5 +1,7 @@
 package com.dsp.agendaPapers.entity;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Map;
 
 import com.dsp.agendaPapers.util.MapJsonConverter;
@@ -72,5 +74,9 @@ public class ApplicationInstance extends Auditable {
 
 	@Column(name = "draft")
 	private Boolean draft;
+
+	// adding the coloumn
+	@Column(name = "document_date")
+	private Date documentDate;
 
 }

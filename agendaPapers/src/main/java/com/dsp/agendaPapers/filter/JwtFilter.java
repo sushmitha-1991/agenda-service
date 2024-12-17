@@ -8,9 +8,14 @@ package com.dsp.agendaPapers.filter;
 /**
  * 
  */
-import java.io.IOException;
 
-
+import com.dsp.agendaPapers.service.CustomUserDetailsService;
+import com.dsp.agendaPapers.util.JwtUtil;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +26,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.dsp.agendaPapers.service.CustomUserDetailsService;
-import com.dsp.agendaPapers.util.JwtUtil;
-
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -63,7 +61,7 @@ public class JwtFilter extends OncePerRequestFilter {
 				if (userDetails.isEnabled() && jwtUtil.validateToken(jwt, userDetails)) {
 					log.debug("JWT token validated successfully");
 					UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-							userDetails, null, userDetails.getAuthorities());
+							userDetails, jwt, userDetails.getAuthorities());
 					usernamePasswordAuthenticationToken
 							.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);

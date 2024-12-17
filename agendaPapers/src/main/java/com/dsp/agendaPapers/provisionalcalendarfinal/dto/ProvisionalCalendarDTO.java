@@ -27,6 +27,7 @@ public class ProvisionalCalendarDTO {
     private String inputText;
     private String footnoteText;
     private String approverName;
+
     private String approverDesignation;
     private List<Map<String, Object>> dateOfSittingInputs;
     private List<Map<String, Object>> listOfDocument;
@@ -41,9 +42,11 @@ public class ProvisionalCalendarDTO {
     private String rajyaSabhaSessionNo;
     private Boolean generatedFlag;
     private String content;
+
     // adding new field for return
     private String inputStatus;
     private String remarks;
+    private String refNumber;
 
 
 
@@ -61,6 +64,7 @@ public class ProvisionalCalendarDTO {
     private Long applicationId;
 
     private ApplicationInstanceDTO applicationInstanceDTO;
+
 
 
     // process insatnce will be remove from everywhere

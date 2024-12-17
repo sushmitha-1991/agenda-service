@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.*;
+import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.dialect.SybaseSqmToSqlAstConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,26 +16,24 @@ import org.springframework.stereotype.Service;
 
 import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarDTO;
 //import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarGenerateDTO;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarGenerateDTO;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarInputDTO;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarTableOfficeDTO;
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.ProvisionalCalendar;
 import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.ProvisionalCalendarDTOMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.repository.ProvisionalCalendarRepository;
 import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
 
 import jakarta.transaction.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarService {
 
 	@Autowired
 	private ProvisionalCalendarRepository provisionalCalendarRepository;
-
 	@Autowired
 	ApplicationInstanceRepository applicationInstanceRepository;
+	@Autowired
+	private BearerClient bearerClient;
 
 	@Transactional
 	@Override
@@ -61,6 +61,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.content(provisionalCalendarDTO.getContent())
 				.inputStatus(provisionalCalendarDTO.getInputStatus())
 				.remarks(provisionalCalendarDTO.getRemarks())
+
 				// application instance
 				.id(provisionalCalendarDTO.getId()).applicationNo(provisionalCalendarDTO.getApplicationNo())
 				.currentStatus(provisionalCalendarDTO.getCurrentStatus())
@@ -70,6 +71,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.lokSabhaSession(provisionalCalendarDTO.getLokSabhaSession())
 				.lokSabhaSessionNumber(provisionalCalendarDTO.getLokSabhaSessionNumber())
 				.rajyaSabhaSession(provisionalCalendarDTO.getRajyaSabhaSession())
+				.documentDate(provisionalCalendarDTO.getDateOfInput())
 //                .otherInfo((Map<String, Object>) questionbranchInputDTO.getOtherInfo())
 				.applicationId(provisionalCalendarDTO.getApplicationId()).draft(false).build();
 
@@ -120,6 +122,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			// adding the new field inputstaus and remarks
 			existingEntity.setInputStatus(provisionalCalendarDTO.getInputStatus());
 			existingEntity.setRemarks(provisionalCalendarDTO.getRemarks());
+			existingEntity.setDocumentDate(provisionalCalendarDTO.getDateOfInput());
 
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
 			return mapToDto(updatedEntity);
@@ -143,8 +146,20 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	@Override
 	public ProvisionalCalendarInputDTO createProvisionalCalendarInput(ProvisionalCalendarInputDTO inputDTO) {
 		// Map DTO to Entity
-		String applicationNo = generateApplicationNo(inputDTO.getLokSabhaSession(),
-				inputDTO.getLokSabhaSessionNumber());
+		// changes for the input
+
+		SerialNumberRequest serialNumberRequest=new SerialNumberRequest();
+		serialNumberRequest.setAppId(inputDTO.getApplicationId());
+		serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
+		System.out.println("apppppppppppppppppppp");
+		System.out.println(bearerClient.getResource(serialNumberRequest));
+		SerialNumberResponse applicationNo=    bearerClient.getResource(serialNumberRequest);
+		System.out.println(applicationNo.getId());
+//		.setApplicationNo(applicationNo.getId());
+
+
+//		String applicationNo = generateApplicationNo(inputDTO.getLokSabhaSession(),
+//				inputDTO.getLokSabhaSessionNumber());
 		ProvisionalCalendar provisionalCalendar = ProvisionalCalendar.builder().dateOfInput(inputDTO.getDateOfInput())
 				.language(inputDTO.getLanguage()).submittedBy(inputDTO.getSubmittedBy())
 				.submittedByBranch(inputDTO.getSubmittedByBranch()).subject(inputDTO.getSubject())
@@ -153,7 +168,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.dateOfSittingInputs(inputDTO.getDateOfSittingInputs()).listOfDocument(inputDTO.getListOfDocument())
 				.applicationId(inputDTO.getApplicationId()).lokSabhaSession(inputDTO.getLokSabhaSession())
 				.lokSabhaSessionNumber(inputDTO.getLokSabhaSessionNumber())
-				.rajyaSabhaSession(inputDTO.getRajyaSabhaSession()).applicationNo(applicationNo) // Set applicationNo
+				.rajyaSabhaSession(inputDTO.getRajyaSabhaSession())
+				.documentDate(inputDTO.getDateOfInput())
+//				.applicationNo(applicationNo)
+				.applicationNo(applicationNo.getId())// Set applicationNo
 				// input status and remarks
 				.currentStatus(inputDTO.getStatus())
 				.inputStatus(inputDTO.getInputStatus())
@@ -227,6 +245,15 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	}
 
 	private ProvisionalCalendarDTO mapToDto(ProvisionalCalendar provisionalCalendar) {
+
+		SerialNumberRequest serialNumberRequest=new SerialNumberRequest();
+		serialNumberRequest.setAppId(provisionalCalendar.getApplicationId());
+		serialNumberRequest.setSessionId(2l);
+		System.out.println("apppppppppppppppppppp");
+		System.out.println(bearerClient.getResource(serialNumberRequest));
+		SerialNumberResponse applicationNo=    bearerClient.getResource(serialNumberRequest);
+		System.out.println(applicationNo.getId());
+		provisionalCalendar.setApplicationNo(applicationNo.getId());
 		return ProvisionalCalendarDTO.builder().id(provisionalCalendar.getId())
 				.dateOfInput(provisionalCalendar.getDateOfInput()).language(provisionalCalendar.getLanguage())
 				.submittedBy(provisionalCalendar.getSubmittedBy())
@@ -253,7 +280,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.applicationInstanceDTO(ApplicationInstanceDTO.builder().id(provisionalCalendar.getId())
 						.applicationId(provisionalCalendar.getApplicationId())
 						.applicationNo(provisionalCalendar.getApplicationNo())
-						.currentStatus(provisionalCalendar.getCurrentStatus()).build())
+						.currentStatus(provisionalCalendar.getCurrentStatus())
+						.documentDate(provisionalCalendar.getDateOfInput()).build())
 				.build();
 	}
 
@@ -284,10 +312,13 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 //                .provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId())
 //                .build();
 //    }
-
+	// generated is working fine
 	@Override
 	public ProvisionalCalendarGenerateDTO createProvisionalCalendarGenerate(
 			ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
+		// get application number
+//		Long applicationNo =
+
 		// Check if ProvisionalCalendar with the given ID exists
 		Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository
 				.findById(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId());
@@ -434,7 +465,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 //		return response;
 //	}
 
-	// handle the Exceptions with try catch
+	// getAll deployed apis is that deployed and Working fine
 
 	@Override
 	public List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(
@@ -502,7 +533,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.applicationInstanceDTO(ApplicationInstanceDTO.builder().id(provisionalCalendar.getId())
 						.applicationId(provisionalCalendar.getApplicationId())
 						.applicationNo(provisionalCalendar.getApplicationNo())
-						.currentStatus(provisionalCalendar.getCurrentStatus()).build())
+						.currentStatus(provisionalCalendar.getCurrentStatus())
+						.documentDate(provisionalCalendar.getDateOfInput())
+						.build())
 				.build();
 	}
 

@@ -43,8 +43,8 @@ public class BaseUser extends Auditable implements UserDetails {
 	@Column(name = "password", nullable = false)
 	private String password;
 
-	@Column(name = "role", nullable = true)
-	private String role;
+	@Column(name = "house_id", nullable = true)
+	private Long houseId;
 
 	// Merged User entity properties
 

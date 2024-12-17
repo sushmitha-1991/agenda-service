@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @Builder
 @Data
 @NoArgsConstructor
@@ -15,4 +18,6 @@ public class ApplicationInstanceDTO {
       private  Long   applicationId;
       private String  applicationNo;
       private   String  currentStatus;
+      // adding the date
+      private Date documentDate;
 }

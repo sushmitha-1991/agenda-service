@@ -1,9 +1,7 @@
 package com.dsp.agendaPapers.provisionalcalendarfinal.controller;
 
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarDTO;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarGenerateDTO;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarInputDTO;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarTableOfficeDTO;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.*;
+import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
 import com.dsp.agendaPapers.provisionalcalendarfinal.service.ProvisionalCalendarService;
 import com.dsp.agendaPapers.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +20,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/agendapapers/provisionalcalendar")
 public class ProvisionalCalendarFinalController {
+
+    @Autowired
+    private BearerClient bearerClient;
 
     @Autowired
     private ProvisionalCalendarService provisionalCalendarService;
@@ -158,6 +159,8 @@ public class ProvisionalCalendarFinalController {
     })
     public ResponseEntity<GenericResponse<ProvisionalCalendarGenerateDTO>> createProvisionalCalendarGenerate(
             @Valid @RequestBody ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
+        // for ref id
+
         ProvisionalCalendarGenerateDTO createdGenerate = provisionalCalendarService.createProvisionalCalendarGenerate(provisionalCalendarGenerateDTO);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -185,7 +188,6 @@ public class ProvisionalCalendarFinalController {
                 .status(HttpStatus.OK)
                 .body(new GenericResponse<>(true, "  Provisional Calendar Input  returned successfully", updatedDTO, HttpStatus.OK.value()));
     }
-
 
 
     // handle the Exceptions filter
@@ -219,8 +221,13 @@ public class ProvisionalCalendarFinalController {
         }
     }
 
-}
+    // for generated the ref id
 
+    @PostMapping("/test")
+    public SerialNumberResponse getSerialNumber(@RequestBody SerialNumberRequest serialNumberRequest) {
+        return bearerClient.getResource(serialNumberRequest);
+    }
+}
 
 
 
