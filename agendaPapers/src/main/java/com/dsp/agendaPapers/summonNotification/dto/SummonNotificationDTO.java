@@ -23,20 +23,20 @@ public class SummonNotificationDTO {
 	private String sessionNo;
 	
 	private String rajyasabhaSessionNo;
-	@NotEmpty
+
 	private LocalDate summonIssuanceDate;
-	@NotEmpty
+	
 	private String summonIssuanceDateHindiEn;
-	@NotEmpty
+	
 	private String summonIssuanceDateHindi;
-	@NotEmpty
+
 	private String notificationNo;
 
 	private LocalDateTime summonStartAt;
 	private Long applicationId;
 
 	private String applicationNo;
-	@NotEmpty
+	
 	private String status;
 	private String templateContent;
 	private SummonNotificationDTO parentNotification;

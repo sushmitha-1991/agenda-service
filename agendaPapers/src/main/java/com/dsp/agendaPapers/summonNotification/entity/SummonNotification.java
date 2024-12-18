@@ -43,16 +43,16 @@ public class SummonNotification extends Auditable {
 	@Column(name = "rajyasabha_SessionNo", length = 100)
 	private String rajyasabhaSessionNo;
 
-	@Column(name = "summon_issuance_date", nullable = false)
+	@Column(name = "summon_issuance_date")
 	private LocalDate summonIssuanceDate;
 
-	@Column(name = "summon_issuance_date_hindi_en", nullable = false, length = 100)
+	@Column(name = "summon_issuance_date_hindi_en", length = 100)
 	private String summonIssuanceDateHindiEn;
 
-	@Column(name = "summon_issuance_date_hindi", nullable = false, length = 100)
+	@Column(name = "summon_issuance_date_hindi", length = 100)
 	private String summonIssuanceDateHindi;
 
-	@Column(name = "notification_no", nullable = false, length = 100)
+	@Column(name = "notification_no", length = 100)
 	private String notificationNo;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
