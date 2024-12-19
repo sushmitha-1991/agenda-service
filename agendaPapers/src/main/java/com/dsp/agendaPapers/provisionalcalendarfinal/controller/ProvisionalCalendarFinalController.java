@@ -167,26 +167,33 @@ public class ProvisionalCalendarFinalController {
                 .body(new GenericResponse<>(true, "Provisional Calendar generated successfully", createdGenerate, HttpStatus.CREATED.value()));
     }
 
-
-    // for the input status will be update
+    // for the input status
 
     @PutMapping("/update-inputstatus/{id}")
-    @Operation(summary = "Update input status of a Provisional Calendar entry")
+    @Operation(summary = "Update input status and remarks of a Provisional Calendar entry")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Input status updated successfully"),
+            @ApiResponse(responseCode = "200", description = "Input status and remarks updated successfully"),
             @ApiResponse(responseCode = "404", description = "Provisional Calendar entry not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> updateInputStatus(
             @PathVariable Long id,
-            @RequestParam String inputStatus) {
+            @RequestParam String inputStatus,
+            @RequestParam(required = false) String remarks) {
 
-        // Update input status using service
-        ProvisionalCalendarInputDTO updatedDTO = provisionalCalendarService.updateInputStatus(id, inputStatus);
+        if (inputStatus == null || inputStatus.isEmpty()) {
+            throw new IllegalArgumentException("InputStatus is required and cannot be null or empty.");
+        }
+
+        ProvisionalCalendarInputDTO updatedDTO = provisionalCalendarService.updateInputStatus(id, inputStatus, remarks);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(new GenericResponse<>(true, "  Provisional Calendar Input  returned successfully", updatedDTO, HttpStatus.OK.value()));
+                .body(new GenericResponse<>(
+                        true,
+                        "Provisional Calendar Input updated successfully",
+                        updatedDTO,
+                        HttpStatus.OK.value()));
     }
 
 

@@ -404,18 +404,29 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 
 
-	// update for the input status
+	// update for the input status and remarks testing
+
 	@Override
-	public ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus) {
+	public ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus, String remarks) {
+		// Find the ProvisionalCalendar entity by ID
 		Optional<ProvisionalCalendar> optionalEntity = provisionalCalendarRepository.findById(id);
 
-		System.out.println("############### update status ");
-		System.out.println(optionalEntity);
 		if (optionalEntity.isPresent()) {
 			ProvisionalCalendar existingEntity = optionalEntity.get();
+
+			// Update input status
 			existingEntity.setInputStatus(inputStatus);
-			existingEntity.setRefId(existingEntity.getId());// Ensure the field name is consistent
+
+			// Ensure remarks is never null. Set it to an empty string if null.
+			if (remarks == null) {
+				remarks = "";  // Or set a default value, like "No remarks provided"
+			}
+			existingEntity.setRemarks(remarks);
+
+			// Save the updated entity back to the repository
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
+
+			// Map the updated entity to DTO and return
 			return mapToInputDto(updatedEntity);
 		} else {
 			throw new RuntimeException("ProvisionalCalendar not found with id " + id);
@@ -423,11 +434,12 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	}
 
 
-
 	private ProvisionalCalendarInputDTO mapToInputDto(ProvisionalCalendar entity) {
 		return ProvisionalCalendarInputDTO.builder()
 				.id(entity.getId())
-				.inputStatus(entity.getInputStatus()) // Ensure the field name is consistent
+				.inputStatus(entity.getInputStatus())
+				.remarks(entity.getRemarks())
+				// Ensure the field name is consistent
 				.build();
 	}
 
