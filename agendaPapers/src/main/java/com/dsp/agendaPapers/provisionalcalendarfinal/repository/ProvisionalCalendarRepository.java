@@ -50,4 +50,20 @@ public interface ProvisionalCalendarRepository extends JpaRepository<Provisional
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    // for submitted by in get All for testing
+
+    // All data for the testing
+
+    List<ProvisionalCalendar> findByInputStatusAndSubmittedBy(String inputStatus, String submittedBy);
+
+    List<ProvisionalCalendar> findBySubmittedBy(String submittedBy);
+
+    List<ProvisionalCalendar> findBySubmittedByAndDateOfInputBetween(String submittedBy, LocalDateTime startDate, LocalDateTime endDate);
+
+    List<ProvisionalCalendar> findByInputStatusAndSubmittedByAndDateOfInputBetween(
+            String inputStatus, String submittedBy, LocalDateTime startDate, LocalDateTime endDate);
+
+
+
 }

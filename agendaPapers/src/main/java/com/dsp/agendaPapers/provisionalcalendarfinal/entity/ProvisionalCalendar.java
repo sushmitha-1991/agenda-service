@@ -107,6 +107,13 @@ public class ProvisionalCalendar extends ApplicationInstance {
         @Column(name = "remarks", columnDefinition = "TEXT", nullable = true)
         private String remarks;
 
+        // coloumm for the draft status
+
+//        @Column(name= "drfat_status", columnDefinition = "boolean default false",  nullable = true )
+//        private Boolean draftStatus;
+
+
+
 
 }
 

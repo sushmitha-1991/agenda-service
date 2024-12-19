@@ -28,5 +28,4 @@ public class ProvisionalCalendarTableOfficeDTO {
     private Boolean draftStatus;
     private Long provisionalCalendarInputId;
 
-
 }

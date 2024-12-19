@@ -48,6 +48,10 @@ public class ProvisionalCalendarDTO {
     private String remarks;
     private String refNumber;
 
+    // adding the new fiels draft status
+//    private Boolean draftStatus;
+
+
 
 
     // Application Instace

@@ -2,15 +2,12 @@ package com.dsp.agendaPapers.provisionalcalendarfinal.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.*;
 import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
-import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.dialect.SybaseSqmToSqlAstConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +20,6 @@ import com.dsp.agendaPapers.provisionalcalendarfinal.repository.ProvisionalCalen
 import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
 
 import jakarta.transaction.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarService {
@@ -350,6 +346,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId()).build();
 	}
 
+
+
+
 // getAll working fine
 
 //	@Override
@@ -423,6 +422,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		}
 	}
 
+
+
 	private ProvisionalCalendarInputDTO mapToInputDto(ProvisionalCalendar entity) {
 		return ProvisionalCalendarInputDTO.builder()
 				.id(entity.getId())
@@ -473,16 +474,72 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 //	}
 
 	// getAll deployed apis is that deployed and Working fine
+//	@Override
+//	public List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(
+//			LocalDate startDate, LocalDate endDate, String inputStatus) {
+//		List<ProvisionalCalendarDTO> response;
+//		try {
+//			if (startDate == null || endDate == null) {
+//				// Handle cases with only inputStatus filter
+//				if (inputStatus != null) {
+//					response = provisionalCalendarRepository.findByInputStatus(inputStatus).stream()
+//							.map(ProvisionalCalendarDTOMapper::toDTO)
+//							.collect(Collectors.toList());
+//				} else {
+//					// Fetch all records if no filters provided
+//					response = provisionalCalendarRepository.findAll().stream()
+//							.map(ProvisionalCalendarDTOMapper::toDTO)
+//							.collect(Collectors.toList());
+//				}
+//			} else {
+//				// Handle date range filtering
+//				LocalDateTime startDateTime = startDate.atStartOfDay();
+//				LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+//
+//				if (inputStatus != null) {
+//					response = provisionalCalendarRepository
+//							.findByInputStatusAndDateOfInputBetween(inputStatus, startDateTime, endDateTime)
+//							.stream()
+//							.map(ProvisionalCalendarDTOMapper::toDTO)
+//							.collect(Collectors.toList());
+//				} else {
+//					response = provisionalCalendarRepository
+//							.findByDateOfInputBetween(startDateTime, endDateTime)
+//							.stream()
+//							.map(ProvisionalCalendarDTOMapper::toDTO)
+//							.collect(Collectors.toList());
+//				}
+//			}
+//			return response;
+//		} catch (Exception ex) {
+//			// Log the exception
+//			System.err.println("Error occurred while fetching Provisional Calendar entries: " + ex.getMessage());
+//			ex.printStackTrace();  // Print stack trace for debugging
+//
+//			// Optionally, rethrow the exception or return an empty list
+//			throw new RuntimeException("An error occurred while fetching Provisional Calendar entries", ex);
+//		}
+//	}
 
+	// get All filter with testing for submiited by
 	@Override
 	public List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(
-			LocalDate startDate, LocalDate endDate, String inputStatus) {
+			LocalDate startDate, LocalDate endDate, String inputStatus, String submittedBy) {
 		List<ProvisionalCalendarDTO> response;
 		try {
 			if (startDate == null || endDate == null) {
-				// Handle cases with only inputStatus filter
-				if (inputStatus != null) {
+				// Handle cases with only inputStatus and submittedBy filters
+				if (inputStatus != null && submittedBy != null) {
+					response = provisionalCalendarRepository
+							.findByInputStatusAndSubmittedBy(inputStatus, submittedBy).stream()
+							.map(ProvisionalCalendarDTOMapper::toDTO)
+							.collect(Collectors.toList());
+				} else if (inputStatus != null) {
 					response = provisionalCalendarRepository.findByInputStatus(inputStatus).stream()
+							.map(ProvisionalCalendarDTOMapper::toDTO)
+							.collect(Collectors.toList());
+				} else if (submittedBy != null) {
+					response = provisionalCalendarRepository.findBySubmittedBy(submittedBy).stream()
 							.map(ProvisionalCalendarDTOMapper::toDTO)
 							.collect(Collectors.toList());
 				} else {
@@ -496,16 +553,27 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				LocalDateTime startDateTime = startDate.atStartOfDay();
 				LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
 
-				if (inputStatus != null) {
+				if (inputStatus != null && submittedBy != null) {
 					response = provisionalCalendarRepository
-							.findByInputStatusAndDateOfInputBetween(inputStatus, startDateTime, endDateTime)
-							.stream()
+							.findByInputStatusAndSubmittedByAndDateOfInputBetween(
+									inputStatus, submittedBy, startDateTime, endDateTime).stream()
+							.map(ProvisionalCalendarDTOMapper::toDTO)
+							.collect(Collectors.toList());
+				} else if (inputStatus != null) {
+					response = provisionalCalendarRepository
+							.findByInputStatusAndDateOfInputBetween(
+									inputStatus, startDateTime, endDateTime).stream()
+							.map(ProvisionalCalendarDTOMapper::toDTO)
+							.collect(Collectors.toList());
+				} else if (submittedBy != null) {
+					response = provisionalCalendarRepository
+							.findBySubmittedByAndDateOfInputBetween(
+									submittedBy, startDateTime, endDateTime).stream()
 							.map(ProvisionalCalendarDTOMapper::toDTO)
 							.collect(Collectors.toList());
 				} else {
 					response = provisionalCalendarRepository
-							.findByDateOfInputBetween(startDateTime, endDateTime)
-							.stream()
+							.findByDateOfInputBetween(startDateTime, endDateTime).stream()
 							.map(ProvisionalCalendarDTOMapper::toDTO)
 							.collect(Collectors.toList());
 				}
@@ -514,12 +582,13 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		} catch (Exception ex) {
 			// Log the exception
 			System.err.println("Error occurred while fetching Provisional Calendar entries: " + ex.getMessage());
-			ex.printStackTrace();  // Print stack trace for debugging
+			ex.printStackTrace(); // Print stack trace for debugging
 
 			// Optionally, rethrow the exception or return an empty list
 			throw new RuntimeException("An error occurred while fetching Provisional Calendar entries", ex);
 		}
 	}
+
 
 
 

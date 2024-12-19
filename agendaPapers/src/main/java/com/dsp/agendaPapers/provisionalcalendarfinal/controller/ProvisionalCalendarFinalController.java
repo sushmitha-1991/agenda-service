@@ -190,10 +190,48 @@ public class ProvisionalCalendarFinalController {
     }
 
 
-    // handle the Exceptions filter
+    // handle the Exceptions filter is that working fine and deployed
+
+//    @GetMapping("/getAllfilter")
+//    @Operation(summary = "Get all Provisional Calendar entries between specific dates")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "All Provisional Calendar entries retrieved successfully"),
+//            @ApiResponse(responseCode = "404", description = "No Provisional Calendar entries found"),
+//            @ApiResponse(responseCode = "500", description = "Internal server error")
+//    })
+//    public ResponseEntity<GenericResponse<List<ProvisionalCalendarDTO>>> getAllProvisionalCalendars(
+//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+//            @RequestParam(required = false) String inputStatus) {
+//
+//        try {
+//            List<ProvisionalCalendarDTO> calendarDTOs = provisionalCalendarService
+//                    .getAllProvisionalCalendarsBetweenDates(startDate, endDate, inputStatus);
+//
+//            if (calendarDTOs == null || calendarDTOs.isEmpty()) {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                        .body(new GenericResponse<>(true, "No Provisional Calendar entries found", calendarDTOs, HttpStatus.NOT_FOUND.value()));
+//            }
+//
+//            return ResponseEntity.status(HttpStatus.OK)
+//                    .body(new GenericResponse<>(true, "All Provisional Calendar entries retrieved successfully", calendarDTOs, HttpStatus.OK.value()));
+//        } catch (RuntimeException ex) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new GenericResponse<>(false, "An error occurred while fetching Provisional Calendar entries", null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
+//        }
+//    }
+
+    // for generated the ref id
+
+    @PostMapping("/test")
+    public SerialNumberResponse getSerialNumber(@RequestBody SerialNumberRequest serialNumberRequest) {
+        return bearerClient.getResource(serialNumberRequest);
+    }
+
+    // get ALl with filter I am checking for newly deployed
 
     @GetMapping("/getAllfilter")
-    @Operation(summary = "Get all Provisional Calendar entries between specific dates")
+    @Operation(summary = "Get all Provisional Calendar entries between specific dates and by submittedBy")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "All Provisional Calendar entries retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "No Provisional Calendar entries found"),
@@ -202,11 +240,12 @@ public class ProvisionalCalendarFinalController {
     public ResponseEntity<GenericResponse<List<ProvisionalCalendarDTO>>> getAllProvisionalCalendars(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false) String inputStatus) {
+            @RequestParam(required = false) String inputStatus,
+            @RequestParam(required = false) String submittedBy) {
 
         try {
             List<ProvisionalCalendarDTO> calendarDTOs = provisionalCalendarService
-                    .getAllProvisionalCalendarsBetweenDates(startDate, endDate, inputStatus);
+                    .getAllProvisionalCalendarsBetweenDates(startDate, endDate, inputStatus, submittedBy);
 
             if (calendarDTOs == null || calendarDTOs.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -221,12 +260,7 @@ public class ProvisionalCalendarFinalController {
         }
     }
 
-    // for generated the ref id
 
-    @PostMapping("/test")
-    public SerialNumberResponse getSerialNumber(@RequestBody SerialNumberRequest serialNumberRequest) {
-        return bearerClient.getResource(serialNumberRequest);
-    }
 }
 
 

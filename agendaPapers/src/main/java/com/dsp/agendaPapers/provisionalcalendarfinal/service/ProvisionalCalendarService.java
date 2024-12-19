@@ -34,7 +34,11 @@ public interface ProvisionalCalendarService {
 
     ProvisionalCalendarGenerateDTO createProvisionalCalendarGenerate(ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO);
 
-    List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate endDate,String inputStatus);
+
+    List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate endDate, String inputStatus, String submittedBy);
     // for the input status
     ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus);
+
+//    List<ProvisionalCalendarDTO> findByInputStatusAndSubmittedByAndDateOfInputBetween(
+//            LocalDate startDate, LocalDate endDate, String inputStatus, String submittedBy);
 }
