@@ -1,7 +1,8 @@
 package com.dsp.agendaPapers.summonNotification.dto;
 
-//SummonNotification Microservice - DTO for sending data to ApplicationInstance
+import java.time.LocalDate;
 
+//SummonNotification Microservice - DTO for sending data to ApplicationInstance
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,10 +15,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ApplicationInstanceDTO {
 	private Long id;
-
- private Long applicationId; // Reference to Application ID
- private String applicationNo;
- private String currentStatus;
- private String publishedDocumentUrl;
- private Long refId;
+	private Long applicationId; // Reference to Application ID
+	private String applicationNo;
+	private String currentStatus;
+	private String publishedDocumentUrl;
+	private Long refId;
+	//private LocalDate documentDate;
 }

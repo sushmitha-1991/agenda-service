@@ -1,5 +1,9 @@
 package com.dsp.agendaPapers.prorogationnotice.service.impl;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.dsp.agendaPapers.applicationPapers.dto.ApplicationPapersDTO;
 import com.dsp.agendaPapers.applicationPapers.dto.TemplatesDTO;
+import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
 import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
@@ -69,7 +75,7 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 	        // Generate Application Number using the generated ID
 	        String applicationNo = generateApplicationNo(
 	            prorogationNoticeDTO.getLokSabhaNo(),
-	            prorogationNoticeDTO.getLobSabhaSessionNo(),
+	            prorogationNoticeDTO.getLokSabhaSessionNo(),
 	            prorogationNoticeDTO.getRajyaSabhaSessionNo(),
 	            savedNotice.getId()
 	        );
@@ -261,5 +267,143 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 	        throw new RuntimeException("Failed to fetch ApplicationInstance data", e);
 	    }
 	}
+
+
+
+	@Override
+	public List<ProrogationNoticeDTO> getAllProrogationNoticeBySessionNo(String lokSabhaSessionNo) {
+	    log.debug("Entering getProrogationNoticeBySessionNo with sessionNo: {}", lokSabhaSessionNo);
+
+	    try {
+	        List<ProrogationNotice> prorogationNotices = prorogationNoticeRepository.findByLokSabhaSessionNo(lokSabhaSessionNo);
+
+	        if (prorogationNotices.isEmpty()) {
+	            log.error("No ProrogationNotices found with sessionNo: {}", lokSabhaSessionNo);
+	            throw new ResourceNotFoundException("No ProrogationNotices found with sessionNo: " + lokSabhaSessionNo);
+	        }
+
+	        // Convert each ProrogationNotice entity to ProrogationNoticeDTO
+	        List<ProrogationNoticeDTO> prorogationNoticeDTOs = prorogationNotices.stream()
+	                .map(prorogationNotice -> {
+	                    ProrogationNoticeDTO dto = prorogationNoticeMapper.toDto(prorogationNotice);
+	                    ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
+	                            prorogationNotice.getApplicationNo());
+	                    dto.setApplicationInstanceDTO(instanceDTO);
+	                    if (instanceDTO != null && instanceDTO.getId() != null) {
+	                        applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+	                                .ifPresent(applicationPapers -> {
+	                                    dto.setTemplateId(applicationPapers.getTemplateId());
+	                                    dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+	                                });
+	                    }
+	                    return dto;
+	                }).collect(Collectors.toList());
+
+	        log.debug("Returning list of ProrogationNoticeDTOs: {}", prorogationNoticeDTOs);
+	        return prorogationNoticeDTOs;
+
+	    } catch (ResourceNotFoundException e) {
+	        log.error("Resource not found when retrieving ProrogationNotices: {}", e.getMessage());
+	        throw e; // Re-throw the exception for further handling
+	    } catch (Exception e) {
+	        log.error("Error in getAllProrogationNoticeBySessionNo: ", e);
+	        throw new RuntimeException("Failed to retrieve ProrogationNotices by sessionNo", e);
+	    }
+	}
+
+
+
+	@Transactional
+	@Override
+	public ProrogationNoticeDTO updateProrogationNotice(Long id, ProrogationNoticeDTO prorogationNoticeDTO) {
+	    log.debug("Starting update for ProrogationNotice with ID: {}", id);
+
+	    try {
+	        // Fetch the existing ProrogationNotice
+	        ProrogationNotice existingNotice = prorogationNoticeRepository.findById(id)
+	                .orElseThrow(() -> new ResourceNotFoundException("ProrogationNotice not found with id: " + id));
+
+	        // Update only the fields you want to change
+	        existingNotice.setNotificationNo(prorogationNoticeDTO.getNotificationNo());
+	        existingNotice.setStatus(prorogationNoticeDTO.getStatus());
+	        existingNotice.setTemplateContent(prorogationNoticeDTO.getTemplateContent());
+	        existingNotice.setTemplateContentHindi(prorogationNoticeDTO.getTemplateContentHindi());
+
+	        // Save the updated ProrogationNotice
+	        ProrogationNotice updatedNotice = prorogationNoticeRepository.save(existingNotice);
+
+	        // Prepare the response DTO
+	        ProrogationNoticeDTO responseDTO = prorogationNoticeMapper.toDto(updatedNotice);
+
+	        // Automatically update the ApplicationInstance
+	        if (updatedNotice.getStatus() != null) {
+	            ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
+	            applicationInstanceDTO.setCurrentStatus(updatedNotice.getStatus()); // New status from ProrogationNotice
+
+	            // Call the external service to update ApplicationInstance
+	            String url = applicationInstanceServiceUrl + "/updateByApplicationNo/" + updatedNotice.getApplicationNo();
+	            try {
+	                restTemplate.put(url, applicationInstanceDTO);
+	                log.debug("Updated ApplicationInstance with new status for applicationNo: {}",
+	                        updatedNotice.getApplicationNo());
+	            } catch (Exception e) {
+	                log.error("Failed to update ApplicationInstance: ", e);
+	                throw new RuntimeException("Failed to update ApplicationInstance", e);
+	            }
+	        }
+
+	        // Fetch the updated ApplicationInstance data
+	        String applicationNo = updatedNotice.getApplicationNo();
+	        String applicationInstanceUrl = applicationInstanceServiceUrl + "/getApplicationNo/" + applicationNo;
+
+	        try {
+	            ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(
+	                    applicationInstanceUrl, HttpMethod.GET, null,
+	                    new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
+	                    });
+
+	            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+	                ApplicationInstanceDTO applicationInstanceDTOResponse = response.getBody().getData();
+	                if (applicationInstanceDTOResponse != null) {
+	                    responseDTO.setApplicationInstanceDTO(applicationInstanceDTOResponse); // Include ApplicationInstance data
+	                    responseDTO.setApplicationId(applicationInstanceDTOResponse.getApplicationId()); // Include applicationId
+	                    log.debug("Fetched ApplicationInstance for applicationNo: {}", applicationNo);
+	                }
+	            }
+	        } catch (Exception e) {
+	            log.error("Failed to fetch ApplicationInstance: ", e);
+	            // Handle as needed
+	        }
+
+	        if (prorogationNoticeDTO.getTemplateContent() != null || prorogationNoticeDTO.getTemplateContentHindi() != null) {
+	            Optional<ApplicationPapers> existingPapersOpt = applicationPapersRepository
+	                    .findByApplicationIdAndApplicationInstanceId(prorogationNoticeDTO.getApplicationId(),
+	                            responseDTO.getApplicationInstanceDTO().getId());
+
+	            if (existingPapersOpt.isPresent()) {
+	                ApplicationPapers existingPapers = existingPapersOpt.get();
+	                existingPapers.setTemplateContent(prorogationNoticeDTO.getTemplateContent());
+	                existingPapers.setTemplateContentHindi(prorogationNoticeDTO.getTemplateContentHindi());
+
+	                applicationPapersRepository.save(existingPapers);
+	                log.debug("Updated ApplicationPapers with new template content.");
+	            } else {
+	                log.warn("ApplicationPapers not found for ApplicationId: {} and ApplicationInstanceId: {}",
+	                        prorogationNoticeDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
+	            }
+	        }
+
+	        log.debug("Returning updated ProrogationNoticeDTO with ApplicationInstance data: {}", responseDTO);
+	        return responseDTO;
+
+	    } catch (ResourceNotFoundException e) {
+	        log.error("Resource not found during updateProrogationNotice: {}", e.getMessage());
+	        throw e;
+	    } catch (Exception e) {
+	        log.error("Error in updateProrogationNotice: ", e);
+	        throw new RuntimeException("Failed to update ProrogationNotice", e);
+	    }
+	}
+
 
 }

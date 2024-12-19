@@ -112,7 +112,11 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	        log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
 
 	        // Validate template ID
-	        validateTemplateId(summonNotificationDTO.getTemplateId());
+	        
+	        if (summonNotificationDTO.getTemplateId() != null) {
+	            validateTemplateId(summonNotificationDTO.getTemplateId());
+	        }
+
 
 	        // Create ApplicationPapersDTO and save template content from SummonNotification
 	        ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()

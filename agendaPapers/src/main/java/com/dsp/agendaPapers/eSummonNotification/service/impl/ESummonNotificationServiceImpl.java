@@ -109,9 +109,12 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
 
 			// Validate template ID
+			if (eSummonNotificationDTO.getTemplateId() != null) {
 			validateTemplateId(eSummonNotificationDTO.getTemplateId());
+			}
+			if (eSummonNotificationDTO.getTemplateHindiId() != null) {
 			validateTemplateId(eSummonNotificationDTO.getTemplateHindiId());
-
+			}
 			// Create ApplicationPapersDTO and save template content from SummonNotification
 			ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
 					.applicationId(eSummonNotificationDTO.getApplicationId())

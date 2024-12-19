@@ -27,8 +27,8 @@ public class ProrogationNotice extends Auditable {
 	@Column(name = "lok_sabha_no")
 	private String lokSabhaNo;
 
-	@Column(name = "lob_sabha_session_no")
-	private String lobSabhaSessionNo;
+	@Column(name = "lok_sabha_session_no")
+	private String lokSabhaSessionNo;
 
 	@Column(name = "rajya_sabha_session_no")
 	private String rajyaSabhaSessionNo;

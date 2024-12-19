@@ -17,7 +17,7 @@ public class ProrogationNoticeMapper {
         return ProrogationNoticeDTO.builder()
                 .id(prorogationNotice.getId())
                 .lokSabhaNo(prorogationNotice.getLokSabhaNo())
-                .lobSabhaSessionNo(prorogationNotice.getLobSabhaSessionNo())
+                .lokSabhaSessionNo(prorogationNotice.getLokSabhaSessionNo())
                 .rajyaSabhaSessionNo(prorogationNotice.getRajyaSabhaSessionNo())
                 .issuanceDate(prorogationNotice.getIssuanceDate())
                 .issuanceDateSakaEra(prorogationNotice.getIssuanceDateSakaEra())
@@ -40,7 +40,7 @@ public class ProrogationNoticeMapper {
         ProrogationNotice prorogationNotice = new ProrogationNotice();
         prorogationNotice.setId(prorogationNoticeDTO.getId());
         prorogationNotice.setLokSabhaNo(prorogationNoticeDTO.getLokSabhaNo());
-        prorogationNotice.setLobSabhaSessionNo(prorogationNoticeDTO.getLobSabhaSessionNo());
+        prorogationNotice.setLokSabhaSessionNo(prorogationNoticeDTO.getLokSabhaSessionNo());
         prorogationNotice.setRajyaSabhaSessionNo(prorogationNoticeDTO.getRajyaSabhaSessionNo());
         prorogationNotice.setIssuanceDate(prorogationNoticeDTO.getIssuanceDate());
         prorogationNotice.setIssuanceDateSakaEra(prorogationNoticeDTO.getIssuanceDateSakaEra());

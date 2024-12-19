@@ -17,7 +17,7 @@ public class ProrogationNoticeDTO {
 
     private Long id;
     private String lokSabhaNo;
-    private String lobSabhaSessionNo;
+    private String lokSabhaSessionNo;
     private String rajyaSabhaSessionNo;
     private LocalDate issuanceDate;
     private String issuanceDateSakaEra;
