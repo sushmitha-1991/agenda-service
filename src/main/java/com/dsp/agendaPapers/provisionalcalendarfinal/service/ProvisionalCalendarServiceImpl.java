@@ -102,11 +102,18 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		{
 			// InputInstanceDTO responceDTO=inputInstanceRepository.findById(singleDTO.getId()).
 			// map(InputInstanceMapper::toDTO);
-			InputInstanceDTO responseDTO = inputInstanceRepository
+			try{
+				InputInstanceDTO responseDTO = inputInstanceRepository
 			.findById(singleDTO.getId())
 			.map(InputInstanceMapper::toDTO)
 			.orElse(null); 
 			singleDTO.setInputInstanceDTO(responseDTO);
+			}
+			catch(Exception e)
+			{
+				System.out.println("Input Instance Not found for PC");
+				throw e;
+			}
 		}
 		System.out.println("input instance DTO getAll");
 		System.out.println(dto);
