@@ -77,6 +77,9 @@ public class ApplicationInstance extends Auditable {
 
 	// adding the coloumn
 	@Column(name = "document_date")
-	private Date documentDate;
+	private LocalDate documentDate;
+	//Changes done by Sushmitha
+	// private Date documentDate;
+
 
 }

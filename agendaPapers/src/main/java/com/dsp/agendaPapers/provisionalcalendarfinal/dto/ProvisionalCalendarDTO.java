@@ -1,6 +1,5 @@
 package com.dsp.agendaPapers.provisionalcalendarfinal.dto;
 
-
 import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,9 @@ import java.util.Map;
 public class ProvisionalCalendarDTO {
 
     private Long id;
-    private Date dateOfInput;
+    // private Date dateOfInput;
+// changes by Sushmitha
+    private LocalDate dateOfInput;
     private String language;
     private String submittedBy;
     private String submittedByBranch;
@@ -37,7 +39,9 @@ public class ProvisionalCalendarDTO {
     private String listOfDocumentTableOfficeFootnote;
     private String listOfDocumentTableOfficeNote;
     private List<Map<String, Object>> dateOfSittingInputsTableOffice;
-    private Date dateOfInputTableOffice;
+    //Changes by Sushmitha
+    private LocalDate dateOfInputTableOffice;
+    // private Date dateOfInputTableOffice;
     private String inputTextTableOffice;
     private String rajyaSabhaSessionNo;
     private Boolean generatedFlag;
@@ -49,17 +53,14 @@ public class ProvisionalCalendarDTO {
     private String refNumber;
 
     // adding the new fiels draft status
-//    private Boolean draftStatus;
-
-
-
+    // private Boolean draftStatus;
 
     // Application Instace
 
     private String applicationNo;
     private String currentStatus;
     private String publishedDocumentUrl;
-//    private String processInstanceId;
+    // private String processInstanceId;
     private String taskId;
     private Boolean isPublished;
     private String lokSabhaSessionNumber;
@@ -68,11 +69,8 @@ public class ProvisionalCalendarDTO {
     private Long applicationId;
 
     private ApplicationInstanceDTO applicationInstanceDTO;
-
-
+    private InputInstanceDTO inputInstanceDTO;
 
     // process insatnce will be remove from everywhere
 
-
 }
-
