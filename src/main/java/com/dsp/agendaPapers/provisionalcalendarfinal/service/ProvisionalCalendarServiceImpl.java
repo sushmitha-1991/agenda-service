@@ -215,15 +215,12 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		.currentStatus(savedEntity.getInputStatus())
 		.build();
 		inputInstanceEntity=inputInstanceRepository.save(inputInstanceEntity);
+		System.out.println("Input Instances");
+		System.out.println(inputInstanceEntity);
 		ProvisionalCalendarInputDTO responceDTO=mapToDtoPCinput(savedEntity);
-		responceDTO.setInputInstanceDTO(InputInstanceDTO.builder()
-		.id(inputInstanceEntity.getId())
-		.applicationId(inputInstanceEntity.getApplicationId())
-		.applicationNo(inputInstanceEntity.getApplicationNo())
-		.refId(inputInstanceEntity.getRefId())
-		.documentDate(inputInstanceEntity.getDocumentDate())
-		.currentStatus(inputInstanceEntity.getCurrentStatus())
-		.build());
+		responceDTO.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstanceEntity));
+		System.out.println("response with Input instance");
+		System.out.println(responceDTO);
 		return responceDTO;
 
 	}
