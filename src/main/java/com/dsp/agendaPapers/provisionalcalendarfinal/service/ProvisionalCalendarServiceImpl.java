@@ -97,7 +97,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	@Override
 	public List<ProvisionalCalendarDTO> getAllProvisionalCalendars() {
 		List<ProvisionalCalendarDTO> dto=provisionalCalendarRepository.findAll().stream().map(this::mapToDto).collect(Collectors.toList());
-		// ProvisionalCalendarInputDTO responceDTO=mapToDtoPCinput(savedEntity);
 		for(ProvisionalCalendarDTO singleDTO:dto)
 		{
 			// InputInstanceDTO responceDTO=inputInstanceRepository.findById(singleDTO.getId()).
@@ -636,6 +635,25 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 							.map(ProvisionalCalendarDTOMapper::toDTO)
 							.collect(Collectors.toList());
 				}
+				for(ProvisionalCalendarDTO singleDTO:response)
+				{
+					// InputInstanceDTO responceDTO=inputInstanceRepository.findById(singleDTO.getId()).
+					// map(InputInstanceMapper::toDTO);
+					try{
+						InputInstanceDTO responseDTO = inputInstanceRepository
+					.findById(singleDTO.getId())
+					.map(InputInstanceMapper::toDTO)
+					.orElse(null); 
+					singleDTO.setInputInstanceDTO(responseDTO);
+					}
+					catch(Exception e)
+					{
+						System.out.println("Input Instance Not found for PC");
+						throw e;
+					}
+				}
+				System.out.println("input instance DTO getAll");
+				System.out.println(response);
 			}
 			return response;
 		} catch (Exception ex) {
