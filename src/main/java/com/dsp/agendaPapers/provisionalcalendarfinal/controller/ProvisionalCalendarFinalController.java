@@ -125,11 +125,16 @@ public class ProvisionalCalendarFinalController {
     })
     public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> createProvisionalCalendarInput(
             @Valid @RequestBody ProvisionalCalendarInputDTO inputDTO) {
-        
+                System.out.println("before saving Input with input instance");
+                System.out.println(inputDTO);
+
         ProvisionalCalendarInputDTO createdInput = provisionalCalendarService.createProvisionalCalendarInput(inputDTO);
+        System.out.println("created Input with input instance");
+        System.out.println(createdInput);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new GenericResponse<>(true, "Provisional Calendar Input created successfully", createdInput, HttpStatus.CREATED.value()));
+                .body(new GenericResponse<>(true, "Provisional Calendar Input created successfully",
+                 createdInput, HttpStatus.CREATED.value()));
     }
 
     @PostMapping("/table-office")

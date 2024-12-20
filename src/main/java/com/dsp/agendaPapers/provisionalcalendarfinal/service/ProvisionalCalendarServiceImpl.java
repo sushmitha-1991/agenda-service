@@ -206,6 +206,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		ProvisionalCalendar savedEntity = provisionalCalendarRepository.save(provisionalCalendar);
 		savedEntity.setRefId(savedEntity.getId());
 		savedEntity = provisionalCalendarRepository.save(savedEntity);
+		System.out.println("calender input with input instance");
 		InputInstance inputInstanceEntity=InputInstance.builder()
 		.id(savedEntity.getId())
 		.applicationId(savedEntity.getApplicationId())
@@ -214,6 +215,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		.documentDate(savedEntity.getDateOfInput())
 		.currentStatus(savedEntity.getInputStatus())
 		.build();
+		System.out.println(inputInstanceEntity);
+
 		inputInstanceEntity=inputInstanceRepository.save(inputInstanceEntity);
 		System.out.println("Input Instances");
 		System.out.println(inputInstanceEntity);
@@ -637,7 +640,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					// InputInstanceDTO responceDTO=inputInstanceRepository.findById(singleDTO.getId()).
 					// map(InputInstanceMapper::toDTO);
 					try{
-						InputInstanceDTO responseDTO = inputInstanceRepository
+					InputInstanceDTO responseDTO = inputInstanceRepository
 					.findById(singleDTO.getId())
 					.map(InputInstanceMapper::toDTO)
 					.orElse(null); 
