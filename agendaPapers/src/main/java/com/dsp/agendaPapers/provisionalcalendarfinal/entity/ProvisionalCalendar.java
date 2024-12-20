@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class ProvisionalCalendar extends ApplicationInstance {
 
         //changes by sushmitha
         @Column(name = "date_of_input")
-        private LocalDate dateOfInput;
+        private LocalDateTime dateOfInput;
 
         @Column(name = "language", length = 30)
         private String language;
@@ -88,7 +89,7 @@ public class ProvisionalCalendar extends ApplicationInstance {
         private List<Map<String, Object>> dateOfSittingInputsTableOffice;
         //Changes by Sushmitha
         @Column(name = "date_of_input_tableoffice")
-        private LocalDate dateOfInputTableOffice;
+        private LocalDateTime dateOfInputTableOffice;
 
         // private Date dateOfInputTableOffice;
 

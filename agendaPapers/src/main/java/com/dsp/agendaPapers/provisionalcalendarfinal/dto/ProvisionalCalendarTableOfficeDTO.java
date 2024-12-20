@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public class ProvisionalCalendarTableOfficeDTO {
     private String listOfDocumentTableOfficeNote;
     private List<Map<String, Object>> dateOfSittingInputsTableOffice;
     //Changes by Sushmitha
-    private LocalDate dateOfInputTableOffice;
+    private LocalDateTime dateOfInputTableOffice;
     // private java.util.Date dateOfInputTableOffice;
     private String inputTextTableOffice;
     private Boolean generatedFlag;

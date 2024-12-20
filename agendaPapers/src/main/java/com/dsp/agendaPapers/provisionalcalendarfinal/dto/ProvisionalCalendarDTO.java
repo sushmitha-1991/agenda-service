@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class ProvisionalCalendarDTO {
     private Long id;
     // private Date dateOfInput;
 // changes by Sushmitha
-    private LocalDate dateOfInput;
+    private LocalDateTime dateOfInput;
     private String language;
     private String submittedBy;
     private String submittedByBranch;
@@ -40,7 +41,7 @@ public class ProvisionalCalendarDTO {
     private String listOfDocumentTableOfficeNote;
     private List<Map<String, Object>> dateOfSittingInputsTableOffice;
     //Changes by Sushmitha
-    private LocalDate dateOfInputTableOffice;
+    private LocalDateTime dateOfInputTableOffice;
     // private Date dateOfInputTableOffice;
     private String inputTextTableOffice;
     private String rajyaSabhaSessionNo;
@@ -69,6 +70,7 @@ public class ProvisionalCalendarDTO {
     private Long applicationId;
 
     private ApplicationInstanceDTO applicationInstanceDTO;
+    //changes by Sushmitha
     private InputInstanceDTO inputInstanceDTO;
 
     // process insatnce will be remove from everywhere

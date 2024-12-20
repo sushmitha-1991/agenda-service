@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class ProvisionalCalendarInputDTO {
 
     private Long id;
     //changes by sushmitha
-    private LocalDate dateOfInput;
+    private LocalDateTime dateOfInput;
     private String language;
     private String submittedBy;
     private String submittedByBranch;
