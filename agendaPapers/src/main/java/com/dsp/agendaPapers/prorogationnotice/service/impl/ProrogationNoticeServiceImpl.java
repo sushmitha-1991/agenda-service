@@ -91,6 +91,7 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 	            .applicationId(prorogationNoticeDTO.getApplicationId()) // From frontend
 	            .applicationNo(savedNotice.getApplicationNo()) // Saved in ProrogationNotice
 	            .currentStatus(savedNotice.getStatus()) // From ProrogationNotice's status
+	            .documentDate(savedNotice.getIssuanceDate())
 	            .publishedDocumentUrl(prorogationNoticeDTO.getPublishedDocumentUrl()) // Optional from frontend
 	            .refId(savedNotice.getId()) // Use ProrogationNotice's ID as refId
 	            .build();
@@ -326,6 +327,9 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 	        // Update only the fields you want to change
 	        existingNotice.setNotificationNo(prorogationNoticeDTO.getNotificationNo());
 	        existingNotice.setStatus(prorogationNoticeDTO.getStatus());
+	        existingNotice.setIssuanceDate(prorogationNoticeDTO.getIssuanceDate());
+	        existingNotice.setIssuanceDateSakaEra(prorogationNoticeDTO.getIssuanceDateSakaEra());
+	        existingNotice.setIssuanceDateSakaEraHindi(prorogationNoticeDTO.getIssuanceDateSakaEraHindi());
 	        existingNotice.setTemplateContent(prorogationNoticeDTO.getTemplateContent());
 	        existingNotice.setTemplateContentHindi(prorogationNoticeDTO.getTemplateContentHindi());
 
@@ -336,21 +340,33 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 	        ProrogationNoticeDTO responseDTO = prorogationNoticeMapper.toDto(updatedNotice);
 
 	        // Automatically update the ApplicationInstance
-	        if (updatedNotice.getStatus() != null) {
+	        if (updatedNotice.getStatus() != null || updatedNotice.getIssuanceDate() != null) {
 	            ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
-	            applicationInstanceDTO.setCurrentStatus(updatedNotice.getStatus()); // New status from ProrogationNotice
+
+	            // Set fields conditionally
+	            if (updatedNotice.getStatus() != null) {
+	                applicationInstanceDTO.setCurrentStatus(updatedNotice.getStatus());
+	                log.debug("Setting currentStatus: {}", updatedNotice.getStatus());
+	            }
+	            if (updatedNotice.getIssuanceDate() != null) {
+	                applicationInstanceDTO.setDocumentDate(updatedNotice.getIssuanceDate());
+	                log.debug("Setting documentDate: {}", updatedNotice.getIssuanceDate());
+	            }
 
 	            // Call the external service to update ApplicationInstance
 	            String url = applicationInstanceServiceUrl + "/updateByApplicationNo/" + updatedNotice.getApplicationNo();
 	            try {
+	                log.debug("Calling external service at {} with DTO: {}", url, applicationInstanceDTO);
 	                restTemplate.put(url, applicationInstanceDTO);
-	                log.debug("Updated ApplicationInstance with new status for applicationNo: {}",
-	                        updatedNotice.getApplicationNo());
+	                log.debug("Updated ApplicationInstance with applicationNo: {}", updatedNotice.getApplicationNo());
 	            } catch (Exception e) {
-	                log.error("Failed to update ApplicationInstance: ", e);
+	                log.error("Failed to update ApplicationInstance for applicationNo: {}", updatedNotice.getApplicationNo(), e);
 	                throw new RuntimeException("Failed to update ApplicationInstance", e);
 	            }
+	        } else {
+	            log.warn("No valid fields to update for ApplicationInstance with applicationNo: {}", updatedNotice.getApplicationNo());
 	        }
+
 
 	        // Fetch the updated ApplicationInstance data
 	        String applicationNo = updatedNotice.getApplicationNo();

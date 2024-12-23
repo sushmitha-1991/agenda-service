@@ -23,9 +23,9 @@ public class ESummonNotificationMapper {
 
 		return ESummonNotificationDTO.builder().id(eSummonNotification.getId())
 				.lokSabhaNo(eSummonNotification.getLokSabhaNo()).sessionNo(eSummonNotification.getSessionNo())
-				.summonIssuanceDate(eSummonNotification.getSummonIssuanceDate())
-				.summonIssuanceDateHindiEn(eSummonNotification.getSummonIssuanceDateHindiEn())
-				.summonIssuanceDateHindi(eSummonNotification.getSummonIssuanceDateHindi())
+				.eSummonIssuanceDate(eSummonNotification.getESummonIssuanceDate())
+				.eSummonIssuanceDateHindiEn(eSummonNotification.getESummonIssuanceDateHindiEn())
+				.eSummonIssuanceDateHindi(eSummonNotification.getESummonIssuanceDateHindi())
 				.applicationNo(eSummonNotification.getApplicationNo()).status(eSummonNotification.getStatus())
 				.templateContent(eSummonNotification.getTemplateContent())
 				.templateContentHindi(eSummonNotification.getTemplateContentHindi())
@@ -43,9 +43,10 @@ public class ESummonNotificationMapper {
 		}
 
 		return ESummonNotification.builder().id(dto.getId()).lokSabhaNo(dto.getLokSabhaNo())
-				.sessionNo(dto.getSessionNo()).summonIssuanceDate(dto.getSummonIssuanceDate())
-				.summonIssuanceDateHindiEn(dto.getSummonIssuanceDateHindiEn())
-				.summonIssuanceDateHindi(dto.getSummonIssuanceDateHindi())
+				.sessionNo(dto.getSessionNo())
+				.eSummonIssuanceDate(dto.getESummonIssuanceDate())
+				.eSummonIssuanceDateHindiEn(dto.getESummonIssuanceDateHindiEn())
+				.eSummonIssuanceDateHindi(dto.getESummonIssuanceDateHindi())
 				.applicationNo(dto.getApplicationNo()).status(dto.getStatus()).templateContent(dto.getTemplateContent())
 				.templateContentHindi(dto.getTemplateContentHindi())
 				.templateType(dto.getTemplateType())

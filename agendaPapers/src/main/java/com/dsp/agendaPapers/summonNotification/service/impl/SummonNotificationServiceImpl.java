@@ -94,6 +94,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	            .applicationId(summonNotificationDTO.getApplicationId()) // From frontend
 	            .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
 	            .currentStatus(savedNotification.getStatus()) // From SummonNotification's status
+	            .documentDate(savedNotification.getSummonIssuanceDate())
 	            .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl()) // Optional from frontend
 	            .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
 	            .build();
@@ -321,6 +322,9 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			existingNotification.setNotificationNo(summonNotificationDTO.getNotificationNo());
 			existingNotification.setStatus(summonNotificationDTO.getStatus());
 			existingNotification.setSummonStartAt(summonNotificationDTO.getSummonStartAt());
+			existingNotification.setSummonIssuanceDate(summonNotificationDTO.getSummonIssuanceDate());
+			existingNotification.setSummonIssuanceDateHindi(summonNotificationDTO.getSummonIssuanceDateHindi());
+			existingNotification.setSummonIssuanceDateHindiEn(summonNotificationDTO.getSummonIssuanceDateHindiEn());
 			existingNotification.setTemplateContent(summonNotificationDTO.getTemplateContent());
 			existingNotification.setTemplateContentHindi(summonNotificationDTO.getTemplateContentHindi());
 
@@ -331,23 +335,32 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(updatedNotification);
 
 			// Now, let's automatically update the ApplicationInstance
-			if (updatedNotification.getStatus() != null) {
-				ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
-				applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus()); // New status from
-																							// SummonNotification
+			if (updatedNotification.getStatus() != null || updatedNotification.getSummonIssuanceDate() != null) {
+			    ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
 
-				// Call the external service to update ApplicationInstance
-				String url = applicationInstanceServiceUrl + "/updateByApplicationNo/"
-						+ updatedNotification.getApplicationNo();
-				try {
-					restTemplate.put(url, applicationInstanceDTO);
-					log.debug("Updated ApplicationInstance with new status for applicationNo: {}",
-							updatedNotification.getApplicationNo());
-				} catch (Exception e) {
-					log.error("Failed to update ApplicationInstance: ", e);
-					throw new RuntimeException("Failed to update ApplicationInstance", e);
-				}
+			    if (updatedNotification.getStatus() != null) {
+			        applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus());
+			        log.debug("Setting currentStatus: {}", updatedNotification.getStatus());
+			    }
+
+			    if (updatedNotification.getSummonIssuanceDate() != null) {
+			        applicationInstanceDTO.setDocumentDate(updatedNotification.getSummonIssuanceDate());
+			        log.debug("Setting documentDate: {}", updatedNotification.getSummonIssuanceDate());
+			    }
+
+			    String url = applicationInstanceServiceUrl + "/updateByApplicationNo/" + updatedNotification.getApplicationNo();
+			    try {
+			        log.debug("Calling external service at {} with DTO: {}", url, applicationInstanceDTO);
+			        restTemplate.put(url, applicationInstanceDTO);
+			        log.debug("Successfully updated ApplicationInstance for applicationNo: {}", updatedNotification.getApplicationNo());
+			    } catch (Exception e) {
+			        log.error("Failed to update ApplicationInstance: ", e);
+			        throw new RuntimeException("Failed to update ApplicationInstance", e);
+			    }
+			} else {
+			    log.warn("No valid fields to update for ApplicationInstance.");
 			}
+
 
 			// Fetch the updated ApplicationInstance data
 			String applicationNo = updatedNotification.getApplicationNo(); // Get the applicationNo for the

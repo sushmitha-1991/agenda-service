@@ -33,13 +33,13 @@ public class ProrogationNotice extends Auditable {
 	@Column(name = "rajya_sabha_session_no")
 	private String rajyaSabhaSessionNo;
 
-	@Column(name = "issuance_date", nullable = false)
+	@Column(name = "issuance_date")
 	private LocalDate issuanceDate;
 
-	@Column(name = "issuance_date_saka_era", nullable = false, length = 50)
+	@Column(name = "issuance_date_saka_era", length = 50)
 	private String issuanceDateSakaEra;
 
-	@Column(name = "issuance_date_saka_era_hindi", nullable = false, length = 50)
+	@Column(name = "issuance_date_saka_era_hindi",length = 50)
 	private String issuanceDateSakaEraHindi;
 
 	@Column(name = "notification_no", nullable = false, length = 100)
@@ -48,10 +48,10 @@ public class ProrogationNotice extends Auditable {
 	@Column(name = "application_no", length = 50)
 	private String applicationNo;
 
-	@Column(name = "template_content")
+	@Column(name = "template_content",columnDefinition = "TEXT")
 	private String templateContent;
 
-	@Column(name = "template_content_hindi")
+	@Column(name = "template_content_hindi",columnDefinition = "TEXT")
 	private String templateContentHindi;
 
 	@Column(name = "draft_flag", nullable = false)

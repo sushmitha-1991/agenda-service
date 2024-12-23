@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.prorogationnotice.Dto;
 
 import java.time.LocalDate;
 
+
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 
 import lombok.AllArgsConstructor;

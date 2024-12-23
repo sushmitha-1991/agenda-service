@@ -20,5 +20,6 @@ public class ApplicationInstanceDTO {
 	private String currentStatus;
 	private String publishedDocumentUrl;
 	private Long refId;
+	 private LocalDate documentDate;
 	//private LocalDate documentDate;
 }

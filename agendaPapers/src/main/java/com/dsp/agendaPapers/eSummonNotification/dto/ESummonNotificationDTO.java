@@ -28,11 +28,11 @@ public class ESummonNotificationDTO {
 	
 	private String rajyasabhaSessionNo;
 
-	private LocalDate summonIssuanceDate;
+	private LocalDate eSummonIssuanceDate;
 
-	private String summonIssuanceDateHindiEn;
+	private String eSummonIssuanceDateHindiEn;
 
-	private String summonIssuanceDateHindi;
+	private String eSummonIssuanceDateHindi;
 
 	private LocalDateTime summonStartAt;
 	private Long applicationId;
