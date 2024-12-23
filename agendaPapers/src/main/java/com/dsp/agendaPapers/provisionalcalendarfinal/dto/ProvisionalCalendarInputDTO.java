@@ -6,10 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 
 @Data
 @SuperBuilder
@@ -18,7 +19,8 @@ import java.util.Map;
 public class ProvisionalCalendarInputDTO {
 
     private Long id;
-    private Date dateOfInput;
+    //changes by sushmitha
+    private LocalDateTime dateOfInput;
     private String language;
     private String submittedBy;
     private String submittedByBranch;
@@ -34,25 +36,22 @@ public class ProvisionalCalendarInputDTO {
     private String lokSabhaSessionNumber;
     private String rajyaSabhaSession;
     private String status;
-    //Additional session details
+    // Additional session details
     private Long lokSabhaSessionNo;
     private Long rsSessionNo;
     // adding the only input status field
     private String inputStatus;
     private String remarks;
+    
 
     //
 
-
-
-
     private ApplicationInstanceDTO applicationInstanceDTO;
 
+    //Input Instance DTO
+
+    private InputInstanceDTO inputInstanceDTO;
 
     // application instance
-
-
-
-
 
 }

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -17,12 +19,14 @@ public class ProvisionalCalendarTableOfficeDTO {
 
     private Long id;
     private List<Map<String, Object>> groupchartsLS;
-    private  List<Map<String, Object>> groupchartsRS;
-    private List< Map<String, Object>>listOfDocumentTableOffice;
+    private List<Map<String, Object>> groupchartsRS;
+    private List<Map<String, Object>> listOfDocumentTableOffice;
     private String listOfDocumentTableOfficeFootnote;
     private String listOfDocumentTableOfficeNote;
     private List<Map<String, Object>> dateOfSittingInputsTableOffice;
-    private java.util.Date dateOfInputTableOffice;
+    //Changes by Sushmitha
+    private LocalDateTime dateOfInputTableOffice;
+    // private java.util.Date dateOfInputTableOffice;
     private String inputTextTableOffice;
     private Boolean generatedFlag;
     private Boolean draftStatus;

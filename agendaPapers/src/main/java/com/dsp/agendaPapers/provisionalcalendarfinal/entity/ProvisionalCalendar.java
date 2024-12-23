@@ -8,15 +8,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cglib.core.Local;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-//@Builder
+// @Builder
 @Data
 @Entity
 @Table(name = "provisional_calendar_final", schema = "agenda_papers")
@@ -27,31 +30,32 @@ public class ProvisionalCalendar extends ApplicationInstance {
         @SequenceGenerator(name = "provisional_calendar_final_seq", sequenceName = "provisional_calendar_final_seq", allocationSize = 1)
         private Long id;
 
+        //changes by sushmitha
         @Column(name = "date_of_input")
-        private Date dateOfInput;
+        private LocalDateTime dateOfInput;
 
-        @Column(name = "language",  length = 30)
+        @Column(name = "language", length = 30)
         private String language;
 
-        @Column(name = "submitted_by",  length = 100)
+        @Column(name = "submitted_by", length = 100)
         private String submittedBy;
 
-        @Column(name = "submitted_by_branch",  length = 100)
+        @Column(name = "submitted_by_branch", length = 100)
         private String submittedByBranch;
 
-        @Column(name = "subject",  length = 128)
+        @Column(name = "subject", length = 128)
         private String subject;
 
-        @Column(name = "input_text",  length = 4096)
+        @Column(name = "input_text", length = 4096)
         private String inputText;
 
-        @Column(name = "footnote_text",  length = 512)
+        @Column(name = "footnote_text", length = 512)
         private String footnoteText;
 
-        @Column(name = "approver_name",  length = 128)
+        @Column(name = "approver_name", length = 128)
         private String approverName;
 
-        @Column(name = "approver_designation",  length = 128)
+        @Column(name = "approver_designation", length = 128)
         private String approverDesignation;
 
         @Column(name = "date_of_sitting_inputs", columnDefinition = "jsonb")
@@ -83,14 +87,16 @@ public class ProvisionalCalendar extends ApplicationInstance {
         @Column(name = "date_of_sitting_inputs_tableoffice", columnDefinition = "jsonb")
         @Convert(converter = JsonMapConverter.class)
         private List<Map<String, Object>> dateOfSittingInputsTableOffice;
-
+        //Changes by Sushmitha
         @Column(name = "date_of_input_tableoffice")
-        private Date dateOfInputTableOffice;
+        private LocalDateTime dateOfInputTableOffice;
+
+        // private Date dateOfInputTableOffice;
 
         @Column(name = "input_text_tableoffice", length = 4096)
         private String inputTextTableOffice;
 
-        @Column(name = "submitted_by_branch_tableoffice",  length = 100)
+        @Column(name = "submitted_by_branch_tableoffice", length = 100)
         private String submittedByBranchTableOffice;
 
         @Column(name = "generated_flag", nullable = true)
@@ -99,21 +105,18 @@ public class ProvisionalCalendar extends ApplicationInstance {
         @Column(name = "content", columnDefinition = "TEXT", nullable = true)
         private String content;
 
-        //adding the new fields for input for the input status
-        @Column(name = "input_status",columnDefinition = "TEXT",nullable = true)
+        // adding the new fields for input for the input status
+        @Column(name = "input_status", columnDefinition = "TEXT", nullable = true)
         private String inputStatus;
 
-        //for the remarks
+        // for the remarks
         @Column(name = "remarks", columnDefinition = "TEXT", nullable = true)
         private String remarks;
 
         // coloumm for the draft status
 
-//        @Column(name= "drfat_status", columnDefinition = "boolean default false",  nullable = true )
-//        private Boolean draftStatus;
-
-
-
+        // @Column(name= "drfat_status", columnDefinition = "boolean default false",
+        // nullable = true )
+        // private Boolean draftStatus;
 
 }
-
