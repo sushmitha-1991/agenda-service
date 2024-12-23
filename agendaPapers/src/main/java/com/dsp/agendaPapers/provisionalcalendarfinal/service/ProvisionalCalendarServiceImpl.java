@@ -203,7 +203,14 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// generating Application No with FeinClient
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(inputDTO.getApplicationId());
-		serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
+		if(inputDTO.getLokSabhaSessionNo()==null)
+		{
+			serialNumberRequest.setSessionId(inputDTO.getRsSessionNo());
+
+		}
+		else {
+			serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
+		}
 		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
 
 		ProvisionalCalendar provisionalCalendar = ProvisionalCalendar.builder().dateOfInput(inputDTO.getDateOfInput())
