@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.eSummonNotification.dto;
 
 import java.time.LocalDate;
 
+
 import java.time.LocalDateTime;
 
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
@@ -33,21 +34,34 @@ public class ESummonNotificationDTO {
 	private String eSummonIssuanceDateHindiEn;
 
 	private String eSummonIssuanceDateHindi;
+	
+	private Boolean draftStatus = false;
 
 	private LocalDateTime summonStartAt;
+	
 	private Long applicationId;
+	
 	private String applicationNo;
 
 	private String status;
+	
 	private SummonNotificationDTO parentNotification;
 
 	private String templateContent;
+	
 	private ApplicationInstanceDTO applicationInstanceDTO;
+	
 	private String currentStatus;
+	
 	private String publishedDocumentUrl;
+	
 	private Long templateId;
+	
 	private Long templateHindiId;
+	
 	private String templateContentHindi;
+	
 	private String templateType;
+	
 	private Long refId;
 }

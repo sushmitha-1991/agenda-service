@@ -34,6 +34,7 @@ public class SummonNotificationDTO {
 
 	private LocalDateTime summonStartAt;
 	private Long applicationId;
+	private Boolean draftStatus = false;
 
 	private String applicationNo;
 	

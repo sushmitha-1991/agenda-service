@@ -31,6 +31,7 @@ public class ESummonNotificationMapper {
 				.templateContentHindi(eSummonNotification.getTemplateContentHindi())
 				.templateType(eSummonNotification.getTemplateType())
 				.rajyasabhaSessionNo(eSummonNotification.getRajyasabhaSessionNo())
+				.draftStatus(eSummonNotification.getDraftStatus())
 				// .parentNotification(toDTO(eSummonNotification.getParentNotification())) //
 				// Recursively map parent notification
 				.build();
@@ -51,6 +52,7 @@ public class ESummonNotificationMapper {
 				.templateContentHindi(dto.getTemplateContentHindi())
 				.templateType(dto.getTemplateType())
 				.rajyasabhaSessionNo(dto.getRajyasabhaSessionNo())
+				.draftStatus(dto.getDraftStatus())
 				// .parentNotification(toEntity(dto.getParentNotification())) // Recursively map
 				// parent notification
 				.build();

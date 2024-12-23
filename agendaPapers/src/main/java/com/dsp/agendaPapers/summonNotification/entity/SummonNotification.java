@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -73,6 +74,10 @@ public class SummonNotification extends Auditable {
 	
 	@Column(name = "template_type")
 	private String templateType;
+	
+	@NotNull
+	@Column(name = "draft_status", nullable = false)
+	private Boolean draftStatus = false;
 
 	@OneToOne
 	@JoinColumn(name = "parent_id")
