@@ -3,14 +3,11 @@ package com.dsp.agendaPapers.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.dsp.agendaPapers.entity.ApplicationInstance;
-
-import jakarta.transaction.Transactional;
 
 @Repository
 public interface ApplicationInstanceRepository extends JpaRepository<ApplicationInstance, Long> {
@@ -26,13 +23,4 @@ public interface ApplicationInstanceRepository extends JpaRepository<Application
 	List<ApplicationInstance> findByRajyaSabhaFilters(@Param("rajyaSabhaSession") String rajyaSabhaSession,
 			@Param("applicationId") Long applicationId);
 
-	/**
-	 * @param applicationId
-	 * @param provisionalCalendarInputId
-	 */
-	@Modifying
-	@Transactional
-	@Query(value = "UPDATE master.application_instance SET application_id = :applicationId WHERE id = :provisionalCalendarInputId", nativeQuery = true)
-	void updateApplicationInstanceId(@Param("applicationId") Long applicationId,
-			@Param("provisionalCalendarInputId") Long provisionalCalendarInputId);
 }

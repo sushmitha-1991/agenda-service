@@ -395,7 +395,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		provisionalCalendar.setCurrentStatus(provisionalCalendarGenerateDTO.getStatus());
 
 		// Update Application Instance
-		applicationInstanceRepository.updateApplicationInstanceId(provisionalCalendarGenerateDTO.getApplicationId(),
+		provisionalCalendarRepository.updateApplicationInstanceId(provisionalCalendarGenerateDTO.getApplicationId(),
 				provisionalCalendarGenerateDTO.getProvisionalCalendarInputId());
 
 		// Save the updated entity
@@ -405,7 +405,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		return ProvisionalCalendarGenerateDTO.builder().id(updatedProvisionalCalendar.getId())
 				.content(updatedProvisionalCalendar.getContent()).status(updatedProvisionalCalendar.getStatus())
 				.provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId())
-				.applicationId(provisionalCalendar.getApplicationId()).build();
+				.applicationId(provisionalCalendarGenerateDTO.getApplicationId()).build();
 	}
 
 	// getAll working fine
