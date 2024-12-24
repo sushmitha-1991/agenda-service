@@ -4,14 +4,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.ProvisionalCalendar;
-
-import jakarta.transaction.Transactional;
 
 @Repository
 public interface ProvisionalCalendarRepository extends JpaRepository<ProvisionalCalendar, Long> {
@@ -60,10 +57,6 @@ public interface ProvisionalCalendarRepository extends JpaRepository<Provisional
 	List<ProvisionalCalendar> findByInputStatusAndDateOfInputBetween(@Param("inputStatus") String inputStatus,
 			@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-	// for submitted by in get All for testing
-
-	// All data for the testing
-
 	List<ProvisionalCalendar> findByInputStatusAndSubmittedBy(String inputStatus, String submittedBy);
 
 	List<ProvisionalCalendar> findBySubmittedBy(String submittedBy);
@@ -74,13 +67,4 @@ public interface ProvisionalCalendarRepository extends JpaRepository<Provisional
 	List<ProvisionalCalendar> findByInputStatusAndSubmittedByAndDateOfInputBetween(String inputStatus,
 			String submittedBy, LocalDateTime startDate, LocalDateTime endDate);
 
-	/**
-	 * @param applicationId
-	 * @param provisionalCalendarInputId
-	 */
-	@Modifying
-	@Transactional
-	@Query(value = "UPDATE master.application_instance SET application_id = :applicationId WHERE id = :provisionalCalendarInputId", nativeQuery = true)
-	void updateApplicationInstanceId(@Param("applicationId") Long applicationId,
-			@Param("provisionalCalendarInputId") Long provisionalCalendarInputId);
 }

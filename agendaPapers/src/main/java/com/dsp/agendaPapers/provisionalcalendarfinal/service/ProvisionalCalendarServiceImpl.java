@@ -395,10 +395,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		provisionalCalendar.setCurrentStatus(provisionalCalendarGenerateDTO.getStatus());
 		provisionalCalendar.setApplicationId(provisionalCalendarGenerateDTO.getApplicationId());
 
-		// Update Application Instance
-//		provisionalCalendarRepository.updateApplicationInstanceId(provisionalCalendarGenerateDTO.getApplicationId(),
-//				provisionalCalendarGenerateDTO.getProvisionalCalendarInputId());
-
 		// Save the updated entity
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 
