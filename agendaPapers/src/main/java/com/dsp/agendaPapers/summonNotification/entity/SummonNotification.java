@@ -75,9 +75,12 @@ public class SummonNotification extends Auditable {
 	@Column(name = "template_type")
 	private String templateType;
 	
-	@NotNull
-	@Column(name = "draft_status", nullable = false)
+	
+	@Column(name = "draft_status")
 	private Boolean draftStatus = false;
+	
+	@Column(name = "custom_template")
+	private Boolean customTemplate;
 
 	@OneToOne
 	@JoinColumn(name = "parent_id")

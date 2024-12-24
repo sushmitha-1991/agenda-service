@@ -37,7 +37,7 @@ public class ESummonNotificationDTO {
 	
 	private Boolean draftStatus = false;
 
-	private LocalDateTime summonStartAt;
+	//private LocalDateTime summonStartAt;
 	
 	private Long applicationId;
 	
@@ -48,7 +48,7 @@ public class ESummonNotificationDTO {
 	private SummonNotificationDTO parentNotification;
 
 	private String templateContent;
-	
+	private Boolean customTemplate;
 	private ApplicationInstanceDTO applicationInstanceDTO;
 	
 	private String currentStatus;

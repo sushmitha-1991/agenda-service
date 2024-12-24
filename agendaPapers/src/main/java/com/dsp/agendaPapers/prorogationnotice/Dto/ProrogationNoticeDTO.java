@@ -37,7 +37,7 @@ public class ProrogationNoticeDTO {
 	private Long templateId;
 	private Long templateHindiId;
 	private ApplicationInstanceDTO applicationInstanceDTO;
-	
+	private Boolean customTemplate;
 
 
     // Getters and Setters

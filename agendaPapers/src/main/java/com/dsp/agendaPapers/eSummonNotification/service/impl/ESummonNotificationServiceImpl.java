@@ -69,7 +69,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			// Convert DTO to entity
 			ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
 			log.debug("Converted E-SummonNotificationDTO to entity: {}", summonNotification);
-
+             System.out.println("@@@@@@@@@@@@@" + summonNotification);
 			// Save SummonNotification entity initially to generate the ID
 			ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
 			log.debug("Initial save of E-SummonNotification to generate ID: {}", savedNotification);

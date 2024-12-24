@@ -46,13 +46,13 @@ public class ESummonNotification extends Auditable {
 
 	private String rajyasabhaSessionNo;
 
-	@Column(name = "eSummon_issuance_date")
+	@Column(name = "e_summon_issuance_date")
 	private LocalDate eSummonIssuanceDate;
 
-	@Column(name = "eSummon_issuance_date_hindi_en", length = 100)
+	@Column(name = "e_summon_issuance_date_hindi_en", length = 100)
 	private String eSummonIssuanceDateHindiEn;
 
-	@Column(name = "eSummon_issuance_date_hindi",length = 100)
+	@Column(name = "e_summon_issuance_date_hindi",length = 100)
 	private String eSummonIssuanceDateHindi;
 
 	@Column(name = "application_no", length = 50)
@@ -70,9 +70,12 @@ public class ESummonNotification extends Auditable {
 	@Column(name = "template_type")
 	private String templateType;
 
-	@NotNull
-	@Column(name = "draft_status", nullable = false)
+
+	@Column(name = "draft_status")
 	private Boolean draftStatus = false;
+	
+	@Column(name = "custom_template")
+	private Boolean customTemplate;
 
 	@OneToOne
 	@JoinColumn(name = "parent_id")

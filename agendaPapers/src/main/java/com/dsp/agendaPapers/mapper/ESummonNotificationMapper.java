@@ -23,15 +23,16 @@ public class ESummonNotificationMapper {
 
 		return ESummonNotificationDTO.builder().id(eSummonNotification.getId())
 				.lokSabhaNo(eSummonNotification.getLokSabhaNo()).sessionNo(eSummonNotification.getSessionNo())
+				.eSummonIssuanceDateHindi(eSummonNotification.getESummonIssuanceDateHindi())
 				.eSummonIssuanceDate(eSummonNotification.getESummonIssuanceDate())
 				.eSummonIssuanceDateHindiEn(eSummonNotification.getESummonIssuanceDateHindiEn())
-				.eSummonIssuanceDateHindi(eSummonNotification.getESummonIssuanceDateHindi())
 				.applicationNo(eSummonNotification.getApplicationNo()).status(eSummonNotification.getStatus())
 				.templateContent(eSummonNotification.getTemplateContent())
 				.templateContentHindi(eSummonNotification.getTemplateContentHindi())
 				.templateType(eSummonNotification.getTemplateType())
 				.rajyasabhaSessionNo(eSummonNotification.getRajyasabhaSessionNo())
 				.draftStatus(eSummonNotification.getDraftStatus())
+				.customTemplate(eSummonNotification.getCustomTemplate())
 				// .parentNotification(toDTO(eSummonNotification.getParentNotification())) //
 				// Recursively map parent notification
 				.build();
@@ -46,13 +47,13 @@ public class ESummonNotificationMapper {
 		return ESummonNotification.builder().id(dto.getId()).lokSabhaNo(dto.getLokSabhaNo())
 				.sessionNo(dto.getSessionNo())
 				.eSummonIssuanceDate(dto.getESummonIssuanceDate())
-				.eSummonIssuanceDateHindiEn(dto.getESummonIssuanceDateHindiEn())
 				.eSummonIssuanceDateHindi(dto.getESummonIssuanceDateHindi())
-				.applicationNo(dto.getApplicationNo()).status(dto.getStatus()).templateContent(dto.getTemplateContent())
-				.templateContentHindi(dto.getTemplateContentHindi())
-				.templateType(dto.getTemplateType())
-				.rajyasabhaSessionNo(dto.getRajyasabhaSessionNo())
-				.draftStatus(dto.getDraftStatus())
+				.eSummonIssuanceDateHindiEn(dto.getESummonIssuanceDateHindiEn())
+				.applicationNo(dto.getApplicationNo())
+				.customTemplate(dto.getCustomTemplate())
+				.status(dto.getStatus()).templateContent(dto.getTemplateContent())
+				.templateContentHindi(dto.getTemplateContentHindi()).templateType(dto.getTemplateType())
+				.rajyasabhaSessionNo(dto.getRajyasabhaSessionNo()).draftStatus(dto.getDraftStatus())
 				// .parentNotification(toEntity(dto.getParentNotification())) // Recursively map
 				// parent notification
 				.build();

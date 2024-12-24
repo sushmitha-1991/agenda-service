@@ -29,6 +29,7 @@ public class SummonNotificationMapper {
                 .templateContent(summonNotification.getTemplateContent())
                 .TemplateType(summonNotification.getTemplateType())
                 .draftStatus(summonNotification.getDraftStatus())
+                .customTemplate(summonNotification.getCustomTemplate())
               .templateContentHindi(summonNotification.getTemplateContentHindi())
                .parentNotification(toDTO(summonNotification.getParentNotification()))  // Recursively map parent notification
                 .build();
@@ -55,6 +56,7 @@ public class SummonNotificationMapper {
                 .templateContent(dto.getTemplateContent())
                 .templateType(dto.getTemplateType())
                 .draftStatus(dto.getDraftStatus())
+                .customTemplate(dto.getCustomTemplate())
                 .templateContentHindi(dto.getTemplateContentHindi())
                 .parentNotification(toEntity(dto.getParentNotification()))  // Recursively map parent notification
                 .build();
