@@ -11,9 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProvisionalCalendarGenerateDTO {
 
-    private Long id;
-    private String content;
-    private String status;
-    private Long provisionalCalendarInputId;
+	private Long id;
+	private String content;
+	private String status;
+	private Long provisionalCalendarInputId;
+	private Long applicationId;
 
 }

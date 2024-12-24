@@ -22,4 +22,11 @@ public interface ApplicationInstanceRepository extends JpaRepository<Application
 			+ "ai.applicationId = :applicationId AND " + "ai.draft = true")
 	List<ApplicationInstance> findByRajyaSabhaFilters(@Param("rajyaSabhaSession") String rajyaSabhaSession,
 			@Param("applicationId") Long applicationId);
+
+	/**
+	 * @param applicationId
+	 * @param provisionalCalendarInputId
+	 */
+	@Query(value = "UPDATE master.application_instance ai SET ai.application_id = :applicationId WHERE ai.id = :provisionalCalendarInputId", nativeQuery = true)
+	void updateApplicationInstanceId(Long applicationId, Long provisionalCalendarInputId);
 }
