@@ -404,7 +404,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// Map the updated entity back to a ProvisionalCalendarGenerateDTO
 		return ProvisionalCalendarGenerateDTO.builder().id(updatedProvisionalCalendar.getId())
 				.content(updatedProvisionalCalendar.getContent()).status(updatedProvisionalCalendar.getStatus())
-				.provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId()).build();
+				.provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId())
+				.applicationId(provisionalCalendar.getApplicationId()).build();
 	}
 
 	// getAll working fine
