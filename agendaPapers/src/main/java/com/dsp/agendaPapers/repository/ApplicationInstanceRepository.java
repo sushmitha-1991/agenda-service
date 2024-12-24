@@ -33,5 +33,6 @@ public interface ApplicationInstanceRepository extends JpaRepository<Application
 	@Modifying
 	@Transactional
 	@Query(value = "UPDATE master.application_instance SET application_id = :applicationId WHERE id = :provisionalCalendarInputId", nativeQuery = true)
-	void updateApplicationInstanceId(Long applicationId, Long provisionalCalendarInputId);
+	void updateApplicationInstanceId(@Param("applicationId") Long applicationId,
+			@Param("provisionalCalendarInputId") Long provisionalCalendarInputId);
 }
