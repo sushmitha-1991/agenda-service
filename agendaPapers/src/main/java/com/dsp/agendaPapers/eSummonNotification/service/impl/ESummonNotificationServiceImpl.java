@@ -91,7 +91,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			log.info(
 					"Saved E-SummonNotification attributes: ID={}, LokSabhaNo={}, SessionNo={}, SummonIssuanceDate={}, Status={}, TemplateContent={}",
 					savedNotification.getId(), savedNotification.getLokSabhaNo(), savedNotification.getSessionNo(),
-					savedNotification.getESummonIssuanceDate(), savedNotification.getStatus(),
+					savedNotification.getEsummonIssuanceDate(), savedNotification.getStatus(),
 					savedNotification.getTemplateContent());
 
 			// Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
@@ -99,6 +99,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 					.applicationId(eSummonNotificationDTO.getApplicationId()) // From frontend
 					.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
 					.currentStatus(savedNotification.getStatus()) // From frontend
+					.documentDate(savedNotification.getEsummonIssuanceDate())
 					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
 					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
 					.build();
@@ -338,9 +339,9 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 			// Update only the fields you want to change
 			existingNotification.setStatus(eSummonNotificationDTO.getStatus());
-			existingNotification.setESummonIssuanceDateHindiEn(eSummonNotificationDTO.getESummonIssuanceDateHindiEn());
-			existingNotification.setESummonIssuanceDate(eSummonNotificationDTO.getESummonIssuanceDate());
-			existingNotification.setESummonIssuanceDateHindi(eSummonNotificationDTO.getESummonIssuanceDateHindi());
+			existingNotification.setEsummonIssuanceDateHindiEn(eSummonNotificationDTO.getEsummonIssuanceDateHindiEn());
+			existingNotification.setEsummonIssuanceDate(eSummonNotificationDTO.getEsummonIssuanceDate());
+			existingNotification.setEsummonIssuanceDateHindi(eSummonNotificationDTO.getEsummonIssuanceDateHindi());
 			existingNotification.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
 			existingNotification.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
 
@@ -351,11 +352,18 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(updatedNotification);
 
 			// Now, let's automatically update the ApplicationInstance
-			if (updatedNotification.getStatus() != null) {
-				ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
-				applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus()); // New status from
-																							// ESummonNotification
+			if (updatedNotification.getStatus() != null || updatedNotification.getEsummonIssuanceDate() != null) {
+			    ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
 
+			    if (updatedNotification.getStatus() != null) {
+			        applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus());
+			        log.debug("Setting currentStatus: {}", updatedNotification.getStatus());
+			    }
+
+			    if (updatedNotification.getEsummonIssuanceDate() != null) {
+			        applicationInstanceDTO.setDocumentDate(updatedNotification.getEsummonIssuanceDate());
+			        log.debug("Setting documentDate: {}", updatedNotification.getEsummonIssuanceDate());
+			    }
 				// Call the external service to update ApplicationInstance
 				String url = applicationInstanceServiceUrl + "/updateByApplicationNo/"
 						+ updatedNotification.getApplicationNo(); // Assuming field renamed

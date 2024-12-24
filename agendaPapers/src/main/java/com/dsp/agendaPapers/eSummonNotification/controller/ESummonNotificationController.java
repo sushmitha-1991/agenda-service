@@ -40,6 +40,7 @@ public class ESummonNotificationController {
 			@RequestBody ESummonNotificationDTO eSummonNotificationDTO) {
 		ESummonNotificationDTO savedNotification = eSummonNotificationService
 				.saveESummonNotification(eSummonNotificationDTO);
+		System.out.println("############" + eSummonNotificationDTO);
 		GenericResponse<ESummonNotificationDTO> response = new GenericResponse<>(true,
 				"E-SummonNotification created successfully", savedNotification, HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);

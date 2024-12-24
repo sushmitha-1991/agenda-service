@@ -47,13 +47,13 @@ public class ESummonNotification extends Auditable {
 	private String rajyasabhaSessionNo;
 
 	@Column(name = "e_summon_issuance_date")
-	private LocalDate eSummonIssuanceDate;
+	private LocalDate esummonIssuanceDate;
 
 	@Column(name = "e_summon_issuance_date_hindi_en", length = 100)
-	private String eSummonIssuanceDateHindiEn;
+	private String esummonIssuanceDateHindiEn;
 
 	@Column(name = "e_summon_issuance_date_hindi",length = 100)
-	private String eSummonIssuanceDateHindi;
+	private String esummonIssuanceDateHindi;
 
 	@Column(name = "application_no", length = 50)
 	private String applicationNo;

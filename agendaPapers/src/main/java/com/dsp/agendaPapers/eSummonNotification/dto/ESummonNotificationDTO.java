@@ -29,11 +29,11 @@ public class ESummonNotificationDTO {
 	
 	private String rajyasabhaSessionNo;
 
-	private LocalDate eSummonIssuanceDate;
+	private LocalDate esummonIssuanceDate;
 
-	private String eSummonIssuanceDateHindiEn;
+	private String esummonIssuanceDateHindiEn;
 
-	private String eSummonIssuanceDateHindi;
+	private String esummonIssuanceDateHindi;
 	
 	private Boolean draftStatus = false;
 

@@ -59,6 +59,7 @@ public class ProrogationNotice extends Auditable {
 	private Boolean draftFlag = false;
 
 	@Column(name = "status", nullable = false, length = 50)
+
 	private String status;
 	
 	@Column(name = "custom_template")
