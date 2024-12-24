@@ -226,7 +226,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				// .applicationNo(applicationNo)
 				.applicationNo(applicationNo.getId())// Set applicationNo
 				// input status and remarks
-				.currentStatus(inputDTO.getStatus())
+				.currentStatus(inputDTO.getInputStatus())
 				.inputStatus(inputDTO.getInputStatus())
 				.remarks(inputDTO.getRemarks())
 				.refId(inputDTO.getId())
@@ -406,6 +406,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 		// Update the content field with the value from the DTO
 		provisionalCalendar.setContent(provisionalCalendarGenerateDTO.getContent());
+		provisionalCalendar.setStatus(provisionalCalendarGenerateDTO.getStatus());
+		provisionalCalendar.setCurrentStatus(provisionalCalendarGenerateDTO.getStatus());
+
 
 		// Save the updated entity
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
@@ -413,6 +416,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// Map the updated entity back to a ProvisionalCalendarGenerateDTO
 		return ProvisionalCalendarGenerateDTO.builder().id(updatedProvisionalCalendar.getId())
 				.content(updatedProvisionalCalendar.getContent())
+				.status(updatedProvisionalCalendar.getStatus())
 				.provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId()).build();
 	}
 
@@ -646,6 +650,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 //					InputInstanceDTO responseDTO = inputInstanceRepository
 //					.findByRefId(singleDTO.getId())
 //					.map(InputInstanceMapper::toDTO)
+//
+//
+//
+//
 //					.orElse(null);
 						InputInstanceDTO responseDTO = inputInstanceRepository
 								.findByRefId(singleDTO.getId())
@@ -754,7 +762,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.approverDesignation(provisionalCalendar.getApproverDesignation())
 				.dateOfSittingInputs(provisionalCalendar.getDateOfSittingInputs())
 				.listOfDocument(provisionalCalendar.getListOfDocument())
-				.applicationId(provisionalCalendar.getApplicationId()).status(provisionalCalendar.getCurrentStatus())
+				.applicationId(provisionalCalendar.getApplicationId())
+//				.status(provisionalCalendar.getCurrentStatus())
 				// adding the remarks and input status
 				.inputStatus(provisionalCalendar.getCurrentStatus())
 				.remarks(provisionalCalendar.getRemarks())

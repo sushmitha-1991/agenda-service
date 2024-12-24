@@ -119,4 +119,7 @@ public class ProvisionalCalendar extends ApplicationInstance {
         // nullable = true )
         // private Boolean draftStatus;
 
+        @Column(name = "status", columnDefinition = "TEXT", nullable = true)
+        private String status;
+
 }

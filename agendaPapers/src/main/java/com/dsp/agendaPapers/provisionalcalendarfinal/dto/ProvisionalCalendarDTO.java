@@ -53,6 +53,9 @@ public class ProvisionalCalendarDTO {
     private String remarks;
     private String refNumber;
 
+    // new field for task input status
+    private String status;
+
     // adding the new fiels draft status
     // private Boolean draftStatus;
 

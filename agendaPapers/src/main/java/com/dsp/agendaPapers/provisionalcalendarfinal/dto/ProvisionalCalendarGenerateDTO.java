@@ -13,6 +13,7 @@ public class ProvisionalCalendarGenerateDTO {
 
     private Long id;
     private String content;
+    private String status;
     private Long provisionalCalendarInputId;
 
 }
