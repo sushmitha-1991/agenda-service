@@ -51,7 +51,7 @@ public class ProrogationNoticeMapper {
 		prorogationNotice.setTemplateContentHindi(prorogationNoticeDTO.getTemplateContentHindi());
 		prorogationNotice.setTemplateType(prorogationNoticeDTO.getTemplateType());
 		prorogationNotice.setDraftFlag(prorogationNoticeDTO.getDraftFlag());
-		prorogationNotice.setCustomTemplate(prorogationNotice.getCustomTemplate());
+		prorogationNotice.setCustomTemplate(prorogationNoticeDTO.getCustomTemplate());
 		return prorogationNotice;
 	}
 

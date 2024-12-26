@@ -149,9 +149,9 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 
 
 
-	private String generateApplicationNo(String lokSabhaNo, String lobSabhaSessionNo, String rajyaSabhaSessionNo, Long id) {
-	    if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && lobSabhaSessionNo != null && !lobSabhaSessionNo.isEmpty()) {
-	        return "PNLS" + lokSabhaNo + lobSabhaSessionNo + id;
+	private String generateApplicationNo(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaSessionNo, Long id) {
+	    if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && lokSabhaSessionNo != null && !lokSabhaSessionNo.isEmpty()) {
+	        return "PNLS" + lokSabhaNo + lokSabhaSessionNo + id;
 	    } else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
 	        return "PNRS" + rajyaSabhaSessionNo + id;
 	    } else {
