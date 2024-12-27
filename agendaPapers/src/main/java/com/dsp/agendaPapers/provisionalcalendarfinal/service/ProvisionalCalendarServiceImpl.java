@@ -15,9 +15,11 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
+import com.dsp.agendaPapers.dto.UserDetailsDTO;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarDTO;
@@ -108,10 +110,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.orElseThrow(() -> new RuntimeException("ProvisionalCalendar not found with id " + id));
 		ProvisionalCalendarDTO responseDTO = mapToDto(provisionalCalendar);
 		try {
-//					InputInstanceDTO responseDTO = inputInstanceRepository
-//					.findByRefId(singleDTO.getId())
-//					.map(InputInstanceMapper::toDTO)
-//					.orElse(null);
+			// InputInstanceDTO responseDTO = inputInstanceRepository
+			// .findByRefId(singleDTO.getId())
+			// .map(InputInstanceMapper::toDTO)
+			// .orElse(null);
 			InputInstanceDTO dto = inputInstanceRepository.findByRefId(responseDTO.getId())
 					.map(InputInstanceMapper::toDTO)
 					.orElseThrow(() -> new Exception("InputInstance not found for refId: " + responseDTO.getId()));
@@ -316,10 +318,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(provisionalCalendar.getApplicationId());
 		serialNumberRequest.setSessionId(2l);
-//		serialNumberRequest.setSessionId(1l);
-
-
-
+		// serialNumberRequest.setSessionId(1l);
 
 		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
 		System.out.println(applicationNo.getId());
@@ -353,7 +352,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.refId(provisionalCalendar.getRefId()).build())
 				.build();
 	}
-
 
 	// generated is working fine
 	@Override
@@ -426,131 +424,148 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.build();
 	}
 
-
-//	// get All filter with testing for submiited by is that working fine and deployed code
-//	@Override
-//	public List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate endDate,
-//			String inputStatus, String submittedBy) {
-//		List<ProvisionalCalendarDTO> response;
-//		try {
-//			System.out.println("@@@@@@@@@@@");
-//			if (startDate == null || endDate == null) {
-//				// Handle cases with only inputStatus and submittedBy filters
-//				if (inputStatus != null && submittedBy != null) {
-//					response = provisionalCalendarRepository.findByInputStatusAndSubmittedBy(inputStatus, submittedBy)
-//							.stream().map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
-//					System.out.println(response);
-//
-//				} else if (inputStatus != null) {
-//					response = provisionalCalendarRepository.findByInputStatus(inputStatus).stream()
-//							.map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
-//					System.out.println(response);
-//
-//				} else if (submittedBy != null) {
-//					response = provisionalCalendarRepository.findBySubmittedBy(submittedBy).stream()
-//							.map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
-//
-//				} else {
-//					// Fetch all records if no filters provided
-//					response = provisionalCalendarRepository.findAll().stream().map(ProvisionalCalendarDTOMapper::toDTO)
-//							.collect(Collectors.toList());
-//				}
-//				for (ProvisionalCalendarDTO singleDTO : response) {
-//					System.out.println(singleDTO);
-//					// InputInstanceDTO
-//					// responceDTO=inputInstanceRepository.findById(singleDTO.getId()).
-//					// map(InputInstanceMapper::toDTO);
-//					try {
-////					InputInstanceDTO responseDTO = inputInstanceRepository
-////					.findByRefId(singleDTO.getId())
-////					.map(InputInstanceMapper::toDTO)
-////
-////
-////
-////
-////					.orElse(null);
-//						InputInstanceDTO responseDTO = inputInstanceRepository.findByRefId(singleDTO.getId())
-//								.map(InputInstanceMapper::toDTO).orElseThrow(
-//										() -> new Exception("InputInstance not found for refId: " + singleDTO.getId()));
-//						System.out.println("###########3 responseDTO of Input Instance DTO");
-//						System.out.println(responseDTO);
-//						singleDTO.setInputInstanceDTO(responseDTO);
-//					} catch (Exception e) {
-//
-//						System.out.println("Input Instance Not found for PC");
-//						e.printStackTrace();
-//					}
-//				}
-//			} else {
-//
-//				// Handle date range filtering
-////				LocalDateTime startDateTime = startDate.atStartOfDay();
-//				LocalDateTime startDateTime = startDate.atStartOfDay();
-//				LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
-//				if (inputStatus != null && submittedBy != null) {
-//					response = provisionalCalendarRepository
-//							.findByInputStatusAndSubmittedByAndDateOfInputBetween(inputStatus, submittedBy,
-//									startDateTime, endDateTime)
-//							.stream().map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
-//
-//				} else if (inputStatus != null) {
-//					response = provisionalCalendarRepository
-//							.findByInputStatusAndDateOfInputBetween(inputStatus, startDateTime, endDateTime).stream()
-//							.map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
-//
-//				} else if (submittedBy != null) {
-//					response = provisionalCalendarRepository
-//							.findBySubmittedByAndDateOfInputBetween(submittedBy, startDateTime, endDateTime).stream()
-//							.map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
-//
-//				} else {
-//					response = provisionalCalendarRepository.findByDateOfInputBetween(startDateTime, endDateTime)
-//							.stream().map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
-//
-//				}
-//				for (ProvisionalCalendarDTO singleDTO : response) {
-//					System.out.println(singleDTO);
-//					// InputInstanceDTO
-//					// responceDTO=inputInstanceRepository.findById(singleDTO.getId()).
-//					// map(InputInstanceMapper::toDTO);
-//					try {
-////					InputInstanceDTO responseDTO = inputInstanceRepository
-////					.findByRefId(singleDTO.getId())
-////					.map(InputInstanceMapper::toDTO)
-////					.orElse(null);
-//						InputInstanceDTO responseDTO = inputInstanceRepository.findByRefId(singleDTO.getId())
-//								.map(InputInstanceMapper::toDTO).orElseThrow(
-//										() -> new Exception("InputInstance not found for refId: " + singleDTO.getId()));
-//						System.out.println("###########3 responseDTO of Input Instance DTO");
-//						System.out.println(responseDTO);
-//						singleDTO.setInputInstanceDTO(responseDTO);
-//					} catch (Exception e) {
-//
-//						System.out.println("Input Instance Not found for PC");
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//
-//			return response;
-//		} catch (Exception ex) {
-//			// Log the exception
-//			System.err.println("Error occurred while fetching Provisional Calendar entries: " + ex.getMessage());
-//			ex.printStackTrace(); // Print stack trace for debugging
-//
-//			// Optionally, rethrow the exception or return an empty list
-//			throw new RuntimeException("An error occurred while fetching Provisional Calendar entries", ex);
-//		}
-//	}
-//
-	// get All new codes according to  kaushik sir
+	// // get All filter with testing for submiited by is that working fine and
+	// deployed code
+	// @Override
+	// public List<ProvisionalCalendarDTO>
+	// getAllProvisionalCalendarsBetweenDates(LocalDate startDate, LocalDate
+	// endDate,
+	// String inputStatus, String submittedBy) {
+	// List<ProvisionalCalendarDTO> response;
+	// try {
+	// System.out.println("@@@@@@@@@@@");
+	// if (startDate == null || endDate == null) {
+	// // Handle cases with only inputStatus and submittedBy filters
+	// if (inputStatus != null && submittedBy != null) {
+	// response =
+	// provisionalCalendarRepository.findByInputStatusAndSubmittedBy(inputStatus,
+	// submittedBy)
+	// .stream().map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
+	// System.out.println(response);
+	//
+	// } else if (inputStatus != null) {
+	// response =
+	// provisionalCalendarRepository.findByInputStatus(inputStatus).stream()
+	// .map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
+	// System.out.println(response);
+	//
+	// } else if (submittedBy != null) {
+	// response =
+	// provisionalCalendarRepository.findBySubmittedBy(submittedBy).stream()
+	// .map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
+	//
+	// } else {
+	// // Fetch all records if no filters provided
+	// response =
+	// provisionalCalendarRepository.findAll().stream().map(ProvisionalCalendarDTOMapper::toDTO)
+	// .collect(Collectors.toList());
+	// }
+	// for (ProvisionalCalendarDTO singleDTO : response) {
+	// System.out.println(singleDTO);
+	// // InputInstanceDTO
+	// // responceDTO=inputInstanceRepository.findById(singleDTO.getId()).
+	// // map(InputInstanceMapper::toDTO);
+	// try {
+	//// InputInstanceDTO responseDTO = inputInstanceRepository
+	//// .findByRefId(singleDTO.getId())
+	//// .map(InputInstanceMapper::toDTO)
+	////
+	////
+	////
+	////
+	//// .orElse(null);
+	// InputInstanceDTO responseDTO =
+	// inputInstanceRepository.findByRefId(singleDTO.getId())
+	// .map(InputInstanceMapper::toDTO).orElseThrow(
+	// () -> new Exception("InputInstance not found for refId: " +
+	// singleDTO.getId()));
+	// System.out.println("###########3 responseDTO of Input Instance DTO");
+	// System.out.println(responseDTO);
+	// singleDTO.setInputInstanceDTO(responseDTO);
+	// } catch (Exception e) {
+	//
+	// System.out.println("Input Instance Not found for PC");
+	// e.printStackTrace();
+	// }
+	// }
+	// } else {
+	//
+	// // Handle date range filtering
+	//// LocalDateTime startDateTime = startDate.atStartOfDay();
+	// LocalDateTime startDateTime = startDate.atStartOfDay();
+	// LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+	// if (inputStatus != null && submittedBy != null) {
+	// response = provisionalCalendarRepository
+	// .findByInputStatusAndSubmittedByAndDateOfInputBetween(inputStatus,
+	// submittedBy,
+	// startDateTime, endDateTime)
+	// .stream().map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
+	//
+	// } else if (inputStatus != null) {
+	// response = provisionalCalendarRepository
+	// .findByInputStatusAndDateOfInputBetween(inputStatus, startDateTime,
+	// endDateTime).stream()
+	// .map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
+	//
+	// } else if (submittedBy != null) {
+	// response = provisionalCalendarRepository
+	// .findBySubmittedByAndDateOfInputBetween(submittedBy, startDateTime,
+	// endDateTime).stream()
+	// .map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
+	//
+	// } else {
+	// response =
+	// provisionalCalendarRepository.findByDateOfInputBetween(startDateTime,
+	// endDateTime)
+	// .stream().map(ProvisionalCalendarDTOMapper::toDTO).collect(Collectors.toList());
+	//
+	// }
+	// for (ProvisionalCalendarDTO singleDTO : response) {
+	// System.out.println(singleDTO);
+	// // InputInstanceDTO
+	// // responceDTO=inputInstanceRepository.findById(singleDTO.getId()).
+	// // map(InputInstanceMapper::toDTO);
+	// try {
+	//// InputInstanceDTO responseDTO = inputInstanceRepository
+	//// .findByRefId(singleDTO.getId())
+	//// .map(InputInstanceMapper::toDTO)
+	//// .orElse(null);
+	// InputInstanceDTO responseDTO =
+	// inputInstanceRepository.findByRefId(singleDTO.getId())
+	// .map(InputInstanceMapper::toDTO).orElseThrow(
+	// () -> new Exception("InputInstance not found for refId: " +
+	// singleDTO.getId()));
+	// System.out.println("###########3 responseDTO of Input Instance DTO");
+	// System.out.println(responseDTO);
+	// singleDTO.setInputInstanceDTO(responseDTO);
+	// } catch (Exception e) {
+	//
+	// System.out.println("Input Instance Not found for PC");
+	// e.printStackTrace();
+	// }
+	// }
+	// }
+	//
+	// return response;
+	// } catch (Exception ex) {
+	// // Log the exception
+	// System.err.println("Error occurred while fetching Provisional Calendar
+	// entries: " + ex.getMessage());
+	// ex.printStackTrace(); // Print stack trace for debugging
+	//
+	// // Optionally, rethrow the exception or return an empty list
+	// throw new RuntimeException("An error occurred while fetching Provisional
+	// Calendar entries", ex);
+	// }
+	// }
+	//
+	// get All new codes according to kaushik sir
 	@Override
 	public List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(
 			LocalDate startDate,
 			LocalDate endDate,
 			String inputStatus,
-			String submittedBy
-	) {
+			String submittedBy) {
 		List<ProvisionalCalendarDTO> response = new ArrayList<>();
 		try {
 			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -577,22 +592,47 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 			TypedQuery<ProvisionalCalendar> query = entityManager.createQuery(cq);
 			List<ProvisionalCalendar> provisionalCalendars = query.getResultList();
+			/* For Differenciating lok Sabha And Rajya Sabha */
+			// changes by Sushmitha
+			Long houseId = null;
+			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if (principal instanceof UserDetailsDTO) {
+				houseId = ((UserDetailsDTO) principal).getHouseId();
+			}
+			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
+				if (houseId == 1) {
+					if (provisionalCalendar.getRajyaSabhaSession() != null) {
+						// Convert entities to DTOs
+						// response = provisionalCalendars.stream()
+						// .map(ProvisionalCalendarDTOMapper::toDTO)
+						// .collect(Collectors.toList());
+						response.add(ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar));
+					}
+				} else if (houseId == 2) {
+					if (provisionalCalendar.getLokSabhaSessionNumber() != null) {
+						response.add(ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar));
 
-			// Convert entities to DTOs
-			response = provisionalCalendars.stream()
-					.map(ProvisionalCalendarDTOMapper::toDTO)
-					.collect(Collectors.toList());
+					}
+				}
+			}
+			// // Convert entities to DTOs
+			// response = provisionalCalendars.stream()
+			// .map(ProvisionalCalendarDTOMapper::toDTO)
+			// .collect(Collectors.toList());
 
+			/* Changes From Sushmitha ends here */
 			// Process InputInstanceDTO for each ProvisionalCalendarDTO
 			for (ProvisionalCalendarDTO singleDTO : response) {
 				try {
 					InputInstanceDTO responseDTO = inputInstanceRepository.findByRefId(singleDTO.getId())
 							.map(InputInstanceMapper::toDTO)
-							.orElseThrow(() -> new Exception("InputInstance not found for refId: " + singleDTO.getId()));
+							.orElseThrow(
+									() -> new Exception("InputInstance not found for refId: " + singleDTO.getId()));
 
 					singleDTO.setInputInstanceDTO(responseDTO);
 				} catch (Exception e) {
-					System.err.println("Input Instance not found for Provisional Calendar with ID: " + singleDTO.getId());
+					System.err
+							.println("Input Instance not found for Provisional Calendar with ID: " + singleDTO.getId());
 					e.printStackTrace();
 				}
 			}
@@ -607,9 +647,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		return response;
 	}
 
-
-
-
 	private ProvisionalCalendarInputDTO mapToDtoPCinput(ProvisionalCalendar provisionalCalendar) {
 		return ProvisionalCalendarInputDTO.builder().id(provisionalCalendar.getId())
 				.dateOfInput(provisionalCalendar.getDateOfInput()).language(provisionalCalendar.getLanguage())
@@ -621,7 +658,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.dateOfSittingInputs(provisionalCalendar.getDateOfSittingInputs())
 				.listOfDocument(provisionalCalendar.getListOfDocument())
 				.applicationId(provisionalCalendar.getApplicationId())
-//				.status(provisionalCalendar.getCurrentStatus())
+				// .status(provisionalCalendar.getCurrentStatus())
 				// adding the remarks and input status
 				.inputStatus(provisionalCalendar.getCurrentStatus()).remarks(provisionalCalendar.getRemarks())
 				.applicationInstanceDTO(ApplicationInstanceDTO.builder().id(provisionalCalendar.getId())
