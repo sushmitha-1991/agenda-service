@@ -14,4 +14,6 @@ public interface InputInstanceRepository extends JpaRepository<InputInstance, Lo
     @Query("SELECT i FROM InputInstance i WHERE i.refId = :refId")
     Optional<InputInstance> findByRefId(@Param("refId") Long refId);
 
+	InputInstance findByApplicationNo(String applicationNo);
+
 }

@@ -35,6 +35,8 @@ public class ProrogationNoticeController {
 	@PostMapping("/create")
 	public ResponseEntity<GenericResponse<ProrogationNoticeDTO>> createProrogationNotice(
 			@RequestBody ProrogationNoticeDTO prorogationNoticeDTO) {
+		
+		System.out.println("@@@@@@@@@@"+ prorogationNoticeDTO);
 		ProrogationNoticeDTO savedNotification = prorogationNoticeService
 				.saveProrogationNotice(prorogationNoticeDTO);
 		GenericResponse<ProrogationNoticeDTO> response = new GenericResponse<>(true,

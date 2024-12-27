@@ -151,9 +151,9 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 
 	private String generateApplicationNo(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaSessionNo, Long id) {
 	    if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && lokSabhaSessionNo != null && !lokSabhaSessionNo.isEmpty()) {
-	        return "PNLS" + lokSabhaNo + lokSabhaSessionNo + id;
+	        return "PN-LS" + "-"+ lokSabhaNo + "-" + lokSabhaSessionNo + "-"+id;
 	    } else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
-	        return "PNRS" + rajyaSabhaSessionNo + id;
+	        return "PN-RS" +"-"+ rajyaSabhaSessionNo +"-"+ id;
 	    } else {
 	        throw new IllegalArgumentException("Insufficient data to generate application number");
 	    }

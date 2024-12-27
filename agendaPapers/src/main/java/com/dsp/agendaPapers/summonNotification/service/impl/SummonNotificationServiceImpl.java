@@ -157,9 +157,9 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 	private String generateApplicationNo(String lokSabhaNo, String sessionNo, String rajyaSabhaSessionNo, Long id) {
 	    if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
-	        return "SNLS" + lokSabhaNo + sessionNo + id;
+	        return "SN-LS" + "-" + lokSabhaNo+ "-" + sessionNo + "-" + id;
 	    } else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
-	        return "SNRS" + rajyaSabhaSessionNo + id;
+	        return "SN-RS" + "-" + rajyaSabhaSessionNo + "-" + id;
 	    } else {
 	        throw new IllegalArgumentException("Insufficient data to generate application number");
 	    }
@@ -230,6 +230,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 								dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
 							});
 				}
+				
 
 				responseList.add(dto);
 			}

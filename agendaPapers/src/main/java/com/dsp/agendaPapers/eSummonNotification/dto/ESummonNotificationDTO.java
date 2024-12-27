@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import java.time.LocalDateTime;
 
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -45,11 +46,14 @@ public class ESummonNotificationDTO {
 
 	private String status;
 	
+	
 	private SummonNotificationDTO parentNotification;
 
 	private String templateContent;
 	private Boolean customTemplate;
 	private ApplicationInstanceDTO applicationInstanceDTO;
+	
+	private InputInstanceDTO inputInstanceDTO;
 	
 	private String currentStatus;
 	
@@ -64,4 +68,5 @@ public class ESummonNotificationDTO {
 	private String templateType;
 	
 	private Long refId;
+	
 }

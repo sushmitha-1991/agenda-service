@@ -9,6 +9,7 @@ public class InputInstanceMapper {
                 .id(dto.getId())
                 .applicationId(dto.getApplicationId())
                 .applicationNo(dto.getApplicationNo())
+                .currentStatus(dto.getCurrentStatus())
                 .refId(dto.getRefId())
                 .documentDate(dto.getDocumentDate())
                 .build();
@@ -20,6 +21,7 @@ public class InputInstanceMapper {
                 .applicationId(entity.getApplicationId())
                 .applicationNo(entity.getApplicationNo())
                 .refId(entity.getRefId())
+                .currentStatus(entity.getCurrentStatus())
                 .documentDate(entity.getDocumentDate())
                 .build();
 
