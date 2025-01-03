@@ -227,7 +227,11 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.submittedByBranch(inputDTO.getSubmittedByBranch()).subject(inputDTO.getSubject())
 				.inputText(inputDTO.getInputText()).footnoteText(inputDTO.getFootnoteText())
 				.approverName(inputDTO.getApproverName()).approverDesignation(inputDTO.getApproverDesignation())
-				.dateOfSittingInputs(inputDTO.getDateOfSittingInputs()).listOfDocument(inputDTO.getListOfDocument())
+				.dateOfSittingInputs(inputDTO.getDateOfSittingInputs())
+				//sushmitha added
+				.rsSessionNo(inputDTO.getRsSessionNo())
+				.lokSabhaSessionNo(inputDTO.getLokSabhaSessionNo())
+				.listOfDocument(inputDTO.getListOfDocument())
 				.applicationId(inputDTO.getApplicationId()).lokSabhaSession(inputDTO.getLokSabhaSession())
 				.lokSabhaSessionNumber(inputDTO.getLokSabhaSessionNumber())
 				.rajyaSabhaSession(inputDTO.getRajyaSabhaSession())
@@ -315,14 +319,15 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	// Mapper() in service
 	private ProvisionalCalendarDTO mapToDto(ProvisionalCalendar provisionalCalendar) {
 
-//		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
-//		serialNumberRequest.setAppId(provisionalCalendar.getApplicationId());
-//		serialNumberRequest.setSessionId(2l);
-//		// serialNumberRequest.setSessionId(1l);
-//
-//		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
-//		System.out.println(applicationNo.getId());
-//		provisionalCalendar.setApplicationNo(applicationNo.getId());
+		// SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
+		// serialNumberRequest.setAppId(provisionalCalendar.getApplicationId());
+		// serialNumberRequest.setSessionId(2l);
+		// // serialNumberRequest.setSessionId(1l);
+		//
+		// SerialNumberResponse applicationNo =
+		// bearerClient.getResource(serialNumberRequest);
+		// System.out.println(applicationNo.getId());
+		// provisionalCalendar.setApplicationNo(applicationNo.getId());
 		return ProvisionalCalendarDTO.builder().id(provisionalCalendar.getId())
 				.dateOfInput(provisionalCalendar.getDateOfInput()).language(provisionalCalendar.getLanguage())
 				.submittedBy(provisionalCalendar.getSubmittedBy())
@@ -424,8 +429,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.build();
 	}
 
-
-
 	// get All new codes according to kaushik sir
 	@Override
 	public List<ProvisionalCalendarDTO> getAllProvisionalCalendarsBetweenDates(
@@ -468,7 +471,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			}
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
 				if (houseId == 1) {
-					if (provisionalCalendar.getRajyaSabhaSession() != null) {
+					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
 						// response = provisionalCalendars.stream()
 						// .map(ProvisionalCalendarDTOMapper::toDTO)
@@ -476,7 +479,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						response.add(ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar));
 					}
 				} else if (houseId == 2) {
-					if (provisionalCalendar.getLokSabhaSessionNumber() != null) {
+					if (provisionalCalendar.getLokSabhaSessionNo() != null) {
 						response.add(ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar));
 
 					}
@@ -526,6 +529,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.listOfDocument(provisionalCalendar.getListOfDocument())
 				.applicationId(provisionalCalendar.getApplicationId())
 				// .status(provisionalCalendar.getCurrentStatus())
+				.lokSabhaSessionNo(provisionalCalendar.getLokSabhaSessionNo())
+				.rsSessionNo(provisionalCalendar.getRsSessionNo())
 				// adding the remarks and input status
 				.inputStatus(provisionalCalendar.getCurrentStatus()).remarks(provisionalCalendar.getRemarks())
 				.applicationInstanceDTO(ApplicationInstanceDTO.builder().id(provisionalCalendar.getId())
