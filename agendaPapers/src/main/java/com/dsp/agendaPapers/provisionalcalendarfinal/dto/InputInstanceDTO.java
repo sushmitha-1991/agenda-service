@@ -18,6 +18,7 @@ public class InputInstanceDTO {
 	private String currentStatus;
 	// private String publishedDocumentUrl;
 	private Long refId;
+	private String pendingAt;
 	// private String processInstanceId;
 	private LocalDate documentDate;
 }

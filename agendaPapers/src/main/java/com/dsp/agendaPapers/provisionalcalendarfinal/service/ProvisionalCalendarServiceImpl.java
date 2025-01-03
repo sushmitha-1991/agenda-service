@@ -228,7 +228,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.inputText(inputDTO.getInputText()).footnoteText(inputDTO.getFootnoteText())
 				.approverName(inputDTO.getApproverName()).approverDesignation(inputDTO.getApproverDesignation())
 				.dateOfSittingInputs(inputDTO.getDateOfSittingInputs())
-				//sushmitha added
+				// sushmitha added
 				.rsSessionNo(inputDTO.getRsSessionNo())
 				.lokSabhaSessionNo(inputDTO.getLokSabhaSessionNo())
 				.listOfDocument(inputDTO.getListOfDocument())
@@ -245,17 +245,50 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		savedEntity.setRefId(savedEntity.getId());
 		savedEntity = provisionalCalendarRepository.save(savedEntity);
 		System.out.println("calender input with input instance");
-		InputInstance inputInstanceEntity = InputInstance.builder().id(savedEntity.getId())
-				.applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getApplicationNo())
-				.refId(savedEntity.getRefId()).documentDate(savedEntity.getDateOfInput().toLocalDate())
-				.currentStatus(savedEntity.getInputStatus()).build();
-		System.out.println(inputInstanceEntity);
-
-		inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
-		System.out.println("Input Instances");
-		System.out.println(inputInstanceEntity);
+		// Changes by Sushmitha Starts here
 		ProvisionalCalendarInputDTO responceDTO = mapToDtoPCinput(savedEntity);
-		responceDTO.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstanceEntity));
+
+		if (savedEntity.getLokSabhaSessionNo() == null) {
+			InputInstance inputInstanceEntity = InputInstance.builder().id(savedEntity.getId())
+					.applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getApplicationNo())
+					.refId(savedEntity.getRefId()).documentDate(savedEntity.getDateOfInput().toLocalDate())
+					.currentStatus(savedEntity.getInputStatus())
+					.pendingAt("Legislative Section").build();
+			System.out.println(inputInstanceEntity);
+
+			inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
+			System.out.println("Input Instances RajyaSabha");
+			System.out.println(inputInstanceEntity);
+			responceDTO.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstanceEntity));
+
+		} else {
+			InputInstance inputInstanceEntity = InputInstance.builder().id(savedEntity.getId())
+					.applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getApplicationNo())
+					.refId(savedEntity.getRefId()).pendingAt("Table Office A")
+					.documentDate(savedEntity.getDateOfInput().toLocalDate())
+					.currentStatus(savedEntity.getInputStatus()).build();
+			System.out.println(inputInstanceEntity);
+
+			inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
+			System.out.println("Input Instances Lok sabha");
+			System.out.println(inputInstanceEntity);
+			responceDTO.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstanceEntity));
+
+		}
+		// Ends Here
+
+		// InputInstance inputInstanceEntity =
+		// InputInstance.builder().id(savedEntity.getId())
+		// .applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getApplicationNo())
+		// .refId(savedEntity.getRefId()).documentDate(savedEntity.getDateOfInput().toLocalDate())
+		// .currentStatus(savedEntity.getInputStatus()).build();
+		// System.out.println(inputInstanceEntity);
+
+		// inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
+		// System.out.println("Input Instances");
+		// System.out.println(inputInstanceEntity);
+		// ProvisionalCalendarInputDTO responceDTO = mapToDtoPCinput(savedEntity);
+		// responceDTO.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstanceEntity));
 		System.out.println("response with Input instance");
 		System.out.println(responceDTO);
 		return responceDTO;

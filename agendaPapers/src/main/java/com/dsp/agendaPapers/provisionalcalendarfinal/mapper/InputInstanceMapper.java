@@ -11,6 +11,7 @@ public class InputInstanceMapper {
                 .applicationNo(dto.getApplicationNo())
                 .currentStatus(dto.getCurrentStatus())
                 .refId(dto.getRefId())
+                .pendingAt(dto.getPendingAt())
                 .documentDate(dto.getDocumentDate())
                 .build();
     }
@@ -23,6 +24,7 @@ public class InputInstanceMapper {
                 .refId(entity.getRefId())
                 .currentStatus(entity.getCurrentStatus())
                 .documentDate(entity.getDocumentDate())
+                .pendingAt(entity.getPendingAt())
                 .build();
 
     }
