@@ -31,5 +31,10 @@ public class ProvisionalCalendarTableOfficeDTO {
     private Boolean generatedFlag;
     private Boolean draftStatus;
     private Long provisionalCalendarInputId;
+    //Feilds needed to be shared
+    private Long applicationId;
+    private Long rssNo;
+    private Long lssNo;
+    
 
 }

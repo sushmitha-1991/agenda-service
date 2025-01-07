@@ -16,5 +16,8 @@ public class ProvisionalCalendarGenerateDTO {
 	private String status;
 	private Long provisionalCalendarInputId;
 	private Long applicationId;
+	//changes on 07-01-2025
+	private Long lssNo;
+	private Long rssNo;
 
 }

@@ -119,13 +119,17 @@ public class ProvisionalCalendar extends ApplicationInstance {
         // nullable = true )
         // private Boolean draftStatus;
 
-        @Column(name = "status", columnDefinition = "TEXT", nullable = true)
+        @Column(name = "status",length = 20, nullable = true)
         private String status;
 
         //Changes by Sushmitha
-        @Column(name = "lok_sabha_session_no", columnDefinition = "TEXT", nullable = true)
+        @Column(name = "lok_sabha_session_no", nullable = true)
         private Long lokSabhaSessionNo;
-        @Column(name = "rajya_sabha_session_no", columnDefinition = "TEXT", nullable = true)
+        @Column(name = "rajya_sabha_session_no", nullable = true)
         private Long rsSessionNo;
+        //changes on 07-01-2025
+        @Column(name = "input_ref_no", length = 50)
+        private String inputRefNo;
+
 
 }
