@@ -131,5 +131,4 @@ public class ProvisionalCalendar extends ApplicationInstance {
         @Column(name = "input_ref_no", length = 50)
         private String inputRefNo;
 
-
 }

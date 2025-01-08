@@ -261,9 +261,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			InputInstance inputInstanceEntity = InputInstance.builder().id(savedEntity.getId())
 					.applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getApplicationNo())
 					.refId(savedEntity.getRefId()).documentDate(savedEntity.getDateOfInput().toLocalDate())
-					.currentStatus(savedEntity.getInputStatus()).lokSabhaSession(savedEntity.getLokSabhaSession())
-					.lokSabhaSessionNumber(savedEntity.getLokSabhaSessionNumber())
-					.rajyaSabhaSession(savedEntity.getRajyaSabhaSession())
+					.currentStatus(savedEntity.getInputStatus())
+					.rajyaSabhaSession(inputDTO.getRajyaSabhaSession())
 					.pendingAt("Legislative Section").build();
 			System.out.println(inputInstanceEntity);
 
@@ -277,7 +276,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					.applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getInputRefNo())
 					.refId(savedEntity.getRefId()).pendingAt("Table Office A")
 					.documentDate(savedEntity.getDateOfInput().toLocalDate())
-					.currentStatus(savedEntity.getInputStatus()).build();
+					.currentStatus(savedEntity.getInputStatus())
+					.lokSabhaSession(inputDTO.getLokSabhaSession())
+					.lokSabhaSessionNumber(inputDTO.getLokSabhaSessionNumber())
+					.build();
 			System.out.println(inputInstanceEntity);
 
 			inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
@@ -419,6 +421,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.applicationNo(provisionalCalendar.getApplicationNo())
 						.currentStatus(provisionalCalendar.getCurrentStatus())
 						.documentDate(provisionalCalendar.getDateOfInput().toLocalDate())
+						.lokSabhaSession(provisionalCalendar.getLokSabhaSession())
+						.lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
+						.rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
 						.refId(provisionalCalendar.getRefId()).build())
 				.build();
 	}
@@ -544,7 +549,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				predicate = cb.and(predicate, cb.equal(root.get("inputStatus"), inputStatus));
 			}
 			if (submittedBy != null && !submittedBy.trim().isEmpty()) {
-				predicate = cb.and(predicate, cb.equal(root.get("submittedBy"), submittedBy));
+				predicate = cb.and(predicate, cb.equal(root.get("submittedBy"), "%"+submittedBy+"%"));
 			}
 
 			cq.where(predicate);
