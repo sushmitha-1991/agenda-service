@@ -294,8 +294,6 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 	@Override
 	public List<ProrogationNoticeDTO> getAllProrogationNoticeBySessionNo(String lokSabhaSessionNo) {
 		log.debug("Entering getProrogationNoticeBySessionNo with sessionNo: {}", lokSabhaSessionNo);
-
-		
 		try {
 			List<ProrogationNotice> prorogationNotices = prorogationNoticeRepository
 					.findByLokSabhaSessionNo(lokSabhaSessionNo);
