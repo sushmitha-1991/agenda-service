@@ -343,7 +343,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			List<SummonNotificationDTO> responseList = new ArrayList<>();
 			for (SummonNotification notification : summonNotifications) {
 				if (houseId == 1) {
-					if (!notification.getRajyasabhaSessionNo().equals("")) {
+					if (!notification.getRajyasabhaSessionNo().equals(null) || !notification.getRajyasabhaSessionNo().equals("")) {
 						SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								notification.getApplicationNo());
@@ -360,7 +360,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 						responseList.add(dto);
 					}
 				} else if (houseId == 2) {
-					if (!notification.getSessionNo().equals("")) {
+					if (!notification.getSessionNo().equals(null) || !notification.getSessionNo().equals("")) {
 						SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								notification.getApplicationNo());

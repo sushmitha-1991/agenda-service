@@ -256,7 +256,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 		for (ESummonNotification notification : notifications) {
 
 			if (houseId == 1) {				
-				if (!notification.getRajyasabhaSessionNo().equals("")) 
+				if (!notification.getRajyasabhaSessionNo().equals(null) || !notification.getRajyasabhaSessionNo().equals("")) 
 				{
 					// Convert entities to DTOs
 					log.debug("Processing E-SummonNotification: {}", notification);
@@ -286,7 +286,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 				
 			} else if (houseId == 2) {
 
-				if (!notification.getSessionNo().equals("")) {
+				if (!notification.getSessionNo().equals(null) || !notification.getSessionNo().equals("")) {
 
 					log.debug("Processing E-SummonNotification: {}", notification);
 					ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
