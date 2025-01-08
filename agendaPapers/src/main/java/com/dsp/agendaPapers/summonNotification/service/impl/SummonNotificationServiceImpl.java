@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -343,7 +344,9 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			List<SummonNotificationDTO> responseList = new ArrayList<>();
 			for (SummonNotification notification : summonNotifications) {
 				if (houseId == 1) {
-					if (!notification.getRajyasabhaSessionNo().equals(null) || !notification.getRajyasabhaSessionNo().equals("")) {
+					
+					if (StringUtils.isBlank(notification.getSessionNo())){
+					// !(notification.getSessionNo().isBlank())) {
 						SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								notification.getApplicationNo());
@@ -360,12 +363,11 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 						responseList.add(dto);
 					}
 				} else if (houseId == 2) {
-					if (!notification.getSessionNo().equals(null) || !notification.getSessionNo().equals("")) {
+					if (StringUtils.isBlank(notification.getRajyasabhaSessionNo())) {
 						SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								notification.getApplicationNo());
 						dto.setApplicationInstanceDTO(instanceDTO);
-
 						if (instanceDTO != null && instanceDTO.getId() != null) {
 							applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
 									.ifPresent(applicationPapers -> {
@@ -373,7 +375,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 										dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
 									});
 						}
-
 						responseList.add(dto);
 					}
 				}

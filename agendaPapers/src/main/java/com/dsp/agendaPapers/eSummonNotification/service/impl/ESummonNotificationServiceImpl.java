@@ -40,6 +40,7 @@ import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
 import com.dsp.agendaPapers.summonNotification.entity.SummonNotification;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -256,7 +257,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 		for (ESummonNotification notification : notifications) {
 
 			if (houseId == 1) {				
-				if (!notification.getRajyasabhaSessionNo().equals(null) || !notification.getRajyasabhaSessionNo().equals("")) 
+				if (StringUtils.isBlank(notification.getSessionNo())) 
 				{
 					// Convert entities to DTOs
 					log.debug("Processing E-SummonNotification: {}", notification);
@@ -286,7 +287,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 				
 			} else if (houseId == 2) {
 
-				if (!notification.getSessionNo().equals(null) || !notification.getSessionNo().equals("")) {
+				if (StringUtils.isBlank(notification.getRajyasabhaSessionNo())) {
 
 					log.debug("Processing E-SummonNotification: {}", notification);
 					ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
