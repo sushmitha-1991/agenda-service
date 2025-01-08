@@ -15,10 +15,13 @@ import java.util.Date;
 public class ApplicationInstanceDTO {
 
       private Long id;
-      private  Long   applicationId;
-      private String  applicationNo;
-      private   String  currentStatus;
+      private Long applicationId;
+      private String applicationNo;
+      private String currentStatus;
       private Long refId;
       // adding the date
       private LocalDate documentDate;
+      private String lokSabhaSessionNumber;
+      private String lokSabhaSession;
+      private String rajyaSabhaSession;
 }

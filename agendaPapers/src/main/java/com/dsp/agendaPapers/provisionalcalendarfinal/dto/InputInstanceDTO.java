@@ -21,4 +21,7 @@ public class InputInstanceDTO {
 	private String pendingAt;
 	// private String processInstanceId;
 	private LocalDate documentDate;
+	private String lokSabhaSession;
+	private String lokSabhaSessionNumber;
+	private String rajyaSabhaSession;
 }

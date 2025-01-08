@@ -13,6 +13,9 @@ public class InputInstanceMapper {
                 .refId(dto.getRefId())
                 .pendingAt(dto.getPendingAt())
                 .documentDate(dto.getDocumentDate())
+                .lokSabhaSession(dto.getLokSabhaSession())
+                .lokSabhaSessionNumber(dto.getLokSabhaSessionNumber())
+                .rajyaSabhaSession(dto.getRajyaSabhaSession())
                 .build();
     }
 
@@ -25,6 +28,9 @@ public class InputInstanceMapper {
                 .currentStatus(entity.getCurrentStatus())
                 .documentDate(entity.getDocumentDate())
                 .pendingAt(entity.getPendingAt())
+                .lokSabhaSession(entity.getLokSabhaSession())
+                .lokSabhaSessionNumber(entity.getLokSabhaSessionNumber())
+                .rajyaSabhaSession(entity.getRajyaSabhaSession())
                 .build();
 
     }

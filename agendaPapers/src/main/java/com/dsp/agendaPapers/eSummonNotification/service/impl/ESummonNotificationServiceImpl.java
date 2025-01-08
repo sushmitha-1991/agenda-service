@@ -12,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +22,7 @@ import com.dsp.agendaPapers.applicationPapers.dto.TemplatesDTO;
 import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
 import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
+import com.dsp.agendaPapers.dto.UserDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
@@ -29,7 +31,9 @@ import com.dsp.agendaPapers.exception.ResourceNotFoundException;
 import com.dsp.agendaPapers.mapper.ESummonNotificationMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.InputInstance;
+import com.dsp.agendaPapers.provisionalcalendarfinal.entity.ProvisionalCalendar;
 import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.InputInstanceMapper;
+import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.ProvisionalCalendarDTOMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.repository.InputInstanceRepository;
 import com.dsp.agendaPapers.response.GenericResponse;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
@@ -58,13 +62,12 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 	@Value("${application.instance.service.url}")
 	private String applicationInstanceServiceUrl;
-	
+
 	@Autowired
 	private ApplicationPapersRepository applicationPapersRepository;
 
 	@Autowired
 	private InputInstanceRepository inputInstanceRepository;
-	
 
 	@Transactional
 	@Override
@@ -75,20 +78,18 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			// Convert DTO to entity
 			ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
 			log.debug("Converted E-SummonNotificationDTO to entity: {}", summonNotification);
-             System.out.println("@@@@@@@@@@@@@" + summonNotification);
+			System.out.println("@@@@@@@@@@@@@" + summonNotification);
 			// Save SummonNotification entity initially to generate the ID
 			ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
 			log.debug("Initial save of E-SummonNotification to generate ID: {}", savedNotification);
 
-			 String applicationNo = generateApplicationNo(
-					 eSummonNotificationDTO.getLokSabhaNo(),
-					 eSummonNotificationDTO.getSessionNo(),
-					 eSummonNotificationDTO.getRajyasabhaSessionNo(),
-			            savedNotification.getId()
-			        );
-			 savedNotification.setApplicationNo(applicationNo);
-			 savedNotification = eSummonNotificationRepository.save(savedNotification);
-
+			String applicationNo = generateApplicationNo(
+					eSummonNotificationDTO.getLokSabhaNo(),
+					eSummonNotificationDTO.getSessionNo(),
+					eSummonNotificationDTO.getRajyasabhaSessionNo(),
+					savedNotification.getId());
+			savedNotification.setApplicationNo(applicationNo);
+			savedNotification = eSummonNotificationRepository.save(savedNotification);
 
 			// Save the SummonNotification entity again with the generated Application No
 			savedNotification = eSummonNotificationRepository.save(savedNotification);
@@ -108,7 +109,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 					.currentStatus(savedNotification.getStatus()) // From frontend
 					.documentDate(savedNotification.getEsummonIssuanceDate())
 					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
-					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+					.refId(savedNotification.getId())
+					// changes on 08-01-2025
+					.lokSabhaSession(eSummonNotificationDTO.getLokSabhaNo())
+					.lokSabhaSessionNumber(eSummonNotificationDTO.getSessionNo())
+					.rajyaSabhaSession(eSummonNotificationDTO.getRajyasabhaSessionNo())
+					// ends here
+					// Use SummonNotification's ID as refId
 					.build();
 			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
 
@@ -118,33 +125,34 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 			// Validate template ID
 			if (eSummonNotificationDTO.getTemplateId() != null) {
-			validateTemplateId(eSummonNotificationDTO.getTemplateId());
+				validateTemplateId(eSummonNotificationDTO.getTemplateId());
 			}
 			if (eSummonNotificationDTO.getTemplateHindiId() != null) {
-			validateTemplateId(eSummonNotificationDTO.getTemplateHindiId());
+				validateTemplateId(eSummonNotificationDTO.getTemplateHindiId());
 			}
-			
-			
-			 InputInstance inputInstanceEntity = InputInstance.builder()
-			           // .id(savedNotification.getId())
-			            .applicationId(eSummonNotificationDTO.getApplicationId()) // From frontend
-						.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-						.currentStatus(savedNotification.getStatus()) // From frontend
-						.documentDate(savedNotification.getEsummonIssuanceDate())
-						.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
-						.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-						.build();
-			 System.out.println("&&&&&&&&&&&&"+ inputInstanceEntity );
-			        log.debug("Created InputInstance entity: {}", inputInstanceEntity);
 
-			        inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
-			        log.debug("Saved InputInstance entity: {}", inputInstanceEntity);
-			     // Convert saved InputInstance entity to DTO
-			        InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstanceEntity);
+			InputInstance inputInstanceEntity = InputInstance.builder()
+					// .id(savedNotification.getId())
+					.applicationId(eSummonNotificationDTO.getApplicationId()) // From frontend
+					.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+					.currentStatus(savedNotification.getStatus()) // From frontend
+					.documentDate(savedNotification.getEsummonIssuanceDate())
+					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl())
+					.lokSabhaSession(eSummonNotificationDTO.getLokSabhaNo())
+					.lokSabhaSessionNumber(eSummonNotificationDTO.getSessionNo())
+					.rajyaSabhaSession(eSummonNotificationDTO.getRajyasabhaSessionNo())
+					// From frontend
+					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+					.build();
+			System.out.println("&&&&&&&&&&&&" + inputInstanceEntity);
+			log.debug("Created InputInstance entity: {}", inputInstanceEntity);
 
-			        // Add InputInstanceDTO to ESummonNotificationDTO
-			       
+			inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
+			log.debug("Saved InputInstance entity: {}", inputInstanceEntity);
+			// Convert saved InputInstance entity to DTO
+			InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstanceEntity);
 
+			// Add InputInstanceDTO to ESummonNotificationDTO
 
 			// Create ApplicationPapersDTO and save template content from SummonNotification
 			ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
@@ -164,12 +172,12 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(savedNotification);
 			responseDTO.setApplicationInstanceDTO(savedInstanceDTO); // Set the ApplicationInstanceDTO
 			log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
-			 responseDTO.setInputInstanceDTO(inputInstanceDTO);
-		        log.debug("Added InputInstanceDTO to response: {}", inputInstanceDTO);
-			 responseDTO.setTemplateId(eSummonNotificationDTO.getTemplateId()); 
-			 responseDTO.setTemplateHindiId(eSummonNotificationDTO.getTemplateHindiId());
+			responseDTO.setInputInstanceDTO(inputInstanceDTO);
+			log.debug("Added InputInstanceDTO to response: {}", inputInstanceDTO);
+			responseDTO.setTemplateId(eSummonNotificationDTO.getTemplateId());
+			responseDTO.setTemplateHindiId(eSummonNotificationDTO.getTemplateHindiId());
 
-	            log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
+			log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
 
 			return responseDTO;
 		} catch (Exception e) {
@@ -179,13 +187,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 	}
 
 	private String generateApplicationNo(String lokSabhaNo, String sessionNo, String rajyaSabhaSessionNo, Long id) {
-	    if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
-	        return "ES-LS" + "-" + lokSabhaNo + "-" + sessionNo + "-" + id;
-	    } else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
-	        return "ES-RS" + "-"+ rajyaSabhaSessionNo + "-" + id;
-	    } else {
-	        throw new IllegalArgumentException("Insufficient data to generate application number");
-	    }
+		if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
+			return "ES-LS" + "-" + lokSabhaNo + "-" + sessionNo + "-" + id;
+		} else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
+			return "ES-RS" + "-" + rajyaSabhaSessionNo + "-" + id;
+		} else {
+			throw new IllegalArgumentException("Insufficient data to generate application number");
+		}
 	}
 
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
@@ -238,31 +246,100 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 		log.debug("Fetched all E-SummonNotifications: {}", notifications);
 
 		List<ESummonNotificationDTO> notificationDTOs = new ArrayList<>();
+		// changes of Sushmitha
+		Long houseId = null;
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (principal instanceof UserDetailsDTO) {
+			houseId = ((UserDetailsDTO) principal).getHouseId();
+		}
 
 		for (ESummonNotification notification : notifications) {
-			log.debug("Processing E-SummonNotification: {}", notification);
-			ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
-			ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getApplicationNo());
-			dto.setApplicationInstanceDTO(instanceDTO);
-			
-			 if (instanceDTO != null && instanceDTO.getId() != null) {
-	                applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
-	                        .ifPresent(applicationPapers -> {
-	                            dto.setTemplateId(applicationPapers.getTemplateId());
-	                            dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
-	                        });
-	            }
-			 
-			 InputInstance inputInstance = inputInstanceRepository.findByApplicationNo(notification.getApplicationNo());
-		        if (inputInstance != null) {
-		            log.debug("Fetched InputInstance: {}", inputInstance);
 
-		            // Map InputInstance to DTO and set in ESummonNotificationDTO
-		            InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstance);
-		            dto.setInputInstanceDTO(inputInstanceDTO);
-		        }
-			
-			notificationDTOs.add(dto);
+			if (houseId == 1) {				
+				if (!notification.getRajyasabhaSessionNo().equals("")) 
+				{
+					// Convert entities to DTOs
+					log.debug("Processing E-SummonNotification: {}", notification);
+					ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
+					ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getApplicationNo());
+					dto.setApplicationInstanceDTO(instanceDTO);
+					if (instanceDTO != null && instanceDTO.getId() != null) {
+						applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+								.ifPresent(applicationPapers -> {
+									dto.setTemplateId(applicationPapers.getTemplateId());
+									dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+								});
+					}
+
+					InputInstance inputInstance = inputInstanceRepository
+							.findByApplicationNo(notification.getApplicationNo());
+					if (inputInstance != null) {
+						log.debug("Fetched InputInstance: {}", inputInstance);
+
+						// Map InputInstance to DTO and set in ESummonNotificationDTO
+						InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstance);
+						dto.setInputInstanceDTO(inputInstanceDTO);
+					}
+
+					notificationDTOs.add(dto);
+				}
+				
+			} else if (houseId == 2) {
+
+				if (!notification.getSessionNo().equals("")) {
+
+					log.debug("Processing E-SummonNotification: {}", notification);
+					ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
+					ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getApplicationNo());
+					dto.setApplicationInstanceDTO(instanceDTO);
+
+					if (instanceDTO != null && instanceDTO.getId() != null) {
+						applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+								.ifPresent(applicationPapers -> {
+									dto.setTemplateId(applicationPapers.getTemplateId());
+									dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+								});
+					}
+
+					InputInstance inputInstance = inputInstanceRepository
+							.findByApplicationNo(notification.getApplicationNo());
+					if (inputInstance != null) {
+						log.debug("Fetched InputInstance: {}", inputInstance);
+
+						// Map InputInstance to DTO and set in ESummonNotificationDTO
+						InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstance);
+						dto.setInputInstanceDTO(inputInstanceDTO);
+					}
+
+					notificationDTOs.add(dto);
+				}
+			}
+
+			// log.debug("Processing E-SummonNotification: {}", notification);
+			// ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
+			// ApplicationInstanceDTO instanceDTO =
+			// fetchApplicationInstanceData(notification.getApplicationNo());
+			// dto.setApplicationInstanceDTO(instanceDTO);
+
+			// if (instanceDTO != null && instanceDTO.getId() != null) {
+			// applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+			// .ifPresent(applicationPapers -> {
+			// dto.setTemplateId(applicationPapers.getTemplateId());
+			// dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+			// });
+			// }
+
+			// InputInstance inputInstance =
+			// inputInstanceRepository.findByApplicationNo(notification.getApplicationNo());
+			// if (inputInstance != null) {
+			// log.debug("Fetched InputInstance: {}", inputInstance);
+
+			// // Map InputInstance to DTO and set in ESummonNotificationDTO
+			// InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstance);
+			// dto.setInputInstanceDTO(inputInstanceDTO);
+			// }
+
+			// notificationDTOs.add(dto);
 		}
 
 		log.debug("Returning list of E-SummonNotificationDTOs: {}", notificationDTOs);
@@ -308,22 +385,22 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 		ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
 		ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getApplicationNo());
 		dto.setApplicationInstanceDTO(instanceDTO);
-		
-		 if (instanceDTO != null && instanceDTO.getId() != null) {
-             applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
-                     .ifPresent(applicationPapers -> {
-                         dto.setTemplateId(applicationPapers.getTemplateId());
-                         dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
-                     });
-         }
-		 InputInstance inputInstance = inputInstanceRepository.findByApplicationNo(notification.getApplicationNo());
-		    if (inputInstance != null) {
-		        log.debug("Fetched InputInstance: {}", inputInstance);
 
-		        // Map to DTO
-		        InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstance);
-		        dto.setInputInstanceDTO(inputInstanceDTO);
-		    }
+		if (instanceDTO != null && instanceDTO.getId() != null) {
+			applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+					.ifPresent(applicationPapers -> {
+						dto.setTemplateId(applicationPapers.getTemplateId());
+						dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+					});
+		}
+		InputInstance inputInstance = inputInstanceRepository.findByApplicationNo(notification.getApplicationNo());
+		if (inputInstance != null) {
+			log.debug("Fetched InputInstance: {}", inputInstance);
+
+			// Map to DTO
+			InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstance);
+			dto.setInputInstanceDTO(inputInstanceDTO);
+		}
 
 		log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", dto);
 		return dto;
@@ -352,24 +429,24 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								summonNotification.getApplicationNo());
 						dto.setApplicationInstanceDTO(instanceDTO);
-						
-						 if (instanceDTO != null && instanceDTO.getId() != null) {
-				                applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
-				                        .ifPresent(applicationPapers -> {
-				                            dto.setTemplateId(applicationPapers.getTemplateId());
-				                            dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
-				                        });
-				            }
-						 
-						 InputInstance inputInstance = inputInstanceRepository.findByApplicationNo(summonNotification.getApplicationNo());
-		                    if (inputInstance != null) {
-		                        log.debug("Fetched InputInstance: {}", inputInstance);
 
-		                        // Map to DTO
-		                        InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstance);
-		                        dto.setInputInstanceDTO(inputInstanceDTO);
-		                    }
+						if (instanceDTO != null && instanceDTO.getId() != null) {
+							applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+									.ifPresent(applicationPapers -> {
+										dto.setTemplateId(applicationPapers.getTemplateId());
+										dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+									});
+						}
 
+						InputInstance inputInstance = inputInstanceRepository
+								.findByApplicationNo(summonNotification.getApplicationNo());
+						if (inputInstance != null) {
+							log.debug("Fetched InputInstance: {}", inputInstance);
+
+							// Map to DTO
+							InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstance);
+							dto.setInputInstanceDTO(inputInstanceDTO);
+						}
 
 						return dto;
 					}).collect(Collectors.toList());
@@ -412,17 +489,17 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 			// Now, let's automatically update the ApplicationInstance
 			if (updatedNotification.getStatus() != null || updatedNotification.getEsummonIssuanceDate() != null) {
-			    ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
+				ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
 
-			    if (updatedNotification.getStatus() != null) {
-			        applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus());
-			        log.debug("Setting currentStatus: {}", updatedNotification.getStatus());
-			    }
+				if (updatedNotification.getStatus() != null) {
+					applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus());
+					log.debug("Setting currentStatus: {}", updatedNotification.getStatus());
+				}
 
-			    if (updatedNotification.getEsummonIssuanceDate() != null) {
-			        applicationInstanceDTO.setDocumentDate(updatedNotification.getEsummonIssuanceDate());
-			        log.debug("Setting documentDate: {}", updatedNotification.getEsummonIssuanceDate());
-			    }
+				if (updatedNotification.getEsummonIssuanceDate() != null) {
+					applicationInstanceDTO.setDocumentDate(updatedNotification.getEsummonIssuanceDate());
+					log.debug("Setting documentDate: {}", updatedNotification.getEsummonIssuanceDate());
+				}
 				// Call the external service to update ApplicationInstance
 				String url = applicationInstanceServiceUrl + "/updateByApplicationNo/"
 						+ updatedNotification.getApplicationNo(); // Assuming field renamed
@@ -462,24 +539,25 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 				log.error("Failed to fetch ApplicationInstance: ", e);
 				// You can choose to handle this case as needed
 			}
-			
-			 if (eSummonNotificationDTO.getTemplateContent() != null || eSummonNotificationDTO.getTemplateContentHindi() != null) {
-		            Optional<ApplicationPapers> existingPapersOpt = applicationPapersRepository
-		                    .findByApplicationIdAndApplicationInstanceId(eSummonNotificationDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
-		            
-		            if (existingPapersOpt.isPresent()) {
-		                ApplicationPapers existingPapers = existingPapersOpt.get();
-		                existingPapers.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
-		                existingPapers.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
 
-		                applicationPapersRepository.save(existingPapers);
-		                log.debug("Updated ApplicationPapers with new template content.");
-		            } else {
-		                log.warn("ApplicationPapers not found for ApplicationId: {} and ApplicationInstanceId: {}",
-		                         eSummonNotificationDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
-		            }
-		        }
+			if (eSummonNotificationDTO.getTemplateContent() != null
+					|| eSummonNotificationDTO.getTemplateContentHindi() != null) {
+				Optional<ApplicationPapers> existingPapersOpt = applicationPapersRepository
+						.findByApplicationIdAndApplicationInstanceId(eSummonNotificationDTO.getApplicationId(),
+								responseDTO.getApplicationInstanceDTO().getId());
 
+				if (existingPapersOpt.isPresent()) {
+					ApplicationPapers existingPapers = existingPapersOpt.get();
+					existingPapers.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
+					existingPapers.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
+
+					applicationPapersRepository.save(existingPapers);
+					log.debug("Updated ApplicationPapers with new template content.");
+				} else {
+					log.warn("ApplicationPapers not found for ApplicationId: {} and ApplicationInstanceId: {}",
+							eSummonNotificationDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
+				}
+			}
 
 			log.debug("Returning updated ESummonNotificationDTO with ApplicationInstance data: {}", responseDTO);
 			return responseDTO;

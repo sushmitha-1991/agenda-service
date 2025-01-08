@@ -95,7 +95,11 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	            .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
 	            .currentStatus(savedNotification.getStatus()) // From SummonNotification's status
 	            .documentDate(savedNotification.getSummonIssuanceDate())
-	            .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl()) // Optional from frontend
+	            .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl())
+				.lokSabhaSession(summonNotificationDTO.getLokSabhaNo())
+				.lokSabhaSessionNumber(summonNotificationDTO.getSessionNo())
+				.rajyaSabhaSession(summonNotificationDTO.getRajyasabhaSessionNo())
+				// Optional from frontend
 	            .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
 	            .build();
 	        log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
