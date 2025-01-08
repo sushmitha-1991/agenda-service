@@ -66,230 +66,224 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	@Transactional
 	@Override
 	public SummonNotificationDTO saveSummonNotification(SummonNotificationDTO summonNotificationDTO) {
-	    log.debug("Entering saveSummonNotification with SummonNotificationDTO: {}", summonNotificationDTO);
-
-
+		log.debug("Entering saveSummonNotification with SummonNotificationDTO: {}", summonNotificationDTO);
 
 		Long houseId = null;
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (principal instanceof UserDetailsDTO) {
 			houseId = ((UserDetailsDTO) principal).getHouseId();
 		}
-	    try {
-			if(houseId==1)
-			{
+		try {
+			if (houseId == 1) {
 				summonNotificationDTO.setLokSabhaNo("");
 				summonNotificationDTO.setSessionNo("");
-			}
-			else if(houseId==2)
-			{
+			} else if (houseId == 2) {
 				summonNotificationDTO.setRajyasabhaSessionNo("");
 			}
-	        // Convert DTO to entity
-	        SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
-	        log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
+			// Convert DTO to entity
+			SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
+			log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
 
-	        // Save SummonNotification entity first to generate the ID
-	        SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
-	        log.debug("First save - Generated SummonNotification ID: {}", savedNotification.getId());
+			// Save SummonNotification entity first to generate the ID
+			SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
+			log.debug("First save - Generated SummonNotification ID: {}", savedNotification.getId());
 
-	        // Generate Application Number using the generated ID
-	        String applicationNo = generateApplicationNo(
-	            summonNotificationDTO.getLokSabhaNo(),
-	            summonNotificationDTO.getSessionNo(),
-	            summonNotificationDTO.getRajyasabhaSessionNo(),
-	            savedNotification.getId()
-	        );
-	        savedNotification.setApplicationNo(applicationNo);
-	        log.debug("Generated Application No: {}", applicationNo);
+			// Generate Application Number using the generated ID
+			String applicationNo = generateApplicationNo(
+					summonNotificationDTO.getLokSabhaNo(),
+					summonNotificationDTO.getSessionNo(),
+					summonNotificationDTO.getRajyasabhaSessionNo(),
+					savedNotification.getId());
+			savedNotification.setApplicationNo(applicationNo);
+			log.debug("Generated Application No: {}", applicationNo);
 
-	        // Save SummonNotification again with the updated applicationNo
-	        savedNotification = summonNotificationRepository.save(savedNotification);
-	        log.debug("Saved SummonNotification entity with updated Application No: {}", savedNotification);
-	        SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
+			// Save SummonNotification again with the updated applicationNo
+			savedNotification = summonNotificationRepository.save(savedNotification);
+			log.debug("Saved SummonNotification entity with updated Application No: {}", savedNotification);
+			SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
 
-			
-	        // Create ApplicationInstanceDTO for external microservice
-			if(houseId==1)
-			{
+			// Create ApplicationInstanceDTO for external microservice
+			if (houseId == 1) {
 				ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-	            .applicationId(summonNotificationDTO.getApplicationId()) // From frontend
-	            .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-	            .currentStatus(savedNotification.getStatus()) // From SummonNotification's status
-	            .documentDate(savedNotification.getSummonIssuanceDate())
-	            .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl())
-				// .lokSabhaSession(summonNotificationDTO.getLokSabhaNo())
-				// .lokSabhaSessionNumber(summonNotificationDTO.getSessionNo())
-				.rajyaSabhaSession(summonNotificationDTO.getRajyasabhaSessionNo())
-				// Optional from frontend
-	            .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-	            .build();
-	        log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
+						.applicationId(summonNotificationDTO.getApplicationId()) // From frontend
+						.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+						.currentStatus(savedNotification.getStatus()) // From SummonNotification's status
+						.documentDate(savedNotification.getSummonIssuanceDate())
+						.publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl())
+						// .lokSabhaSession(summonNotificationDTO.getLokSabhaNo())
+						// .lokSabhaSessionNumber(summonNotificationDTO.getSessionNo())
+						.rajyaSabhaSession(summonNotificationDTO.getRajyasabhaSessionNo())
+						// Optional from frontend
+						.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+						.build();
+				log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
 
-	        // Call ApplicationInstance microservice to save the application instance data
-	        ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
-	        log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+				// Call ApplicationInstance microservice to save the application instance data
+				ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+				log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
 
-	        if (savedInstanceDTO == null) {
-	            log.error("ApplicationInstanceDTO is null after the microservice call!");
-	            throw new RuntimeException("ApplicationInstance creation failed");
-	        }
+				if (savedInstanceDTO == null) {
+					log.error("ApplicationInstanceDTO is null after the microservice call!");
+					throw new RuntimeException("ApplicationInstance creation failed");
+				}
 
-	        Long applicationInstanceId = savedInstanceDTO.getId();
-	        log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
-			if (summonNotificationDTO.getTemplateId() != null) {
-	            validateTemplateId(summonNotificationDTO.getTemplateId());
-	        }
+				Long applicationInstanceId = savedInstanceDTO.getId();
+				log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
+				if (summonNotificationDTO.getTemplateId() != null) {
+					validateTemplateId(summonNotificationDTO.getTemplateId());
+				}
 
+				// Create ApplicationPapersDTO and save template content from SummonNotification
+				ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
+						.applicationId(summonNotificationDTO.getApplicationId())
+						.applicationInstanceId(applicationInstanceId)
+						.templateId(summonNotificationDTO.getTemplateId())
+						.templateContent(summonNotificationDTO.getTemplateContent())
+						.templateHindiId(summonNotificationDTO.getTemplateHindiId())
+						.templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
+						.build();
+				log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
+				// Save ApplicationPapers data
+				applicationPapersService.saveApplicationPapers(applicationPapersDTO);
+				log.debug("Saved ApplicationPapers data.");
+				// Convert saved entity back to DTO
+				responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
 
-	        // Create ApplicationPapersDTO and save template content from SummonNotification
-	        ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
-	            .applicationId(summonNotificationDTO.getApplicationId())
-	            .applicationInstanceId(applicationInstanceId)
-	            .templateId(summonNotificationDTO.getTemplateId())
-	            .templateContent(summonNotificationDTO.getTemplateContent())
-	            .templateHindiId(summonNotificationDTO.getTemplateHindiId())
-	            .templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
-	            .build();
-	        log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
-	        // Save ApplicationPapers data
-	        applicationPapersService.saveApplicationPapers(applicationPapersDTO);
-	        log.debug("Saved ApplicationPapers data.");
-	        // Convert saved entity back to DTO
-	        responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
-	       
+			} else if (houseId == 2) {
+				ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
+						.applicationId(summonNotificationDTO.getApplicationId()) // From frontend
+						.applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+						.currentStatus(savedNotification.getStatus()) // From SummonNotification's status
+						.documentDate(savedNotification.getSummonIssuanceDate())
+						.publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl())
+						.lokSabhaSession(summonNotificationDTO.getLokSabhaNo())
+						.lokSabhaSessionNumber(summonNotificationDTO.getSessionNo())
+						// .rajyaSabhaSession(summonNotificationDTO.getRajyasabhaSessionNo())
+						// Optional from frontend
+						.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+						.build();
+				log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
+
+				// Call ApplicationInstance microservice to save the application instance data
+				ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+				log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+
+				if (savedInstanceDTO == null) {
+					log.error("ApplicationInstanceDTO is null after the microservice call!");
+					throw new RuntimeException("ApplicationInstance creation failed");
+				}
+
+				Long applicationInstanceId = savedInstanceDTO.getId();
+				log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
+				if (summonNotificationDTO.getTemplateId() != null) {
+					validateTemplateId(summonNotificationDTO.getTemplateId());
+				}
+
+				// Create ApplicationPapersDTO and save template content from SummonNotification
+				ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
+						.applicationId(summonNotificationDTO.getApplicationId())
+						.applicationInstanceId(applicationInstanceId)
+						.templateId(summonNotificationDTO.getTemplateId())
+						.templateContent(summonNotificationDTO.getTemplateContent())
+						.templateHindiId(summonNotificationDTO.getTemplateHindiId())
+						.templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
+						.build();
+				log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
+
+				// Save ApplicationPapers data
+				applicationPapersService.saveApplicationPapers(applicationPapersDTO);
+				log.debug("Saved ApplicationPapers data.");
+
+				// Convert saved entity back to DTO
+				responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
 
 			}
-			else if(houseId==2)
-			{
-				ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-	            .applicationId(summonNotificationDTO.getApplicationId()) // From frontend
-	            .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-	            .currentStatus(savedNotification.getStatus()) // From SummonNotification's status
-	            .documentDate(savedNotification.getSummonIssuanceDate())
-	            .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl())
-				.lokSabhaSession(summonNotificationDTO.getLokSabhaNo())
-				.lokSabhaSessionNumber(summonNotificationDTO.getSessionNo())
-				// .rajyaSabhaSession(summonNotificationDTO.getRajyasabhaSessionNo())
-				// Optional from frontend
-	            .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-	            .build();
-	        log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
+			// ApplicationInstanceDTO applicationInstanceDTO =
+			// ApplicationInstanceDTO.builder()
+			// .applicationId(summonNotificationDTO.getApplicationId()) // From frontend
+			// .applicationNo(savedNotification.getApplicationNo()) // Saved in
+			// SummonNotification
+			// .currentStatus(savedNotification.getStatus()) // From SummonNotification's
+			// status
+			// .documentDate(savedNotification.getSummonIssuanceDate())
+			// .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl())
+			// .lokSabhaSession(summonNotificationDTO.getLokSabhaNo())
+			// .lokSabhaSessionNumber(summonNotificationDTO.getSessionNo())
+			// .rajyaSabhaSession(summonNotificationDTO.getRajyasabhaSessionNo())
+			// // Optional from frontend
+			// .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+			// .build();
+			// log.debug("Created ApplicationInstanceDTO for microservice call: {}",
+			// applicationInstanceDTO);
 
-	        // Call ApplicationInstance microservice to save the application instance data
-	        ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
-	        log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+			// // Call ApplicationInstance microservice to save the application instance
+			// data
+			// ApplicationInstanceDTO savedInstanceDTO =
+			// createApplicationInstance(applicationInstanceDTO);
+			// log.debug("Saved ApplicationInstanceDTO returned from microservice: {}",
+			// savedInstanceDTO);
 
-	        if (savedInstanceDTO == null) {
-	            log.error("ApplicationInstanceDTO is null after the microservice call!");
-	            throw new RuntimeException("ApplicationInstance creation failed");
-	        }
+			// if (savedInstanceDTO == null) {
+			// log.error("ApplicationInstanceDTO is null after the microservice call!");
+			// throw new RuntimeException("ApplicationInstance creation failed");
+			// }
 
-	        Long applicationInstanceId = savedInstanceDTO.getId();
-	        log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
-			if (summonNotificationDTO.getTemplateId() != null) {
-	            validateTemplateId(summonNotificationDTO.getTemplateId());
-	        }
+			// Long applicationInstanceId = savedInstanceDTO.getId();
+			// log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
 
+			// Validate template ID
 
-	        // Create ApplicationPapersDTO and save template content from SummonNotification
-	        ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
-	            .applicationId(summonNotificationDTO.getApplicationId())
-	            .applicationInstanceId(applicationInstanceId)
-	            .templateId(summonNotificationDTO.getTemplateId())
-	            .templateContent(summonNotificationDTO.getTemplateContent())
-	            .templateHindiId(summonNotificationDTO.getTemplateHindiId())
-	            .templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
-	            .build();
-	        log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
+			// if (summonNotificationDTO.getTemplateId() != null) {
+			// validateTemplateId(summonNotificationDTO.getTemplateId());
+			// }
 
-	        // Save ApplicationPapers data
-	        applicationPapersService.saveApplicationPapers(applicationPapersDTO);
-	        log.debug("Saved ApplicationPapers data.");
+			// // Create ApplicationPapersDTO and save template content from
+			// SummonNotification
+			// ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
+			// .applicationId(summonNotificationDTO.getApplicationId())
+			// .applicationInstanceId(applicationInstanceId)
+			// .templateId(summonNotificationDTO.getTemplateId())
+			// .templateContent(summonNotificationDTO.getTemplateContent())
+			// .templateHindiId(summonNotificationDTO.getTemplateHindiId())
+			// .templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
+			// .build();
+			// log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
 
-	        // Convert saved entity back to DTO
-	        responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
-	       
-			}
-	        // ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
-	        //     .applicationId(summonNotificationDTO.getApplicationId()) // From frontend
-	        //     .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-	        //     .currentStatus(savedNotification.getStatus()) // From SummonNotification's status
-	        //     .documentDate(savedNotification.getSummonIssuanceDate())
-	        //     .publishedDocumentUrl(summonNotificationDTO.getPublishedDocumentUrl())
-			// 	.lokSabhaSession(summonNotificationDTO.getLokSabhaNo())
-			// 	.lokSabhaSessionNumber(summonNotificationDTO.getSessionNo())
-			// 	.rajyaSabhaSession(summonNotificationDTO.getRajyasabhaSessionNo())
-			// 	// Optional from frontend
-	        //     .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-	        //     .build();
-	        // log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
+			// // Save ApplicationPapers data
+			// applicationPapersService.saveApplicationPapers(applicationPapersDTO);
+			// log.debug("Saved ApplicationPapers data.");
 
-	        // // Call ApplicationInstance microservice to save the application instance data
-	        // ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
-	        // log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+			// // Convert saved entity back to DTO
+			// // SummonNotificationDTO responseDTO =
+			// summonNotificationMapper.toDTO(savedNotification);
+			// responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
+			// log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO: {}",
+			// responseDTO);
 
-	        // if (savedInstanceDTO == null) {
-	        //     log.error("ApplicationInstanceDTO is null after the microservice call!");
-	        //     throw new RuntimeException("ApplicationInstance creation failed");
-	        // }
+			responseDTO.setTemplateId(summonNotificationDTO.getTemplateId());
+			responseDTO.setTemplateHindiId(summonNotificationDTO.getTemplateHindiId());
 
-	        // Long applicationInstanceId = savedInstanceDTO.getId();
-	        // log.debug("ApplicationInstance ID retrieved: {}", applicationInstanceId);
+			log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
 
-	        // Validate template ID
-	        
-	        // if (summonNotificationDTO.getTemplateId() != null) {
-	        //     validateTemplateId(summonNotificationDTO.getTemplateId());
-	        // }
-
-
-	        // // Create ApplicationPapersDTO and save template content from SummonNotification
-	        // ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
-	        //     .applicationId(summonNotificationDTO.getApplicationId())
-	        //     .applicationInstanceId(applicationInstanceId)
-	        //     .templateId(summonNotificationDTO.getTemplateId())
-	        //     .templateContent(summonNotificationDTO.getTemplateContent())
-	        //     .templateHindiId(summonNotificationDTO.getTemplateHindiId())
-	        //     .templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
-	        //     .build();
-	        // log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
-
-	        // // Save ApplicationPapers data
-	        // applicationPapersService.saveApplicationPapers(applicationPapersDTO);
-	        // log.debug("Saved ApplicationPapers data.");
-
-	        // // Convert saved entity back to DTO
-	        // // SummonNotificationDTO responseDTO = summonNotificationMapper.toDTO(savedNotification);
-	        // responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
-	        // log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
-
-	        responseDTO.setTemplateId(summonNotificationDTO.getTemplateId());
-	        responseDTO.setTemplateHindiId(summonNotificationDTO.getTemplateHindiId());
-
-	        log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
-
-	        return responseDTO;
-	    } catch (ResourceNotFoundException e) {
-	        log.error("Resource not found during saveSummonNotification: {}", e.getMessage());
-	        throw e; // Re-throw the exception for further handling
-	    } catch (Exception e) {
-	        log.error("Error in saveSummonNotification: ", e);
-	        throw new RuntimeException("Failed to save SummonNotification", e);
-	    }
+			return responseDTO;
+		} catch (ResourceNotFoundException e) {
+			log.error("Resource not found during saveSummonNotification: {}", e.getMessage());
+			throw e; // Re-throw the exception for further handling
+		} catch (Exception e) {
+			log.error("Error in saveSummonNotification: ", e);
+			throw new RuntimeException("Failed to save SummonNotification", e);
+		}
 	}
-
 
 	private String generateApplicationNo(String lokSabhaNo, String sessionNo, String rajyaSabhaSessionNo, Long id) {
-	    if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
-	        return "SN-LS" + "-" + lokSabhaNo+ "-" + sessionNo + "-" + id;
-	    } else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
-	        return "SN-RS" + "-" + rajyaSabhaSessionNo + "-" + id;
-	    } else {
-	        throw new IllegalArgumentException("Insufficient data to generate application number");
-	    }
+		if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
+			return "SN-LS" + "-" + lokSabhaNo + "-" + sessionNo + "-" + id;
+		} else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
+			return "SN-RS" + "-" + rajyaSabhaSessionNo + "-" + id;
+		} else {
+			throw new IllegalArgumentException("Insufficient data to generate application number");
+		}
 	}
-
 
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
 		String url = applicationInstanceServiceUrl + "/create";
@@ -341,23 +335,62 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 		try {
 			List<SummonNotification> summonNotifications = summonNotificationRepository.findAll();
 			log.debug("Fetched all SummonNotifications from database: {}", summonNotifications);
-
+			Long houseId = null;
+			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if (principal instanceof UserDetailsDTO) {
+				houseId = ((UserDetailsDTO) principal).getHouseId();
+			}
 			List<SummonNotificationDTO> responseList = new ArrayList<>();
 			for (SummonNotification notification : summonNotifications) {
-				SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
-				ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(notification.getApplicationNo());
-				dto.setApplicationInstanceDTO(instanceDTO);
+				if (houseId == 1) {
+					if (!notification.getRajyasabhaSessionNo().equals("")) {
+						SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
+						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
+								notification.getApplicationNo());
+						dto.setApplicationInstanceDTO(instanceDTO);
 
-				if (instanceDTO != null && instanceDTO.getId() != null) {
-					applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
-							.ifPresent(applicationPapers -> {
-								dto.setTemplateId(applicationPapers.getTemplateId());
-								dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
-							});
+						if (instanceDTO != null && instanceDTO.getId() != null) {
+							applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+									.ifPresent(applicationPapers -> {
+										dto.setTemplateId(applicationPapers.getTemplateId());
+										dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+									});
+						}
+
+						responseList.add(dto);
+					}
+				} else if (houseId == 2) {
+					if (!notification.getSessionNo().equals("")) {
+						SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
+						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
+								notification.getApplicationNo());
+						dto.setApplicationInstanceDTO(instanceDTO);
+
+						if (instanceDTO != null && instanceDTO.getId() != null) {
+							applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+									.ifPresent(applicationPapers -> {
+										dto.setTemplateId(applicationPapers.getTemplateId());
+										dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+									});
+						}
+
+						responseList.add(dto);
+					}
 				}
-				
+				// SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
+				// ApplicationInstanceDTO instanceDTO =
+				// fetchApplicationInstanceData(notification.getApplicationNo());
+				// dto.setApplicationInstanceDTO(instanceDTO);
 
-				responseList.add(dto);
+				// if (instanceDTO != null && instanceDTO.getId() != null) {
+				// applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
+				// .ifPresent(applicationPapers -> {
+				// dto.setTemplateId(applicationPapers.getTemplateId());
+				// dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
+				// });
+				// }
+
+				// responseList.add(dto);
 			}
 
 			log.debug("Returning all SummonNotificationDTOs with ApplicationInstanceDTOs: {}", responseList);
@@ -462,31 +495,32 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 			// Now, let's automatically update the ApplicationInstance
 			if (updatedNotification.getStatus() != null || updatedNotification.getSummonIssuanceDate() != null) {
-			    ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
+				ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
 
-			    if (updatedNotification.getStatus() != null) {
-			        applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus());
-			        log.debug("Setting currentStatus: {}", updatedNotification.getStatus());
-			    }
+				if (updatedNotification.getStatus() != null) {
+					applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus());
+					log.debug("Setting currentStatus: {}", updatedNotification.getStatus());
+				}
 
-			    if (updatedNotification.getSummonIssuanceDate() != null) {
-			        applicationInstanceDTO.setDocumentDate(updatedNotification.getSummonIssuanceDate());
-			        log.debug("Setting documentDate: {}", updatedNotification.getSummonIssuanceDate());
-			    }
+				if (updatedNotification.getSummonIssuanceDate() != null) {
+					applicationInstanceDTO.setDocumentDate(updatedNotification.getSummonIssuanceDate());
+					log.debug("Setting documentDate: {}", updatedNotification.getSummonIssuanceDate());
+				}
 
-			    String url = applicationInstanceServiceUrl + "/updateByApplicationNo/" + updatedNotification.getApplicationNo();
-			    try {
-			        log.debug("Calling external service at {} with DTO: {}", url, applicationInstanceDTO);
-			        restTemplate.put(url, applicationInstanceDTO);
-			        log.debug("Successfully updated ApplicationInstance for applicationNo: {}", updatedNotification.getApplicationNo());
-			    } catch (Exception e) {
-			        log.error("Failed to update ApplicationInstance: ", e);
-			        throw new RuntimeException("Failed to update ApplicationInstance", e);
-			    }
+				String url = applicationInstanceServiceUrl + "/updateByApplicationNo/"
+						+ updatedNotification.getApplicationNo();
+				try {
+					log.debug("Calling external service at {} with DTO: {}", url, applicationInstanceDTO);
+					restTemplate.put(url, applicationInstanceDTO);
+					log.debug("Successfully updated ApplicationInstance for applicationNo: {}",
+							updatedNotification.getApplicationNo());
+				} catch (Exception e) {
+					log.error("Failed to update ApplicationInstance: ", e);
+					throw new RuntimeException("Failed to update ApplicationInstance", e);
+				}
 			} else {
-			    log.warn("No valid fields to update for ApplicationInstance.");
+				log.warn("No valid fields to update for ApplicationInstance.");
 			}
-
 
 			// Fetch the updated ApplicationInstance data
 			String applicationNo = updatedNotification.getApplicationNo(); // Get the applicationNo for the
