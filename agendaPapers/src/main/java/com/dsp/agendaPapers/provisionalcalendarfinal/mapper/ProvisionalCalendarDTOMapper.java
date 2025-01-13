@@ -26,7 +26,7 @@ public class ProvisionalCalendarDTOMapper {
         .listOfDocumentTableOffice(dto.getListOfDocumentTableOffice())
         .listOfDocumentTableOfficeFootnote(dto.getListOfDocumentTableOfficeFootnote())
         .listOfDocumentTableOfficeNote(dto.getListOfDocumentTableOfficeNote())
-        .dateOfInput(dto.getDateOfInputTableOffice())
+        .dateOfInputTableOffice(dto.getDateOfInputTableOffice())
         .inputText(dto.getInputTextTableOffice())
         .generatedFlag(dto.getGeneratedFlag())
         .content(dto.getContent())
