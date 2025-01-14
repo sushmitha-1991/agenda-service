@@ -602,10 +602,20 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				predicate = cb.and(predicate, 
 				cb.equal(cb.lower(root.get("inputStatus")), inputStatus.toLowerCase()));
 			}
+			// if (submittedBy != null && !submittedBy.trim().isEmpty()) {
+			// 	String trimmedSubmittedBy = submittedBy.trim().toLowerCase();
+			// 	predicate = cb.and(predicate,
+			// 		cb.like(cb.lower(cb.trim(root.get("submittedBy"))), "%" + trimmedSubmittedBy + "%"));
+			// }
+
 			if (submittedBy != null && !submittedBy.trim().isEmpty()) {
-				String trimmedSubmittedBy = submittedBy.trim().toLowerCase();
+				String trimmedSubmittedBy = submittedBy.replaceAll("\\s", "").toLowerCase();
 				predicate = cb.and(predicate,
-					cb.like(cb.lower(cb.trim(root.get("submittedBy"))), "%" + trimmedSubmittedBy + "%"));
+					cb.like(
+						cb.lower(cb.function("REPLACE", String.class, root.get("submittedBy"), cb.literal(" "), cb.literal(""))),
+						"%" + trimmedSubmittedBy + "%"
+					)
+				);
 			}
 			cq.where(predicate);
 			TypedQuery<ProvisionalCalendar> query = entityManager.createQuery(cq);
