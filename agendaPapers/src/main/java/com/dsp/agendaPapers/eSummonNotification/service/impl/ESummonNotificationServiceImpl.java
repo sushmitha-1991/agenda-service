@@ -27,14 +27,21 @@ import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
+import com.dsp.agendaPapers.entity.MastersLokSabhaSession;
+import com.dsp.agendaPapers.entity.MastersRajyaSabha;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
 import com.dsp.agendaPapers.mapper.ESummonNotificationMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberRequest;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberResponse;
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.InputInstance;
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.ProvisionalCalendar;
+import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
 import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.InputInstanceMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.ProvisionalCalendarDTOMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.repository.InputInstanceRepository;
+import com.dsp.agendaPapers.repository.MasterLSSRepository;
+import com.dsp.agendaPapers.repository.MastersRSSRepository;
 import com.dsp.agendaPapers.response.GenericResponse;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
@@ -54,7 +61,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 	@Autowired
 	private RestTemplate restTemplate;
+	@Value("${master.service.url}")
+	private String masterServiceUrl;
+	@Autowired
+	private MastersRSSRepository mastersRSSRepository;
 
+	@Autowired
+	private MasterLSSRepository masterLSSRepository;
 	@Autowired
 	private ApplicationPapersService applicationPapersService;
 
@@ -64,6 +77,8 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 	@Value("${application.instance.service.url}")
 	private String applicationInstanceServiceUrl;
 
+	@Autowired
+	private BearerClient bearerClient;
 	@Autowired
 	private ApplicationPapersRepository applicationPapersRepository;
 
@@ -75,25 +90,62 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 	public ESummonNotificationDTO saveESummonNotification(ESummonNotificationDTO eSummonNotificationDTO) {
 		log.debug("Entering saveESummonNotification with ESummonNotificationDTO: {}", eSummonNotificationDTO);
 
+		Long houseId = null;
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (principal instanceof UserDetailsDTO) {
+			houseId = ((UserDetailsDTO) principal).getHouseId();
+		}
+
+		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
+		serialNumberRequest.setAppId(eSummonNotificationDTO.getApplicationId());
+
+		if (houseId == 1) {
+			serialNumberRequest.setSessionId(mastersRSSRepository.findLatestByCreatedBy());
+
+		} else if (houseId == 2) {
+			serialNumberRequest.setSessionId(masterLSSRepository.findLatestByCreatedBy());
+		}
+		System.out.println("##############        Application no generation");
+		// SerialNumberResponse applicationNo=generateApplicationNo(serialNumberRequest);
+		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+		System.out.println(applicationNo);
+		eSummonNotificationDTO.setApplicationNo(applicationNo.getId());
 		try {
 			// Convert DTO to entity
 			ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
 			log.debug("Converted E-SummonNotificationDTO to entity: {}", summonNotification);
 			System.out.println("@@@@@@@@@@@@@" + summonNotification);
+
+			if (houseId == 1) {
+				MastersRajyaSabha session = mastersRSSRepository.findById(mastersRSSRepository.findLatestByCreatedBy())
+						.get();
+				summonNotification.setRajyasabhaSessionNo(session.getSessionNumber());
+				summonNotification.setLokSabhaNo("");
+				summonNotification.setSessionNo("");
+
+			} else if (houseId == 2) {
+				MastersLokSabhaSession session = masterLSSRepository
+						.findById(masterLSSRepository.findLatestByCreatedBy())
+						.get();
+				summonNotification.setLokSabhaNo(session.getSessionNumber());
+				summonNotification.setSessionNo(session.getLokSabha().getLokSabhaNumber());
+				summonNotification.setRajyasabhaSessionNo("");
+
+			}
 			// Save SummonNotification entity initially to generate the ID
 			ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
 			log.debug("Initial save of E-SummonNotification to generate ID: {}", savedNotification);
 
-			String applicationNo = generateApplicationNo(
-					eSummonNotificationDTO.getLokSabhaNo(),
-					eSummonNotificationDTO.getSessionNo(),
-					eSummonNotificationDTO.getRajyasabhaSessionNo(),
-					savedNotification.getId());
-			savedNotification.setApplicationNo(applicationNo);
+			// String applicationNo = generateApplicationNo(
+			// 		eSummonNotificationDTO.getLokSabhaNo(),
+			// 		eSummonNotificationDTO.getSessionNo(),
+			// 		eSummonNotificationDTO.getRajyasabhaSessionNo(),
+			// 		savedNotification.getId());
+			// savedNotification.setApplicationNo(applicationNo);
 			savedNotification = eSummonNotificationRepository.save(savedNotification);
 
 			// Save the SummonNotification entity again with the generated Application No
-			savedNotification = eSummonNotificationRepository.save(savedNotification);
+			// savedNotification = eSummonNotificationRepository.save(savedNotification);
 			log.debug("Saved E-SummonNotification entity with Application No: {}", savedNotification);
 
 			// Log saved attributes
@@ -112,9 +164,9 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl()) // From frontend
 					.refId(savedNotification.getId())
 					// changes on 08-01-2025
-					.lokSabhaSession(eSummonNotificationDTO.getLokSabhaNo())
-					.lokSabhaSessionNumber(eSummonNotificationDTO.getSessionNo())
-					.rajyaSabhaSession(eSummonNotificationDTO.getRajyasabhaSessionNo())
+					.lokSabhaSession(summonNotification.getLokSabhaNo())
+					.lokSabhaSessionNumber(summonNotification.getSessionNo())
+					.rajyaSabhaSession(summonNotification.getRajyasabhaSessionNo())
 					// ends here
 					// Use SummonNotification's ID as refId
 					.build();
@@ -139,9 +191,9 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 					.currentStatus(savedNotification.getStatus()) // From frontend
 					.documentDate(savedNotification.getEsummonIssuanceDate())
 					.publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl())
-					.lokSabhaSession(eSummonNotificationDTO.getLokSabhaNo())
-					.lokSabhaSessionNumber(eSummonNotificationDTO.getSessionNo())
-					.rajyaSabhaSession(eSummonNotificationDTO.getRajyasabhaSessionNo())
+					.lokSabhaSession(summonNotification.getLokSabhaNo())
+					.lokSabhaSessionNumber(summonNotification.getSessionNo())
+					.rajyaSabhaSession(summonNotification.getRajyasabhaSessionNo())
 					// From frontend
 					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
 					.build();
@@ -183,6 +235,30 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			return responseDTO;
 		} catch (Exception e) {
 			log.error("Error in saveESummonNotification: ", e);
+			throw e;
+		}
+	}
+
+	public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
+		String url = masterServiceUrl + "/serial-number";
+
+		SerialNumberResponse res = new SerialNumberResponse();
+		try {
+			// RestTemplate restTemplate = new RestTemplate();
+			// return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
+			System.out.println("@@@@@@@@@@");
+			ResponseEntity<GenericResponse<SerialNumberResponse>> response = restTemplate.exchange(url,
+					HttpMethod.POST, new HttpEntity<>(request),
+					new ParameterizedTypeReference<GenericResponse<SerialNumberResponse>>() {
+					});
+			System.out.println(response);
+			System.out.println("applicationNo");
+			SerialNumberResponse applicationNo = response.getBody().getData();
+			System.out.println(applicationNo);
+			// return savedInstance;
+			return res;
+		} catch (Exception e) {
+			System.err.println("Error during API call: " + e.getMessage());
 			throw e;
 		}
 	}
@@ -256,9 +332,8 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 		for (ESummonNotification notification : notifications) {
 
-			if (houseId == 1) {				
-				if (StringUtils.isBlank(notification.getSessionNo())) 
-				{
+			if (houseId == 1) {
+				if (StringUtils.isBlank(notification.getSessionNo())) {
 					// Convert entities to DTOs
 					log.debug("Processing E-SummonNotification: {}", notification);
 					ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(notification);
@@ -284,7 +359,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 					notificationDTOs.add(dto);
 				}
-				
+
 			} else if (houseId == 2) {
 
 				if (StringUtils.isBlank(notification.getRajyasabhaSessionNo())) {

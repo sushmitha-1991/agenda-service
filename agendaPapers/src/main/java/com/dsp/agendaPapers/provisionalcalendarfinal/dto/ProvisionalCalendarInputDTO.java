@@ -42,10 +42,8 @@ public class ProvisionalCalendarInputDTO {
     // adding the only input status field
     private String inputStatus;
     private String remarks;
-    
-
-    //
-
+    private String inputRefNo;
+    //Application Instance
     private ApplicationInstanceDTO applicationInstanceDTO;
 
     //Input Instance DTO
