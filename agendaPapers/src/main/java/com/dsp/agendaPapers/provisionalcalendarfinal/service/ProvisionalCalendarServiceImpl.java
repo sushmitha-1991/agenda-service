@@ -42,6 +42,7 @@ import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
 import com.dsp.agendaPapers.repository.MasterLSSRepository;
 import com.dsp.agendaPapers.repository.MastersRSSRepository;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -90,7 +91,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.dateOfInputTableOffice(provisionalCalendarDTO.getDateOfInputTableOffice())
 				.inputTextTableOffice(provisionalCalendarDTO.getInputTextTableOffice())
 				.rajyaSabhaSession(provisionalCalendarDTO.getRajyaSabhaSessionNo())
-				.generatedFlag(provisionalCalendarDTO.getGeneratedFlag()).content(provisionalCalendarDTO.getContent())
+				.generatedFlag(provisionalCalendarDTO.getGeneratedFlag())
+				.content(provisionalCalendarDTO.getContent())
 				.inputStatus(provisionalCalendarDTO.getInputStatus()).remarks(provisionalCalendarDTO.getRemarks())
 
 				// application instance
@@ -235,16 +237,13 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		}
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(inputDTO.getApplicationId());
-
 		// if (inputDTO.getLokSabhaSessionNo() == null) {
 		if (houseId == 1) {
 			serialNumberRequest.setSessionId(inputDTO.getRsSessionNo());
-
 			// } else {
 		} else if (houseId == 2) {
 			serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
 		}
-
 		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
 		ProvisionalCalendar provisionalCalendar = ProvisionalCalendar.builder().dateOfInput(inputDTO.getDateOfInput())
 				.language(inputDTO.getLanguage()).submittedBy(inputDTO.getSubmittedBy())
@@ -349,6 +348,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	@Override
 	public ProvisionalCalendarTableOfficeDTO createProvisionalCalendarTableOffice(
 			ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
+
+		if (provisionalCalendarTableOfficeDTO.getGeneratedFlag() == null) {
+			provisionalCalendarTableOfficeDTO.setGeneratedFlag(true);
+		}
 		// changes on 07-01-2025
 		System.out.println("$$$$$$$$$$$$$$$44444");
 		Long houseId = null;
@@ -492,7 +495,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		}
 		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
 		// changes ends here
-
 		// Check if ProvisionalCalendar with the given ID exists
 		Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository
 				.findById(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId());
@@ -514,6 +516,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// changes on 07-01-2025
 		provisionalCalendar.setApplicationNo(applicationNo.getId());
 		// ends here
+		// changes for generated flag
+		provisionalCalendar.setGeneratedFlag(true);
 
 		// Save the updated entity
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
@@ -592,30 +596,32 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				predicate = cb.and(predicate, cb.between(root.get("dateOfInput"), startDateTime, endDateTime));
 			}
 			// if (inputStatus != null && !inputStatus.trim().isEmpty()) {
-			// 	predicate = cb.and(predicate, cb.equal(root.get("inputStatus"), inputStatus));
+			// predicate = cb.and(predicate, cb.equal(root.get("inputStatus"),
+			// inputStatus));
 			// }
 			// if (submittedBy != null && !submittedBy.trim().isEmpty()) {
-			// 	predicate = cb.and(predicate, cb.equal(root.get("submittedBy"), "%" + submittedBy + "%"));
+			// predicate = cb.and(predicate, cb.equal(root.get("submittedBy"), "%" +
+			// submittedBy + "%"));
 			// }
 
 			if (inputStatus != null && !inputStatus.trim().isEmpty()) {
-				predicate = cb.and(predicate, 
-				cb.equal(cb.lower(root.get("inputStatus")), inputStatus.toLowerCase()));
+				predicate = cb.and(predicate,
+						cb.equal(cb.lower(root.get("inputStatus")), inputStatus.toLowerCase()));
 			}
 			// if (submittedBy != null && !submittedBy.trim().isEmpty()) {
-			// 	String trimmedSubmittedBy = submittedBy.trim().toLowerCase();
-			// 	predicate = cb.and(predicate,
-			// 		cb.like(cb.lower(cb.trim(root.get("submittedBy"))), "%" + trimmedSubmittedBy + "%"));
+			// String trimmedSubmittedBy = submittedBy.trim().toLowerCase();
+			// predicate = cb.and(predicate,
+			// cb.like(cb.lower(cb.trim(root.get("submittedBy"))), "%" + trimmedSubmittedBy
+			// + "%"));
 			// }
 
 			if (submittedBy != null && !submittedBy.trim().isEmpty()) {
 				String trimmedSubmittedBy = submittedBy.replaceAll("\\s", "").toLowerCase();
 				predicate = cb.and(predicate,
-					cb.like(
-						cb.lower(cb.function("REPLACE", String.class, root.get("submittedBy"), cb.literal(" "), cb.literal(""))),
-						"%" + trimmedSubmittedBy + "%"
-					)
-				);
+						cb.like(
+								cb.lower(cb.function("REPLACE", String.class, root.get("submittedBy"), cb.literal(" "),
+										cb.literal(""))),
+								"%" + trimmedSubmittedBy + "%"));
 			}
 			cq.where(predicate);
 			TypedQuery<ProvisionalCalendar> query = entityManager.createQuery(cq);
@@ -634,10 +640,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
-						Optional<InputInstance> instance = 
-						inputInstanceRepository.findByRefId(dto.getId());
-						if(!instance.isEmpty())
-						{
+						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
+						if (!instance.isEmpty()) {
 							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(instance.get()));
 						}
 						response.add(dto);
@@ -646,8 +650,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					if (provisionalCalendar.getLokSabhaSessionNo() != null) {
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
 						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
-						if(!instance.isEmpty())
-						{
+						if (!instance.isEmpty()) {
 							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(instance.get()));
 						}
 						response.add(dto);
@@ -703,7 +706,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
 						.rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
 						.refId(provisionalCalendar.getRefId()).build())
-			
 
 				.build();
 	}
