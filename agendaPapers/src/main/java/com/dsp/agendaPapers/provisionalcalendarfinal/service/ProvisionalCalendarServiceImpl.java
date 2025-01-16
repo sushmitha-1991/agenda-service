@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.lang.reflect.Field;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -104,7 +105,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.lokSabhaSession(provisionalCalendarDTO.getLokSabhaSession())
 				.lokSabhaSessionNumber(provisionalCalendarDTO.getLokSabhaSessionNumber())
 				.rajyaSabhaSession(provisionalCalendarDTO.getRajyaSabhaSession())
-				.documentDate(provisionalCalendarDTO.getDateOfInput().toLocalDate())
+				.documentDate(provisionalCalendarDTO.getDateOfInput())
 				// .otherInfo((Map<String, Object>) questionbranchInputDTO.getOtherInfo())
 				.applicationId(provisionalCalendarDTO.getApplicationId()).draft(false).build();
 
@@ -167,46 +168,74 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	@Override
 	public ProvisionalCalendarDTO updateProvisionalCalendar(Long id, ProvisionalCalendarDTO provisionalCalendarDTO) {
 
-		return provisionalCalendarRepository.findById(id).map(existingEntity -> {
-			existingEntity.setDateOfInput(provisionalCalendarDTO.getDateOfInput());
-			existingEntity.setLanguage(provisionalCalendarDTO.getLanguage());
-			existingEntity.setSubmittedBy(provisionalCalendarDTO.getSubmittedBy());
-			existingEntity.setSubmittedByBranch(provisionalCalendarDTO.getSubmittedByBranch());
-			existingEntity.setSubject(provisionalCalendarDTO.getSubject());
-			existingEntity.setInputText(provisionalCalendarDTO.getInputText());
-			existingEntity.setFootnoteText(provisionalCalendarDTO.getFootnoteText());
-			existingEntity.setApproverName(provisionalCalendarDTO.getApproverName());
-			existingEntity.setApproverDesignation(provisionalCalendarDTO.getApproverDesignation());
-			existingEntity.setDateOfSittingInputs(provisionalCalendarDTO.getDateOfSittingInputs());
-			existingEntity.setListOfDocument(provisionalCalendarDTO.getListOfDocument());
-			existingEntity.setGroupchartsLS(provisionalCalendarDTO.getGroupchartsLS());
-			existingEntity.setGroupchartsRS(provisionalCalendarDTO.getGroupchartsRS());
-			existingEntity.setListOfDocumentTableOffice(provisionalCalendarDTO.getListOfDocumentTableOffice());
-			existingEntity.setListOfDocumentTableOfficeFootnote(
-					provisionalCalendarDTO.getListOfDocumentTableOfficeFootnote());
-			existingEntity.setListOfDocumentTableOfficeNote(provisionalCalendarDTO.getListOfDocumentTableOfficeNote());
-			existingEntity
-					.setDateOfSittingInputsTableOffice(provisionalCalendarDTO.getDateOfSittingInputsTableOffice());
-			existingEntity.setDateOfInputTableOffice(provisionalCalendarDTO.getDateOfInputTableOffice());
-			existingEntity.setInputTextTableOffice(provisionalCalendarDTO.getInputTextTableOffice());
-			existingEntity.setRajyaSabhaSession(provisionalCalendarDTO.getRajyaSabhaSessionNo());
-			existingEntity.setGeneratedFlag(provisionalCalendarDTO.getGeneratedFlag());
-			existingEntity.setContent(provisionalCalendarDTO.getContent());
-			// adding the new field inputstaus and remarks
-			existingEntity.setInputStatus(provisionalCalendarDTO.getInputStatus());
-			existingEntity.setRemarks(provisionalCalendarDTO.getRemarks());
-			existingEntity.setDocumentDate(provisionalCalendarDTO.getDateOfInput().toLocalDate());
-			existingEntity.setRefId(provisionalCalendarDTO.getId());
+		ProvisionalCalendar existingEntity = provisionalCalendarRepository.findById(id).get();
+		ProvisionalCalendar entityNew = ProvisionalCalendarDTOMapper.toEntity(provisionalCalendarDTO);
+		System.out.println("!!!!!!!!");
+		System.out.println(existingEntity);
+		System.out.println("new entity");
+		System.out.println(entityNew);
+		Field[] fields = entityNew.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			field.setAccessible(true); // Allow access to private fields
+			try {
+				Object newValue = field.get(entityNew);
+				if (newValue != null) {
+					Field entityField = existingEntity.getClass().getDeclaredField(field.getName());
+					entityField.setAccessible(true);
+					entityField.set(existingEntity, newValue);
+				}
+			} catch (NoSuchFieldException | IllegalAccessException e) {
+				throw new RuntimeException("Error updating field: " + field.getName(), e);
+			}
+		}
+		System.out.println("!!!!!!!!");
+		System.out.println(existingEntity);
+		existingEntity.setCurrentStatus(existingEntity.getStatus());
+		existingEntity.setDocumentDate(existingEntity.getDateOfInput());
 
-			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
+		// return provisionalCalendarRepository.findById(id).map(existingEntity -> {
+		// existingEntity.setDateOfInput(provisionalCalendarDTO.getDateOfInput());
+		// existingEntity.setLanguage(provisionalCalendarDTO.getLanguage());
+		// existingEntity.setSubmittedBy(provisionalCalendarDTO.getSubmittedBy());
+		// existingEntity.setSubmittedByBranch(provisionalCalendarDTO.getSubmittedByBranch());
+		// existingEntity.setSubject(provisionalCalendarDTO.getSubject());
+		// existingEntity.setInputText(provisionalCalendarDTO.getInputText());
+		// existingEntity.setFootnoteText(provisionalCalendarDTO.getFootnoteText());
+		// existingEntity.setApproverName(provisionalCalendarDTO.getApproverName());
+		// existingEntity.setApproverDesignation(provisionalCalendarDTO.getApproverDesignation());
+		// existingEntity.setDateOfSittingInputs(provisionalCalendarDTO.getDateOfSittingInputs());
+		// existingEntity.setListOfDocument(provisionalCalendarDTO.getListOfDocument());
+		// existingEntity.setGroupchartsLS(provisionalCalendarDTO.getGroupchartsLS());
+		// existingEntity.setGroupchartsRS(provisionalCalendarDTO.getGroupchartsRS());
+		// existingEntity.setListOfDocumentTableOffice(provisionalCalendarDTO.getListOfDocumentTableOffice());
+		// existingEntity.setListOfDocumentTableOfficeFootnote(
+		// provisionalCalendarDTO.getListOfDocumentTableOfficeFootnote());
+		// existingEntity.setListOfDocumentTableOfficeNote(provisionalCalendarDTO.getListOfDocumentTableOfficeNote());
+		// existingEntity
+		// .setDateOfSittingInputsTableOffice(provisionalCalendarDTO.getDateOfSittingInputsTableOffice());
+		// existingEntity.setDateOfInputTableOffice(provisionalCalendarDTO.getDateOfInputTableOffice());
+		// existingEntity.setInputTextTableOffice(provisionalCalendarDTO.getInputTextTableOffice());
+		// existingEntity.setRajyaSabhaSession(provisionalCalendarDTO.getRajyaSabhaSessionNo());
+		// existingEntity.setGeneratedFlag(provisionalCalendarDTO.getGeneratedFlag());
+		// existingEntity.setContent(provisionalCalendarDTO.getContent());
+		// // adding the new field inputstaus and remarks
+		// existingEntity.setInputStatus(provisionalCalendarDTO.getInputStatus());
+		// existingEntity.setRemarks(provisionalCalendarDTO.getRemarks());
+		// existingEntity.setDocumentDate(provisionalCalendarDTO.getDateOfInput().toLocalDate());
+		// existingEntity.setStatus(provisionalCalendarDTO.getStatus());
+		// existingEntity.setCurrentStatus(provisionalCalendarDTO.getCurrentStatus());
+		// existingEntity.setRefId(provisionalCalendarDTO.getId());
 
-			// changes for status update by sushmitha
-			InputInstance instanceUpdate = inputInstanceRepository.findByRefId(existingEntity.getId()).get();
-			instanceUpdate.setCurrentStatus(provisionalCalendarDTO.getInputStatus());
-			instanceUpdate = inputInstanceRepository.save(instanceUpdate);
-			// ends here
-			return mapToDto(updatedEntity);
-		}).orElseThrow(() -> new RuntimeException("ProvisionalCalendar not found with id " + id));
+		ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
+
+		// changes for status update by sushmitha
+		InputInstance instanceUpdate = inputInstanceRepository.findByRefId(existingEntity.getId()).get();
+		instanceUpdate.setCurrentStatus(provisionalCalendarDTO.getInputStatus());
+		instanceUpdate = inputInstanceRepository.save(instanceUpdate);
+		// ends here
+		return mapToDto(updatedEntity);
+		// }).orElseThrow(() -> new RuntimeException("ProvisionalCalendar not found with
+		// id " + id));
 	}
 
 	// delete() provisional calender
@@ -230,10 +259,17 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// Map DTO to Entity
 		// changes for the input
 		// generating Application No with FeinClient
+		/*
+		 * eyJhbGciOiJIUzI1NiJ9.
+		 * eyJzdWIiOiJwbHVfcnNfc2EiLCJob3VzZUlkIjoxLCJob3VzZUFiYnIiOiJSUyIsImlhdCI6MTczNjg1Mzg3NiwiZXhwIjoxNzM2OTQwMjc2fQ
+		 * .CC18fAwLo5r4wJ6gStn2v5VdxulRq7rvno1561-clK8
+		 */
 		Long houseId = null;
+		// String houseAbbr="";
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (principal instanceof UserDetailsDTO) {
 			houseId = ((UserDetailsDTO) principal).getHouseId();
+			// houseAbbr=((UserDetailsDTO)principal).getHouseAbbr();
 		}
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(inputDTO.getApplicationId());
@@ -245,7 +281,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
 		}
 		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
-		ProvisionalCalendar provisionalCalendar = ProvisionalCalendar.builder().dateOfInput(inputDTO.getDateOfInput())
+		ProvisionalCalendar provisionalCalendar = ProvisionalCalendar.builder()
+				.dateOfInput(inputDTO.getDateOfInput())
 				.language(inputDTO.getLanguage()).submittedBy(inputDTO.getSubmittedBy())
 				.submittedByBranch(inputDTO.getSubmittedByBranch()).subject(inputDTO.getSubject())
 				.inputText(inputDTO.getInputText()).footnoteText(inputDTO.getFootnoteText())
@@ -258,7 +295,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.applicationId(inputDTO.getApplicationId()).lokSabhaSession(inputDTO.getLokSabhaSession())
 				.lokSabhaSessionNumber(inputDTO.getLokSabhaSessionNumber())
 				.rajyaSabhaSession(inputDTO.getRajyaSabhaSession())
-				.documentDate(inputDTO.getDateOfInput().toLocalDate())
+				.documentDate(inputDTO.getDateOfInput())
 				// .applicationNo(applicationNo)
 				.applicationNo(applicationNo.getId())
 				// Set applicationNo
@@ -296,7 +333,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		if (houseId == 1) {
 			InputInstance inputInstanceEntity = InputInstance.builder().id(savedEntity.getId())
 					.applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getApplicationNo())
-					.refId(savedEntity.getRefId()).documentDate(savedEntity.getDateOfInput().toLocalDate())
+					.refId(savedEntity.getRefId()).documentDate(savedEntity.getDateOfInput())
 					.currentStatus(savedEntity.getInputStatus())
 					.rajyaSabhaSession(savedEntity.getRajyaSabhaSession())
 					.pendingAt("Legislative Section").build();
@@ -311,7 +348,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			InputInstance inputInstanceEntity = InputInstance.builder().id(savedEntity.getId())
 					.applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getInputRefNo())
 					.refId(savedEntity.getRefId()).pendingAt("Table Office A")
-					.documentDate(savedEntity.getDateOfInput().toLocalDate())
+					.documentDate(savedEntity.getDateOfInput())
 					.currentStatus(savedEntity.getInputStatus())
 					.lokSabhaSession(savedEntity.getLokSabhaSession())
 					.lokSabhaSessionNumber(savedEntity.getLokSabhaSessionNumber())
@@ -349,28 +386,12 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	public ProvisionalCalendarTableOfficeDTO createProvisionalCalendarTableOffice(
 			ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
 
-		if (provisionalCalendarTableOfficeDTO.getGeneratedFlag() == null) {
-			provisionalCalendarTableOfficeDTO.setGeneratedFlag(true);
-		}
 		// changes on 07-01-2025
-		System.out.println("$$$$$$$$$$$$$$$44444");
 		Long houseId = null;
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (principal instanceof UserDetailsDTO) {
 			houseId = ((UserDetailsDTO) principal).getHouseId();
 		}
-		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
-		serialNumberRequest.setAppId(provisionalCalendarTableOfficeDTO.getApplicationId());
-
-		if (houseId == 1) {
-			serialNumberRequest.setSessionId(provisionalCalendarTableOfficeDTO.getRssNo());
-
-		} else if (houseId == 2) {
-			serialNumberRequest.setSessionId(provisionalCalendarTableOfficeDTO.getLssNo());
-		}
-		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
-		// changes ends here
-
 		// Check if provisionalCalendarInputId exists
 		Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository
 				.findById(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId());
@@ -382,7 +403,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 		// Retrieve the existing ProvisionalCalendar entity
 		ProvisionalCalendar provisionalCalendar = optionalProvisionalCalendar.get();
-
 		// Update the fields with values from the DTO
 		provisionalCalendar.setGroupchartsLS(provisionalCalendarTableOfficeDTO.getGroupchartsLS());
 		provisionalCalendar.setGroupchartsRS(provisionalCalendarTableOfficeDTO.getGroupchartsRS());
@@ -397,18 +417,20 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		provisionalCalendar.setDateOfInputTableOffice(provisionalCalendarTableOfficeDTO.getDateOfInputTableOffice());
 		provisionalCalendar.setInputTextTableOffice(provisionalCalendarTableOfficeDTO.getInputTextTableOffice());
 		provisionalCalendar.setGeneratedFlag(provisionalCalendarTableOfficeDTO.getGeneratedFlag());
-
+		//adding new line for date update
+		// provisionalCalendar.setDateOfInput(provisionalCalendarTableOfficeDTO.getDateOfInputTableOffice());
+		provisionalCalendar.setDocumentDate(provisionalCalendarTableOfficeDTO.getDateOfInputTableOffice());
 		// changes on 07-01-2025
 		provisionalCalendar.setApplicationId(provisionalCalendarTableOfficeDTO.getApplicationId());
-		provisionalCalendar.setApplicationNo(applicationNo.getId());
-		// provisionalCalendar.setCurrentStatus("In Progress");
 		// 07-01-2025 ends here
-
-		// provisionalCalendar.setRefId(provisionalCalendarTableOfficeDTO.getId());
 		// Save the updated entity
-
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
-
+		//Input instance status and date update
+		System.out.println(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId());
+		// InputInstance inputInstance=inputInstanceRepository
+		// .getReferenceById(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId());
+		// inputInstance.setDocumentDate(provisionalCalendar.getDateOfInput());
+		// inputInstance.setCurrentStatus(provisionalCalendar.getStatus());
 		// Map the updated entity back to a DTO
 		// Map the updated entity back to a ProvisionalCalendarTableOfficeDTO
 		return ProvisionalCalendarTableOfficeDTO.builder().id(updatedProvisionalCalendar.getId())
@@ -423,7 +445,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.generatedFlag(updatedProvisionalCalendar.getGeneratedFlag())
 				.provisionalCalendarInputId(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId()).build();
 	}
-
 	// Mapper() in service
 	private ProvisionalCalendarDTO mapToDto(ProvisionalCalendar provisionalCalendar) {
 
@@ -461,7 +482,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.applicationId(provisionalCalendar.getApplicationId())
 						.applicationNo(provisionalCalendar.getApplicationNo())
 						.currentStatus(provisionalCalendar.getCurrentStatus())
-						.documentDate(provisionalCalendar.getDateOfInput().toLocalDate())
+						.documentDate(provisionalCalendar.getDateOfInput())
 						.lokSabhaSession(provisionalCalendar.getLokSabhaSession())
 						.lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
 						.rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
@@ -591,9 +612,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 			// Add filters dynamically
 			if (startDate != null && endDate != null) {
-				LocalDateTime startDateTime = startDate.atStartOfDay();
-				LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
-				predicate = cb.and(predicate, cb.between(root.get("dateOfInput"), startDateTime, endDateTime));
+				// LocalDate startDateTime = startDate.atStartOfDay();
+				// LocalDate endDateTime = endDate
+				// .atTime(23, 59, 59);
+				predicate = cb.and(predicate, cb.between(root.get("dateOfInput"), startDate, endDate));
 			}
 			// if (inputStatus != null && !inputStatus.trim().isEmpty()) {
 			// predicate = cb.and(predicate, cb.equal(root.get("inputStatus"),
@@ -701,7 +723,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.applicationId(provisionalCalendar.getApplicationId())
 						.applicationNo(provisionalCalendar.getApplicationNo())
 						.currentStatus(provisionalCalendar.getCurrentStatus())
-						.documentDate(provisionalCalendar.getDateOfInput().toLocalDate())
+						.documentDate(provisionalCalendar.getDateOfInput())
 						.lokSabhaSession(provisionalCalendar.getLokSabhaSession())
 						.lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
 						.rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())

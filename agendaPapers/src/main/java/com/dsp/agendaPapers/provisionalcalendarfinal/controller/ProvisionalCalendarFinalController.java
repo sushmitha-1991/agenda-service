@@ -105,7 +105,6 @@ public class ProvisionalCalendarFinalController {
 		return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
 				"Provisional Calendar updated successfully", updatedCalendar, HttpStatus.OK.value()));
 	}
-
 	/**
 	 * Soft delete a Provisional Calendar entry.
 	 */

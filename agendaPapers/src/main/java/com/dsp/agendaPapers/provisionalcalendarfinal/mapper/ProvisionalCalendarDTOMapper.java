@@ -49,7 +49,7 @@ public class ProvisionalCalendarDTOMapper {
         .lokSabhaSession(dto.getLokSabhaSession())
         .rajyaSabhaSession(dto.getRajyaSabhaSession())
         .applicationId(dto.getApplicationId())
-        .documentDate(dto.getDateOfInput().toLocalDate())
+        .documentDate(dto.getDateOfInput())
     
         .build();
   }

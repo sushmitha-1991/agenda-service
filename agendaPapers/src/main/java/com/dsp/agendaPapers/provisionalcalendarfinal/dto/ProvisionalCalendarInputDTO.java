@@ -20,7 +20,7 @@ public class ProvisionalCalendarInputDTO {
 
     private Long id;
     //changes by sushmitha
-    private LocalDateTime dateOfInput;
+    private LocalDate dateOfInput;
     private String language;
     private String submittedBy;
     private String submittedByBranch;
