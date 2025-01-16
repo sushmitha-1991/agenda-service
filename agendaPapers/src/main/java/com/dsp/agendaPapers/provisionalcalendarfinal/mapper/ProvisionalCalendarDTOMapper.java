@@ -49,7 +49,6 @@ public class ProvisionalCalendarDTOMapper {
         .lokSabhaSession(dto.getLokSabhaSession())
         .rajyaSabhaSession(dto.getRajyaSabhaSession())
         .applicationId(dto.getApplicationId())
-        .documentDate(dto.getDateOfInput())
     
         .build();
   }
@@ -97,7 +96,6 @@ public class ProvisionalCalendarDTOMapper {
         .lokSabhaSession(entity.getLokSabhaSession())
         .rajyaSabhaSession(entity.getRajyaSabhaSession())
         .applicationId(entity.getApplicationId())
-        
         .applicationInstanceDTO(ApplicationInstanceDTO.builder()
             .id(entity.getId())
             .applicationNo(entity.getApplicationNo())
