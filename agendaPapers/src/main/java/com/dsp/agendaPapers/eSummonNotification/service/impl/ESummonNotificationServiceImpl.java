@@ -61,8 +61,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 	@Autowired
 	private RestTemplate restTemplate;
-	@Value("${master.service.url}")
-	private String masterServiceUrl;
+	
 	@Autowired
 	private MastersRSSRepository mastersRSSRepository;
 
@@ -98,14 +97,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(eSummonNotificationDTO.getApplicationId());
-
 		if (houseId == 1) {
 			serialNumberRequest.setSessionId(mastersRSSRepository.findLatestByCreatedBy());
-
 		} else if (houseId == 2) {
 			serialNumberRequest.setSessionId(masterLSSRepository.findLatestByCreatedBy());
 		}
-		System.out.println("##############        Application no generation");
+		//changes are need to be done according to LS and RS
+		System.out.println("##############  Application no generation");
 		// SerialNumberResponse applicationNo=generateApplicationNo(serialNumberRequest);
 		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
 		System.out.println(applicationNo);
@@ -239,39 +237,39 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 		}
 	}
 
-	public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
-		String url = masterServiceUrl + "/serial-number";
+	// public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
+	// 	String url = masterServiceUrl + "/serial-number";
 
-		SerialNumberResponse res = new SerialNumberResponse();
-		try {
-			// RestTemplate restTemplate = new RestTemplate();
-			// return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
-			System.out.println("@@@@@@@@@@");
-			ResponseEntity<GenericResponse<SerialNumberResponse>> response = restTemplate.exchange(url,
-					HttpMethod.POST, new HttpEntity<>(request),
-					new ParameterizedTypeReference<GenericResponse<SerialNumberResponse>>() {
-					});
-			System.out.println(response);
-			System.out.println("applicationNo");
-			SerialNumberResponse applicationNo = response.getBody().getData();
-			System.out.println(applicationNo);
-			// return savedInstance;
-			return res;
-		} catch (Exception e) {
-			System.err.println("Error during API call: " + e.getMessage());
-			throw e;
-		}
-	}
+	// 	SerialNumberResponse res = new SerialNumberResponse();
+	// 	try {
+	// 		// RestTemplate restTemplate = new RestTemplate();
+	// 		// return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
+	// 		System.out.println("@@@@@@@@@@");
+	// 		ResponseEntity<GenericResponse<SerialNumberResponse>> response = restTemplate.exchange(url,
+	// 				HttpMethod.POST, new HttpEntity<>(request),
+	// 				new ParameterizedTypeReference<GenericResponse<SerialNumberResponse>>() {
+	// 				});
+	// 		System.out.println(response);
+	// 		System.out.println("applicationNo");
+	// 		SerialNumberResponse applicationNo = response.getBody().getData();
+	// 		System.out.println(applicationNo);
+	// 		// return savedInstance;
+	// 		return res;
+	// 	} catch (Exception e) {
+	// 		System.err.println("Error during API call: " + e.getMessage());
+	// 		throw e;
+	// 	}
+	// }
 
-	private String generateApplicationNo(String lokSabhaNo, String sessionNo, String rajyaSabhaSessionNo, Long id) {
-		if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
-			return "ES-LS" + "-" + lokSabhaNo + "-" + sessionNo + "-" + id;
-		} else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
-			return "ES-RS" + "-" + rajyaSabhaSessionNo + "-" + id;
-		} else {
-			throw new IllegalArgumentException("Insufficient data to generate application number");
-		}
-	}
+	// private String generateApplicationNo(String lokSabhaNo, String sessionNo, String rajyaSabhaSessionNo, Long id) {
+	// 	if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
+	// 		return "ES-LS" + "-" + lokSabhaNo + "-" + sessionNo + "-" + id;
+	// 	} else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
+	// 		return "ES-RS" + "-" + rajyaSabhaSessionNo + "-" + id;
+	// 	} else {
+	// 		throw new IllegalArgumentException("Insufficient data to generate application number");
+	// 	}
+	// }
 
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
 		String url = applicationInstanceServiceUrl + "/create";

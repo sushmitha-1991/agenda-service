@@ -24,18 +24,30 @@ import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
 import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
+import com.dsp.agendaPapers.entity.MastersLokSabhaSession;
+import com.dsp.agendaPapers.entity.MastersRajyaSabha;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
 import com.dsp.agendaPapers.prorogationnotice.Dto.ProrogationNoticeDTO;
 import com.dsp.agendaPapers.prorogationnotice.entity.ProrogationNotice;
 import com.dsp.agendaPapers.prorogationnotice.mapper.ProrogationNoticeMapper;
 import com.dsp.agendaPapers.prorogationnotice.repository.ProrogationNoticeRepository;
 import com.dsp.agendaPapers.prorogationnotice.service.ProrogationNoticeService;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberRequest;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberResponse;
+import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
+import com.dsp.agendaPapers.repository.MasterLSSRepository;
+import com.dsp.agendaPapers.repository.MastersRSSRepository;
 import com.dsp.agendaPapers.response.GenericResponse;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 
 @Service
 public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 
+	@Autowired
+	private MastersRSSRepository mastersRSSRepository;
+
+	@Autowired
+	private MasterLSSRepository masterLSSRepository;
 	@Autowired
 	private ProrogationNoticeRepository prorogationNoticeRepository;
 
@@ -47,7 +59,8 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 
 	@Value("${application.instance.service.url}")
 	private String applicationInstanceServiceUrl;
-
+	@Autowired
+	private BearerClient bearerClient;
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -70,28 +83,35 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 		if (principal instanceof UserDetailsDTO) {
 			houseId = ((UserDetailsDTO) principal).getHouseId();
 		}
+		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
+		serialNumberRequest.setAppId(prorogationNoticeDTO.getApplicationId());
 		try {
 			if (houseId == 1) {
 				prorogationNoticeDTO.setLokSabhaNo("");
 				prorogationNoticeDTO.setLokSabhaSessionNo("");
+				serialNumberRequest.setSessionId(Long.parseLong(prorogationNoticeDTO.getRajyaSabhaSessionNo()));
+
 			} else if (houseId == 2) {
 				prorogationNoticeDTO.setRajyaSabhaSessionNo("");
+				serialNumberRequest.setSessionId(Long.parseLong(prorogationNoticeDTO.getLokSabhaSessionNo()));
 			}
 			// Convert DTO to entity
+			SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+			System.out.println(applicationNo);
 			ProrogationNotice prorogationNotice = prorogationNoticeMapper.toEntity(prorogationNoticeDTO);
 			log.debug("Converted ProrogationNoticeDTO to entity: {}", prorogationNotice);
-
+			prorogationNotice.setApplicationNo(applicationNo.getId());
 			// Save ProrogationNotice entity first to generate the ID
 			ProrogationNotice savedNotice = prorogationNoticeRepository.save(prorogationNotice);
 			log.debug("First save - Generated ProrogationNotice ID: {}", savedNotice.getId());
 
 			// Generate Application Number using the generated ID
-			String applicationNo = generateApplicationNo(
-					prorogationNoticeDTO.getLokSabhaNo(),
-					prorogationNoticeDTO.getLokSabhaSessionNo(),
-					prorogationNoticeDTO.getRajyaSabhaSessionNo(),
-					savedNotice.getId());
-			savedNotice.setApplicationNo(applicationNo);
+			// String applicationNo = generateApplicationNo(
+			// prorogationNoticeDTO.getLokSabhaNo(),
+			// prorogationNoticeDTO.getLokSabhaSessionNo(),
+			// prorogationNoticeDTO.getRajyaSabhaSessionNo(),
+			// savedNotice.getId());
+			// savedNotice.setApplicationNo(applicationNo);
 			log.debug("Generated Application No: {}", applicationNo);
 
 			// Save ProrogationNotice again with the updated applicationNo
@@ -107,11 +127,23 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 					.documentDate(savedNotice.getIssuanceDate())
 					.publishedDocumentUrl(prorogationNoticeDTO.getPublishedDocumentUrl()) // Optional from frontend
 					.refId(savedNotice.getId())
-					.lokSabhaSession(prorogationNoticeDTO.getLokSabhaNo())
-					.lokSabhaSessionNumber(prorogationNoticeDTO.getLokSabhaSessionNo())
-					.rajyaSabhaSession(prorogationNoticeDTO.getRajyaSabhaSessionNo())
+					// .lokSabhaSession(prorogationNoticeDTO.getLokSabhaNo())
+					// .lokSabhaSessionNumber(prorogationNoticeDTO.getLokSabhaSessionNo())
+					// .rajyaSabhaSession(prorogationNoticeDTO.getRajyaSabhaSessionNo())
 					// Use ProrogationNotice's ID as refId
 					.build();
+			if (houseId == 1) {
+				MastersRajyaSabha session = mastersRSSRepository
+						.findById(serialNumberRequest.getSessionId()).get();
+				applicationInstanceDTO.setRajyaSabhaSession(session.getSessionNumber());
+			}
+			if (houseId == 2) {
+				MastersLokSabhaSession session = masterLSSRepository
+						.findById(serialNumberRequest.getSessionId()).get();
+				applicationInstanceDTO.setLokSabhaSessionNumber(session.getSessionNumber());
+				applicationInstanceDTO.setLokSabhaSession(session.getLokSabha().getLokSabhaNumber());
+			}
+
 			System.out.println("aaaaaaaaaaaaaaaaaaaa");
 			System.out.println(applicationInstanceDTO);
 			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
