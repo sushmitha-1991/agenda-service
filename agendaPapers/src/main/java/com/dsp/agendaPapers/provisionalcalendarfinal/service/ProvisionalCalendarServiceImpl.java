@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.dsp.agendaPapers.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
+import com.dsp.agendaPapers.entity.BaseUser;
 import com.dsp.agendaPapers.entity.MastersLokSabhaSession;
 import com.dsp.agendaPapers.entity.MastersRajyaSabha;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
@@ -42,6 +43,7 @@ import com.dsp.agendaPapers.provisionalcalendarfinal.repository.ProvisionalCalen
 import com.dsp.agendaPapers.repository.ApplicationInstanceRepository;
 import com.dsp.agendaPapers.repository.MasterLSSRepository;
 import com.dsp.agendaPapers.repository.MastersRSSRepository;
+import com.dsp.agendaPapers.repository.MyUserRepository;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
@@ -65,7 +67,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 	@Autowired
 	private MasterLSSRepository masterLSSRepository;
-
+	@Autowired
+	private MyUserRepository userRepository;
 	@PersistenceContext
 	private EntityManager entityManager;
 
@@ -185,7 +188,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			}
 		}
 
-		existingEntity.setCurrentStatus(existingEntity.getStatus());
+		existingEntity.setCurrentStatus(existingEntity.getInputStatus());
 		existingEntity.setDocumentDate(existingEntity.getDateOfInput());
 
 		// return provisionalCalendarRepository.findById(id).map(existingEntity -> {
@@ -226,6 +229,23 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// changes for status update by sushmitha
 		InputInstance instanceUpdate = inputInstanceRepository.findByRefId(existingEntity.getId()).get();
 		instanceUpdate.setCurrentStatus(provisionalCalendarDTO.getInputStatus());
+		Long houseId = null;
+		// String houseAbbr = "";
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (principal instanceof UserDetailsDTO) 
+		{
+			houseId = ((UserDetailsDTO) principal).getHouseId();
+			// houseAbbr = ((UserDetailsDTO) principal).getHouseAbbr();
+		}
+		if(houseId==1)
+		{
+		instanceUpdate.setPendingAt("Legislative Section");
+		}
+		if(houseId==2)
+		{
+			instanceUpdate.setPendingAt("Table Office A");
+
+		}
 		instanceUpdate = inputInstanceRepository.save(instanceUpdate);
 		// ends here
 		return mapToDto(updatedEntity);
@@ -364,6 +384,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		if (principal instanceof UserDetailsDTO) {
 			houseId = ((UserDetailsDTO) principal).getHouseId();
 		}
+		
+		
 		// Check if provisionalCalendarInputId exists
 		Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository
 				.findById(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId());
@@ -403,12 +425,18 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 		// Input instance status and date update
 
-		// InputInstance inputInstance=inputInstanceRepository
-		// .getReferenceById(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId());
-		// inputInstance.setDocumentDate(provisionalCalendar.getDateOfInput());
-		// inputInstance.setCurrentStatus(provisionalCalendar.getStatus());
-		// Map the updated entity back to a DTO
-		// Map the updated entity back to a ProvisionalCalendarTableOfficeDTO
+		InputInstance inputInstance=
+		inputInstanceRepository.findByRefId(updatedProvisionalCalendar.getId()).get();
+		if(houseId==1)
+		{
+			inputInstance.setPendingAt("Legislative Section");
+		}
+		if(houseId==2)
+		{
+			inputInstance.setPendingAt("Table Office A");
+		}
+		inputInstance=inputInstanceRepository.save(inputInstance);
+
 		return ProvisionalCalendarTableOfficeDTO.builder().id(updatedProvisionalCalendar.getId())
 				.groupchartsLS(updatedProvisionalCalendar.getGroupchartsLS())
 				.groupchartsRS(updatedProvisionalCalendar.getGroupchartsRS())
@@ -533,13 +561,12 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	public ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus, String remarks) {
 		// Find the ProvisionalCalendar entity by ID
 		Optional<ProvisionalCalendar> optionalEntity = provisionalCalendarRepository.findById(id);
-
+		String statusLowerCase=inputStatus.toLowerCase();
+		
 		if (optionalEntity.isPresent()) {
 			ProvisionalCalendar existingEntity = optionalEntity.get();
-
 			// Update input status
 			existingEntity.setInputStatus(inputStatus);
-
 			// Ensure remarks is never null. Set it to an empty string if null.
 			if (remarks == null) {
 				remarks = ""; // Or set a default value, like "No remarks provided"
@@ -552,6 +579,16 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			// changes done by sushmitha
 			InputInstance existingInstance = inputInstanceRepository.findByRefId(updatedEntity.getId()).get();
 			existingInstance.setCurrentStatus(existingEntity.getInputStatus());
+			System.out.println("@@@@@@@@@@");
+			System.out.println(statusLowerCase);
+			if(statusLowerCase.contains("return"));
+			{
+			System.out.println("status return changing pending at");
+			System.out.println(statusLowerCase);
+			System.out.println(existingInstance.getPendingAt());
+			BaseUser user=userRepository.findById(existingInstance.getCreatedBy()).get();
+			existingInstance.setPendingAt(user.getFirstName()+" "+user.getLastName());
+			}
 			existingInstance = inputInstanceRepository.save(existingInstance);
 
 			// changes ends here
