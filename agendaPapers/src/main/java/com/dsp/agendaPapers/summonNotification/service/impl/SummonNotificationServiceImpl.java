@@ -99,7 +99,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			summonNotificationDTO.setRajyasabhaSessionNo("");
 		}
 
-		if (summonNotificationDTO.getApplicationNo() == null) {
+		if (StringUtils.isBlank(summonNotificationDTO.getApplicationNo())) {
 			// Fetch a new application number
 			SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
 			if (applicationNo != null && applicationNo.getId() != null) {
@@ -107,11 +107,12 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			} else {
 				throw new ExternalServiceException("Failed to generate application number");
 			}
-		} else {
-			// If the application number is provided, ensure it is used
-			SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
-			summonNotificationDTO.setApplicationNo(applicationNo.getId());
-		}
+		} 
+		// else {
+		// 	// If the application number is provided, ensure it is used
+		// 	// SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+		// 	summonNotificationDTO.setApplicationNo(applicationNo.getId());
+		// }
 
 		try {
 			// Convert DTO to entity
