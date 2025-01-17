@@ -1,12 +1,11 @@
 package com.dsp.agendaPapers.summonNotification.service.impl;
 
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,6 @@ import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
 import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
-import com.dsp.agendaPapers.entity.MastersLokSabha;
 import com.dsp.agendaPapers.entity.MastersLokSabhaSession;
 import com.dsp.agendaPapers.entity.MastersRajyaSabha;
 import com.dsp.agendaPapers.exception.ExternalServiceException;
@@ -92,8 +90,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(summonNotificationDTO.getApplicationId());
 		if (houseId == 1) {
-			serialNumberRequest.setSessionId(Long
-					.parseLong(summonNotificationDTO.getRajyasabhaSessionNo()));
+			serialNumberRequest.setSessionId(Long.parseLong(summonNotificationDTO.getRajyasabhaSessionNo()));
 			summonNotificationDTO.setLokSabhaNo("");
 			summonNotificationDTO.setSessionNo("");
 		}
@@ -101,9 +98,21 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			serialNumberRequest.setSessionId(Long.parseLong(summonNotificationDTO.getSessionNo()));
 			summonNotificationDTO.setRajyasabhaSessionNo("");
 		}
-		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
-		System.out.println(applicationNo);
-		summonNotificationDTO.setApplicationNo(applicationNo.getId());
+
+		if (summonNotificationDTO.getApplicationNo() == null) {
+			// Fetch a new application number
+			SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+			if (applicationNo != null && applicationNo.getId() != null) {
+				summonNotificationDTO.setApplicationNo(applicationNo.getId());
+			} else {
+				throw new ExternalServiceException("Failed to generate application number");
+			}
+		} else {
+			// If the application number is provided, ensure it is used
+			SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+			summonNotificationDTO.setApplicationNo(applicationNo.getId());
+		}
+
 		try {
 			// Convert DTO to entity
 			SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
@@ -111,7 +120,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			// Save SummonNotification entity first to generate the ID
 			SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
 			log.debug("First save - Generated SummonNotification ID: {}", savedNotification.getId());
-			log.debug("Generated Application No: {}", applicationNo);
 			// Save SummonNotification again with the updated applicationNo
 			savedNotification = summonNotificationRepository.save(savedNotification);
 			log.debug("Saved SummonNotification entity with updated Application No: {}", savedNotification);
@@ -131,13 +139,11 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 					.build();
 
 			if (houseId == 1) {
-				MastersRajyaSabha session = mastersRSSRepository
-						.findById(serialNumberRequest.getSessionId()).get();
+				MastersRajyaSabha session = mastersRSSRepository.findById(serialNumberRequest.getSessionId()).get();
 				applicationInstanceDTO.setRajyaSabhaSession(session.getSessionNumber());
 			}
 			if (houseId == 2) {
-				MastersLokSabhaSession session = masterLSSRepository
-						.findById(serialNumberRequest.getSessionId()).get();
+				MastersLokSabhaSession session = masterLSSRepository.findById(serialNumberRequest.getSessionId()).get();
 				applicationInstanceDTO.setLokSabhaSessionNumber(session.getSessionNumber());
 				applicationInstanceDTO.setLokSabhaSession(session.getLokSabha().getLokSabhaNumber());
 			}
@@ -157,12 +163,10 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			// Create ApplicationPapersDTO and save template content from SummonNotification
 			ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
 					.applicationId(summonNotificationDTO.getApplicationId())
-					.applicationInstanceId(applicationInstanceId)
-					.templateId(summonNotificationDTO.getTemplateId())
+					.applicationInstanceId(applicationInstanceId).templateId(summonNotificationDTO.getTemplateId())
 					.templateContent(summonNotificationDTO.getTemplateContent())
 					.templateHindiId(summonNotificationDTO.getTemplateHindiId())
-					.templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
-					.build();
+					.templateContentHindi(summonNotificationDTO.getTemplateContentHindi()).build();
 			log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
 			// Save ApplicationPapers data
 			applicationPapersService.saveApplicationPapers(applicationPapersDTO);
