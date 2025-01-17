@@ -419,18 +419,20 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// changes on 07-01-2025
 		provisionalCalendar.setApplicationId(provisionalCalendarTableOfficeDTO.getApplicationId());
 		// 07-01-2025 ends here
-
+		provisionalCalendar.setInputStatus("In Progress");
 		// Save the updated entity
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 		// Input instance status and date update
 
 		InputInstance inputInstance = inputInstanceRepository.findByRefId(updatedProvisionalCalendar.getId()).get();
+		inputInstance.setCurrentStatus(updatedProvisionalCalendar.getInputStatus());
 		if (houseId == 1) {
 			inputInstance.setPendingAt("Legislative Section");
 		}
 		if (houseId == 2) {
 			inputInstance.setPendingAt("Table Office A");
 		}
+	
 		inputInstance = inputInstanceRepository.save(inputInstance);
 
 		return ProvisionalCalendarTableOfficeDTO.builder().id(updatedProvisionalCalendar.getId())
@@ -577,6 +579,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
 			// changes done by sushmitha
 			InputInstance existingInstance = inputInstanceRepository.findByRefId(updatedEntity.getId()).get();
+			
 			existingInstance.setCurrentStatus(existingEntity.getInputStatus());
 			if (inputStatus.equalsIgnoreCase("returned"))
 			{
@@ -591,7 +594,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			throw new RuntimeException("ProvisionalCalendar not found with id " + id);
 		}
 	}
-
 	private ProvisionalCalendarInputDTO mapToInputDto(ProvisionalCalendar entity) {
 		return ProvisionalCalendarInputDTO.builder().id(entity.getId()).inputStatus(entity.getInputStatus())
 				.remarks(entity.getRemarks())
@@ -663,6 +665,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			}
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
 
+				
 				if (houseId == 1) {
 					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
@@ -682,9 +685,19 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				} else if (houseId == 2) {
 					if (provisionalCalendar.getLokSabhaSessionNo() != null) {
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
+						// Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
+						// if (!instance.isEmpty()) {
+						// 	dto.setInputInstanceDTO(InputInstanceMapper.toDTO(instance.get()));
+						// }
 						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
+
 						if (!instance.isEmpty()) {
-							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(instance.get()));
+							InputInstance inputInstance = instance.get();
+							if (inputInstance.getApplicationInstanceId() != null) {
+								dto.setInputStatus(provisionalCalendar.getCurrentStatus());
+								inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+							}
+							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
 						}
 						response.add(dto);
 					}
