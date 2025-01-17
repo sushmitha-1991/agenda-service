@@ -1,12 +1,11 @@
 package com.dsp.agendaPapers.summonNotification.service.impl;
 
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,16 +86,27 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 			// Save SummonNotification entity first to generate the ID
 			SummonNotification savedNotification = summonNotificationRepository.save(summonNotification);
+
 			log.debug("First save - Generated SummonNotification ID: {}", savedNotification.getId());
 
-			// Generate Application Number using the generated ID
-			String applicationNo = generateApplicationNo(
-					summonNotificationDTO.getLokSabhaNo(),
-					summonNotificationDTO.getSessionNo(),
-					summonNotificationDTO.getRajyasabhaSessionNo(),
-					savedNotification.getId());
-			savedNotification.setApplicationNo(applicationNo);
-			log.debug("Generated Application No: {}", applicationNo);
+			// Check if applicationNo is null in the payload
+			if (summonNotificationDTO.getApplicationNo() == null) {
+				log.debug("ApplicationNo is null in the payload. Generating a new Application No.");
+
+				// Generate Application Number using the generated ID
+				String applicationNo = generateApplicationNo(summonNotificationDTO.getLokSabhaNo(),
+						summonNotificationDTO.getSessionNo(), summonNotificationDTO.getRajyasabhaSessionNo(),
+						savedNotification.getId());
+				savedNotification.setApplicationNo(applicationNo);
+				log.debug("Generated Application No: {}", applicationNo);
+				System.out.println("### applicationNo - " + applicationNo);
+			} else {
+				// Use the applicationNo provided in the payload
+				System.out.println("### applicationNo - " + summonNotificationDTO.getApplicationNo());
+				savedNotification.setApplicationNo(summonNotificationDTO.getApplicationNo());
+				log.debug("ApplicationNo found in the payload. Setting it directly: {}",
+						summonNotificationDTO.getApplicationNo());
+			}
 
 			// Save SummonNotification again with the updated applicationNo
 			savedNotification = summonNotificationRepository.save(savedNotification);
@@ -137,12 +147,10 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 				// Create ApplicationPapersDTO and save template content from SummonNotification
 				ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
 						.applicationId(summonNotificationDTO.getApplicationId())
-						.applicationInstanceId(applicationInstanceId)
-						.templateId(summonNotificationDTO.getTemplateId())
+						.applicationInstanceId(applicationInstanceId).templateId(summonNotificationDTO.getTemplateId())
 						.templateContent(summonNotificationDTO.getTemplateContent())
 						.templateHindiId(summonNotificationDTO.getTemplateHindiId())
-						.templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
-						.build();
+						.templateContentHindi(summonNotificationDTO.getTemplateContentHindi()).build();
 				log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
 				// Save ApplicationPapers data
 				applicationPapersService.saveApplicationPapers(applicationPapersDTO);
@@ -183,12 +191,10 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 				// Create ApplicationPapersDTO and save template content from SummonNotification
 				ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
 						.applicationId(summonNotificationDTO.getApplicationId())
-						.applicationInstanceId(applicationInstanceId)
-						.templateId(summonNotificationDTO.getTemplateId())
+						.applicationInstanceId(applicationInstanceId).templateId(summonNotificationDTO.getTemplateId())
 						.templateContent(summonNotificationDTO.getTemplateContent())
 						.templateHindiId(summonNotificationDTO.getTemplateHindiId())
-						.templateContentHindi(summonNotificationDTO.getTemplateContentHindi())
-						.build();
+						.templateContentHindi(summonNotificationDTO.getTemplateContentHindi()).build();
 				log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
 
 				// Save ApplicationPapers data
@@ -344,9 +350,9 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			List<SummonNotificationDTO> responseList = new ArrayList<>();
 			for (SummonNotification notification : summonNotifications) {
 				if (houseId == 1) {
-					
-					if (StringUtils.isBlank(notification.getSessionNo())){
-					// !(notification.getSessionNo().isBlank())) {
+
+					if (StringUtils.isBlank(notification.getSessionNo())) {
+						// !(notification.getSessionNo().isBlank())) {
 						SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								notification.getApplicationNo());
