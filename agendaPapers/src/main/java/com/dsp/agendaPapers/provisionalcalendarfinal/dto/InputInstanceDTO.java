@@ -24,4 +24,6 @@ public class InputInstanceDTO {
 	private String lokSabhaSession;
 	private String lokSabhaSessionNumber;
 	private String rajyaSabhaSession;
+	private Long applicationInstanceId;
+
 }
