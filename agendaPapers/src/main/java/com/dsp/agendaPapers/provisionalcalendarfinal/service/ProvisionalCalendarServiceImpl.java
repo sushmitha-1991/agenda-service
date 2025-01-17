@@ -542,8 +542,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// Save the updated entity
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 
+
 		InputInstance inputInstance = inputInstanceRepository
-				.getReferenceById(updatedProvisionalCalendar.getId());
+				.findByRefId(updatedProvisionalCalendar.getId()).get();
+				
 		inputInstance.setApplicationInstanceId(updatedProvisionalCalendar.getId());
 		inputInstance=inputInstanceRepository.save(inputInstance);
 
