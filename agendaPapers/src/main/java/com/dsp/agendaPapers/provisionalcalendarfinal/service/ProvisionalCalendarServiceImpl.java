@@ -562,9 +562,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	public ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus, String remarks) {
 		// Find the ProvisionalCalendar entity by ID
 		Optional<ProvisionalCalendar> optionalEntity = provisionalCalendarRepository.findById(id);
-		String statusLowerCase = inputStatus.toLowerCase();
 
-		if (optionalEntity.isPresent()) {
+		if (optionalEntity.isPresent())
+		{
 			ProvisionalCalendar existingEntity = optionalEntity.get();
 			// Update input status
 			existingEntity.setInputStatus(inputStatus);
@@ -573,24 +573,18 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				remarks = ""; // Or set a default value, like "No remarks provided"
 			}
 			existingEntity.setRemarks(remarks);
-
 			// Save the updated entity back to the repository
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
-
 			// changes done by sushmitha
 			InputInstance existingInstance = inputInstanceRepository.findByRefId(updatedEntity.getId()).get();
 			existingInstance.setCurrentStatus(existingEntity.getInputStatus());
-
-			if (statusLowerCase.contains("return"))
-				;
+			if (inputStatus.equalsIgnoreCase("returned"))
 			{
 				BaseUser user = userRepository.findById(existingInstance.getCreatedBy()).get();
 				existingInstance.setPendingAt(user.getFirstName() + " " + user.getLastName());
 			}
 			existingInstance = inputInstanceRepository.save(existingInstance);
-
 			// changes ends here
-
 			// Map the updated entity to DTO and return
 			return mapToInputDto(updatedEntity);
 		} else {
