@@ -105,7 +105,6 @@ public class ProvisionalCalendarFinalController {
 		return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
 				"Provisional Calendar updated successfully", updatedCalendar, HttpStatus.OK.value()));
 	}
-
 	/**
 	 * Soft delete a Provisional Calendar entry.
 	 */
@@ -129,12 +128,10 @@ public class ProvisionalCalendarFinalController {
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> createProvisionalCalendarInput(
 			@Valid @RequestBody ProvisionalCalendarInputDTO inputDTO) {
-		System.out.println("before saving Input with input instance");
-		System.out.println(inputDTO);
+		
 
 		ProvisionalCalendarInputDTO createdInput = provisionalCalendarService.createProvisionalCalendarInput(inputDTO);
-		System.out.println("created Input with input instance");
-		System.out.println(createdInput);
+		
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
 				"Provisional Calendar Input created successfully", createdInput, HttpStatus.CREATED.value()));
 	}

@@ -22,7 +22,7 @@ public class ProvisionalCalendarDTO {
     private Long id;
     // private Date dateOfInput;
 // changes by Sushmitha
-    private LocalDateTime dateOfInput;
+    private LocalDate dateOfInput;
     private String language;
     private String submittedBy;
     private String submittedByBranch;
@@ -41,7 +41,7 @@ public class ProvisionalCalendarDTO {
     private String listOfDocumentTableOfficeNote;
     private List<Map<String, Object>> dateOfSittingInputsTableOffice;
     //Changes by Sushmitha
-    private LocalDateTime dateOfInputTableOffice;
+    private LocalDate dateOfInputTableOffice;
     // private Date dateOfInputTableOffice;
     private String inputTextTableOffice;
     private String rajyaSabhaSessionNo;

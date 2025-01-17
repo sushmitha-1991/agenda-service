@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.provisionalcalendarfinal.repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -51,20 +52,20 @@ public interface ProvisionalCalendarRepository extends JpaRepository<Provisional
 
 	List<ProvisionalCalendar> findByInputStatus(String inputStatus);
 
-	List<ProvisionalCalendar> findByDateOfInputBetween(LocalDateTime startDate, LocalDateTime endDate);
+	List<ProvisionalCalendar> findByDateOfInputBetween(LocalDate startDate, LocalDate endDate);
 
 	@Query("SELECT p FROM ProvisionalCalendar p WHERE (:inputStatus IS NULL OR p.inputStatus = :inputStatus) AND p.dateOfInput BETWEEN :startDate AND :endDate")
 	List<ProvisionalCalendar> findByInputStatusAndDateOfInputBetween(@Param("inputStatus") String inputStatus,
-			@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 	List<ProvisionalCalendar> findByInputStatusAndSubmittedBy(String inputStatus, String submittedBy);
 
 	List<ProvisionalCalendar> findBySubmittedBy(String submittedBy);
 
-	List<ProvisionalCalendar> findBySubmittedByAndDateOfInputBetween(String submittedBy, LocalDateTime startDate,
-			LocalDateTime endDate);
+	List<ProvisionalCalendar> findBySubmittedByAndDateOfInputBetween(String submittedBy, LocalDate startDate,
+			LocalDate endDate);
 
 	List<ProvisionalCalendar> findByInputStatusAndSubmittedByAndDateOfInputBetween(String inputStatus,
-			String submittedBy, LocalDateTime startDate, LocalDateTime endDate);
+			String submittedBy, LocalDate startDate, LocalDate endDate);
 
 }

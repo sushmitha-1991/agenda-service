@@ -25,7 +25,9 @@ public class ProvisionalCalendarTableOfficeDTO {
     private String listOfDocumentTableOfficeNote;
     private List<Map<String, Object>> dateOfSittingInputsTableOffice;
     //Changes by Sushmitha
-    private LocalDateTime dateOfInputTableOffice;
+    private LocalDate dateOfInputTableOffice;
+    // private LocalDateTime dateOfInputTableOffice;
+
     // private java.util.Date dateOfInputTableOffice;
     private String inputTextTableOffice;
     private Boolean generatedFlag;
