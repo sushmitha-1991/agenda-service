@@ -1,20 +1,12 @@
 package com.dsp.agendaPapers.provisionalcalendarfinal.service;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.lang.reflect.Field;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,7 +25,6 @@ import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarTabl
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberRequest;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberResponse;
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.InputInstance;
-//import com.dsp.agendaPapers.provisionalcalendarfinal.dto.ProvisionalCalendarGenerateDTO;
 import com.dsp.agendaPapers.provisionalcalendarfinal.entity.ProvisionalCalendar;
 import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
 import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.InputInstanceMapper;
@@ -45,7 +36,13 @@ import com.dsp.agendaPapers.repository.MasterLSSRepository;
 import com.dsp.agendaPapers.repository.MastersRSSRepository;
 import com.dsp.agendaPapers.repository.MyUserRepository;
 
-import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -98,7 +95,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.generatedFlag(provisionalCalendarDTO.getGeneratedFlag())
 				.content(provisionalCalendarDTO.getContent())
 				.inputStatus(provisionalCalendarDTO.getInputStatus()).remarks(provisionalCalendarDTO.getRemarks())
-
 				// application instance
 				.id(provisionalCalendarDTO.getId()).applicationNo(provisionalCalendarDTO.getApplicationNo())
 				.currentStatus(provisionalCalendarDTO.getCurrentStatus())
@@ -111,7 +107,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.documentDate(provisionalCalendarDTO.getDateOfInput())
 				// .otherInfo((Map<String, Object>) questionbranchInputDTO.getOtherInfo())
 				.applicationId(provisionalCalendarDTO.getApplicationId()).draft(false).build();
-
 		ProvisionalCalendar savedEntity = provisionalCalendarRepository.save(provisionalCalendar);
 		savedEntity.setRefId(savedEntity.getId());
 		savedEntity = provisionalCalendarRepository.save(savedEntity);
@@ -432,7 +427,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		if (houseId == 2) {
 			inputInstance.setPendingAt("Table Office A");
 		}
-	
+
 		inputInstance = inputInstanceRepository.save(inputInstance);
 
 		return ProvisionalCalendarTableOfficeDTO.builder().id(updatedProvisionalCalendar.getId())
@@ -544,12 +539,11 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// Save the updated entity
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 
-
 		InputInstance inputInstance = inputInstanceRepository
 				.findByRefId(updatedProvisionalCalendar.getId()).get();
-				
+
 		inputInstance.setApplicationInstanceId(updatedProvisionalCalendar.getId());
-		inputInstance=inputInstanceRepository.save(inputInstance);
+		inputInstance = inputInstanceRepository.save(inputInstance);
 
 		// Map the updated entity back to a ProvisionalCalendarGenerateDTO
 		return ProvisionalCalendarGenerateDTO.builder().id(updatedProvisionalCalendar.getId())
@@ -565,8 +559,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// Find the ProvisionalCalendar entity by ID
 		Optional<ProvisionalCalendar> optionalEntity = provisionalCalendarRepository.findById(id);
 
-		if (optionalEntity.isPresent())
-		{
+		if (optionalEntity.isPresent()) {
 			ProvisionalCalendar existingEntity = optionalEntity.get();
 			// Update input status
 			existingEntity.setInputStatus(inputStatus);
@@ -579,10 +572,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
 			// changes done by sushmitha
 			InputInstance existingInstance = inputInstanceRepository.findByRefId(updatedEntity.getId()).get();
-			
+
 			existingInstance.setCurrentStatus(existingEntity.getInputStatus());
-			if (inputStatus.equalsIgnoreCase("returned"))
-			{
+			if (inputStatus.equalsIgnoreCase("returned")) {
 				BaseUser user = userRepository.findById(existingInstance.getCreatedBy()).get();
 				existingInstance.setPendingAt(user.getFirstName() + " " + user.getLastName());
 			}
@@ -594,6 +586,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			throw new RuntimeException("ProvisionalCalendar not found with id " + id);
 		}
 	}
+
 	private ProvisionalCalendarInputDTO mapToInputDto(ProvisionalCalendar entity) {
 		return ProvisionalCalendarInputDTO.builder().id(entity.getId()).inputStatus(entity.getInputStatus())
 				.remarks(entity.getRemarks())
@@ -665,7 +658,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			}
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
 
-				
 				if (houseId == 1) {
 					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
@@ -675,9 +667,17 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						if (!instance.isEmpty()) {
 							InputInstance inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
+								if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
+									BaseUser user = userRepository.findById(inputInstance.getCreatedBy()).get();
+									inputInstance.setPendingAt(user.getFirstName() + " " + user.getLastName());
+								}
 								dto.setInputStatus(provisionalCalendar.getCurrentStatus());
 								inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+								inputInstance = inputInstanceRepository.save(inputInstance);
+								inputInstance = inputInstanceRepository.findById(inputInstance.getId()).get();
 							}
+							System.out.println("@@@@@@@@@@");
+							System.out.println(inputInstance);
 							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
 						}
 						response.add(dto);
@@ -685,9 +685,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				} else if (houseId == 2) {
 					if (provisionalCalendar.getLokSabhaSessionNo() != null) {
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
-						// Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
+						// Optional<InputInstance> instance =
+						// inputInstanceRepository.findByRefId(dto.getId());
 						// if (!instance.isEmpty()) {
-						// 	dto.setInputInstanceDTO(InputInstanceMapper.toDTO(instance.get()));
+						// dto.setInputInstanceDTO(InputInstanceMapper.toDTO(instance.get()));
 						// }
 						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
 
