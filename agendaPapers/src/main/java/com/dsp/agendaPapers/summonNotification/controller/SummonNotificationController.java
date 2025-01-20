@@ -29,7 +29,7 @@ public class SummonNotificationController {
 	@Autowired
 	private SummonNotificationService summonNotificationService;
 
-	@Operation(summary = "Create a new SummonNotification", description = "Creates a new SummonNotification and returns the created SummonNotification details.")
+	@Operation(summary = "Create a new Summon Notification", description = "Creates a new Summon Notification and returns the created Summon Notification details.")
 	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "SummonNotification created successfully"),
 			@ApiResponse(responseCode = "400", description = "Invalid input, object invalid"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
@@ -39,11 +39,11 @@ public class SummonNotificationController {
 		SummonNotificationDTO savedNotification = summonNotificationService
 				.saveSummonNotification(summonNotificationDTO);
 		GenericResponse<SummonNotificationDTO> response = new GenericResponse<>(true,
-				"SummonNotification created successfully", savedNotification, HttpStatus.CREATED.value());
+				"Summon Notification created successfully", savedNotification, HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-	@Operation(summary = "Get all summonNotification", description = "Retrieves a list of all Summon Notification.")
+	@Operation(summary = "Get all Summon Notification", description = "Retrieves a list of all Summon Notification.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Summon Notification retrieved successfully"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
@@ -51,13 +51,13 @@ public class SummonNotificationController {
 	public ResponseEntity<GenericResponse<List<SummonNotificationDTO>>> getAllSummonNotifications() {
 		List<SummonNotificationDTO> summonNotificationDTOs = summonNotificationService.getAllSummonNotifications();
 		GenericResponse<List<SummonNotificationDTO>> response = new GenericResponse<>(true,
-				"Summon notifications retrieved successfully", summonNotificationDTOs, HttpStatus.OK.value());
+				"Summon Notifications retrieved successfully", summonNotificationDTOs, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@Operation(summary = "Get summonNotification By SessionNo", description = "Retrieve all summonNotification By its SessionNo.")
+	@Operation(summary = "Get Summon Notification By SessionNo", description = "Retrieve all Summon Notification By its SessionNo.")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "SummonNotification retrieved successfully"),
+			@ApiResponse(responseCode = "200", description = "Summon Notification retrieved successfully"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@GetMapping("/get/sessionNo/{sessionNo}")
 	public ResponseEntity<GenericResponse<List<SummonNotificationDTO>>> getAllSummonNotificationBySessionNo(@PathVariable String sessionNo) {
@@ -68,9 +68,9 @@ public class SummonNotificationController {
 	}
 	
 
-	@Operation(summary = "Get summonNotification By Id", description = "Retrieve all summonNotification By its Id.")
+	@Operation(summary = "Get Summon Notification By Id", description = "Retrieve all Summon Notification By its Id.")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "SummonNotification retrieved successfully"),
+			@ApiResponse(responseCode = "200", description = "Summon Notification retrieved successfully"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@GetMapping("/get/{id}")
 	public ResponseEntity<GenericResponse<SummonNotificationDTO>> getSummonNotificationById(@PathVariable Long id) {
@@ -80,7 +80,7 @@ public class SummonNotificationController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@Operation(summary = "Update summonNotification", description = "Updates a Summon Notification by its ID.")
+	@Operation(summary = "Update Summon Notification", description = "Updates a Summon Notification by its ID.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Summon Notification updated successfully"),
 			@ApiResponse(responseCode = "404", description = "Summon Notification not found"),
@@ -95,14 +95,14 @@ public class SummonNotificationController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@Operation(summary = "Delete a summonNotification by ID", description = "Deletes a specific summonNotification by its ID.")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "SummonNotification deleted successfully"),
+	@Operation(summary = "Delete a Summon Notification by ID", description = "Deletes a specific summonNotification by its ID.")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Summon Notification deleted successfully"),
 			@ApiResponse(responseCode = "404", description = "SummonNotification not found"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<GenericResponse<String>> deleteSummonNotification(@PathVariable Long id) {
 		summonNotificationService.deleteSummonNotification(id);
-		GenericResponse<String> response = new GenericResponse<>(true, "SummonNotification deleted successfully", null,
+		GenericResponse<String> response = new GenericResponse<>(true, "Summon Notification deleted successfully", null,
 				HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}

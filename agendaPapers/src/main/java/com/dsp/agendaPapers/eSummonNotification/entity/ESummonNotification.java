@@ -72,7 +72,6 @@ public class ESummonNotification extends Auditable {
 	@Column(name = "template_type")
 	private String templateType;
 
-
 	@Column(name = "draft_status")
 	private Boolean draftStatus = false;
 	
