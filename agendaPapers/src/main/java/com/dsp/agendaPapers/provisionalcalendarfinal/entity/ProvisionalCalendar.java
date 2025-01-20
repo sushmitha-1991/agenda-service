@@ -46,10 +46,10 @@ public class ProvisionalCalendar extends ApplicationInstance {
         @Column(name = "subject", length = 128)
         private String subject;
 
-        @Column(name = "input_text", length = 4096)
+        @Column(name = "input_text", columnDefinition = "TEXT")
         private String inputText;
 
-        @Column(name = "footnote_text", length = 512)
+        @Column(name = "footnote_text", columnDefinition="TEXT")
         private String footnoteText;
 
         @Column(name = "approver_name", length = 128)

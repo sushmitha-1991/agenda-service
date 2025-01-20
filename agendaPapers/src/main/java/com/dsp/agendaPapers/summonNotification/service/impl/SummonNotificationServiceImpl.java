@@ -107,11 +107,12 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			} else {
 				throw new ExternalServiceException("Failed to generate application number");
 			}
-		} 
+		}
 		// else {
-		// 	// If the application number is provided, ensure it is used
-		// 	// SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
-		// 	summonNotificationDTO.setApplicationNo(applicationNo.getId());
+		// // If the application number is provided, ensure it is used
+		// // SerialNumberResponse applicationNo =
+		// bearerClient.getResource(serialNumberRequest);
+		// summonNotificationDTO.setApplicationNo(applicationNo.getId());
 		// }
 
 		try {
@@ -255,14 +256,12 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			List<SummonNotificationDTO> responseList = new ArrayList<>();
 			for (SummonNotification notification : summonNotifications) {
 				if (houseId == 1) {
-
 					if (StringUtils.isBlank(notification.getSessionNo())) {
 						// !(notification.getSessionNo().isBlank())) {
 						SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
 						ApplicationInstanceDTO instanceDTO = fetchApplicationInstanceData(
 								notification.getApplicationNo());
 						dto.setApplicationInstanceDTO(instanceDTO);
-
 						if (instanceDTO != null && instanceDTO.getId() != null) {
 							applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
 									.ifPresent(applicationPapers -> {
@@ -270,7 +269,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 										dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
 									});
 						}
-
 						responseList.add(dto);
 					}
 				} else if (houseId == 2) {
@@ -289,22 +287,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 						responseList.add(dto);
 					}
 				}
-				// SummonNotificationDTO dto = summonNotificationMapper.toDTO(notification);
-				// ApplicationInstanceDTO instanceDTO =
-				// fetchApplicationInstanceData(notification.getApplicationNo());
-				// dto.setApplicationInstanceDTO(instanceDTO);
-
-				// if (instanceDTO != null && instanceDTO.getId() != null) {
-				// applicationPapersRepository.findByApplicationInstanceId(instanceDTO.getId())
-				// .ifPresent(applicationPapers -> {
-				// dto.setTemplateId(applicationPapers.getTemplateId());
-				// dto.setTemplateHindiId(applicationPapers.getTemplateHindiId());
-				// });
-				// }
-
-				// responseList.add(dto);
 			}
-
 			log.debug("Returning all SummonNotificationDTOs with ApplicationInstanceDTOs: {}", responseList);
 			return responseList;
 		} catch (Exception e) {
@@ -350,26 +333,24 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			throw new RuntimeException("Failed to retrieve SummonNotification by ID", e);
 		}
 	}
-
 	private ApplicationInstanceDTO fetchApplicationInstanceData(String applicationNo) {
 		String url = applicationInstanceServiceUrl + "/getApplicationNo/" + applicationNo;
+		
 		log.debug("Fetching ApplicationInstance by applicationNo from URL: {}", url);
-
 		try {
+
 			ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(url,
 					HttpMethod.GET, null, new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
 					});
-
 			if (response == null || response.getBody() == null || response.getBody().getData() == null) {
 				log.error("Response or body is null when fetching ApplicationInstance for applicationNo: {}",
 						applicationNo);
 				throw new RuntimeException("Failed to fetch ApplicationInstance, response is null");
 			}
-
+			
 			ApplicationInstanceDTO instanceDTO = response.getBody().getData();
 			log.debug("Fetched ApplicationInstanceDTO: {}", instanceDTO);
 			return instanceDTO;
-
 		} catch (ResourceNotFoundException e) {
 			log.error("Resource not found for applicationNo: {}", applicationNo);
 			throw e; // Re-throw the exception for further handling
