@@ -80,7 +80,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	@Transactional
 	@Override
 	public SummonNotificationDTO saveSummonNotification(SummonNotificationDTO summonNotificationDTO) {
-		log.debug("Entering saveSummonNotification with SummonNotificationDTO: {}", summonNotificationDTO);
+		log.debug("Entering save Summon Notification with SummonNotificationDTO: {}", summonNotificationDTO);
 
 		Long houseId = null;
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -183,8 +183,8 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			log.error("Resource not found during saveSummonNotification: {}", e.getMessage());
 			throw e; // Re-throw the exception for further handling
 		} catch (Exception e) {
-			log.error("Error in saveSummonNotification: ", e);
-			throw new RuntimeException("Failed to save SummonNotification", e);
+			log.error("Error in save Summon Notification: ", e);
+			throw new RuntimeException("Failed to save Summon Notification", e);
 		}
 	}
 
@@ -247,7 +247,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 		try {
 			List<SummonNotification> summonNotifications = summonNotificationRepository.findAll();
-			log.debug("Fetched all SummonNotifications from database: {}", summonNotifications);
+			log.debug("Fetched all Summon Notifications from database: {}", summonNotifications);
 			Long houseId = null;
 			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			if (principal instanceof UserDetailsDTO) {
@@ -292,7 +292,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			return responseList;
 		} catch (Exception e) {
 			log.error("Error in getAllSummonNotifications: ", e);
-			throw new RuntimeException("Failed to retrieve SummonNotifications", e);
+			throw new RuntimeException("Failed to retrieve Summon Notifications", e);
 		}
 	}
 
@@ -304,7 +304,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			// Find the SummonNotification entity by ID or throw an exception if not found
 			SummonNotification summonNotification = summonNotificationRepository.findById(id).orElseThrow(() -> {
 				log.error("SummonNotification not found with ID: {}", id);
-				return new ResourceNotFoundException("SummonNotification not found with id: " + id);
+				return new ResourceNotFoundException("Summon Notification not found with id: " + id);
 			});
 
 			// Convert the SummonNotification entity to a DTO
@@ -326,11 +326,11 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			return summonNotificationDTO;
 
 		} catch (ResourceNotFoundException e) {
-			log.error("Resource not found when retrieving SummonNotification: {}", e.getMessage());
+			log.error("Resource not found when retrieving Summon Notification: {}", e.getMessage());
 			throw e; // Re-throw the exception for further handling
 		} catch (Exception e) {
 			log.error("Error in getSummonNotificationById: ", e);
-			throw new RuntimeException("Failed to retrieve SummonNotification by ID", e);
+			throw new RuntimeException("Failed to retrieve Summon Notification by ID", e);
 		}
 	}
 	private ApplicationInstanceDTO fetchApplicationInstanceData(String applicationNo) {
