@@ -224,7 +224,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// existingEntity.setRefId(provisionalCalendarDTO.getId());
 
 		ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
-
 		// changes for status update by sushmitha
 		InputInstance instanceUpdate = inputInstanceRepository.findByRefId(existingEntity.getId()).get();
 		instanceUpdate.setCurrentStatus(provisionalCalendarDTO.getInputStatus());
@@ -353,6 +352,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getApplicationNo())
 				.refId(savedEntity.getRefId()).documentDate(savedEntity.getDateOfInput())
 				.currentStatus(savedEntity.getInputStatus())
+				.lokSabhaSession(savedEntity.getLokSabhaSession())
+				.lokSabhaSessionNumber(savedEntity.getLokSabhaSessionNumber())
 				.rajyaSabhaSession(savedEntity.getRajyaSabhaSession())
 				.build();
 		if (houseId == 1) {
@@ -360,7 +361,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		} else if (houseId == 2) {
 			inputInstanceEntity.setPendingAt("Table Office A");
 		}
-		inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
 		inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
 		responceDTO.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstanceEntity));
 		// Ends Here
