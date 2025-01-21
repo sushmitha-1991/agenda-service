@@ -119,24 +119,22 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	public ProvisionalCalendarDTO getProvisionalCalendarById(Long id) {
 		ProvisionalCalendar provisionalCalendar = provisionalCalendarRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("ProvisionalCalendar not found with id " + id));
-
 		ProvisionalCalendarDTO responseDTO = mapToDto(provisionalCalendar);
 		try {
-			// InputInstanceDTO responseDTO = inputInstanceRepository
-			// .findByRefId(singleDTO.getId())
-			// .map(InputInstanceMapper::toDTO)
-			// .orElse(null);
 			InputInstance entity = inputInstanceRepository.findByRefId(responseDTO.getId())
 					.orElseThrow(() -> new Exception("InputInstance not found for refId: " + responseDTO.getId()));
-
 			if (entity.getApplicationInstanceId() != null) {
-				responseDTO.setInputStatus(provisionalCalendar.getCurrentStatus());
-				entity.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+				if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
+					if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
+						entity.setPendingAt(null);
+					}
+					responseDTO.setInputStatus(provisionalCalendar.getCurrentStatus());
+					entity.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+				}
 			}
 			InputInstanceDTO dto = InputInstanceMapper.toDTO(entity);
 			responseDTO.setInputInstanceDTO(dto);
 		} catch (Exception e) {
-
 			System.out.println("Input Instance Not found for PC");
 			e.printStackTrace();
 		}
@@ -445,16 +443,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 	// Mapper() in service
 	private ProvisionalCalendarDTO mapToDto(ProvisionalCalendar provisionalCalendar) {
-
-		// SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
-		// serialNumberRequest.setAppId(provisionalCalendar.getApplicationId());
-		// serialNumberRequest.setSessionId(2l);
-		// // serialNumberRequest.setSessionId(1l);
-		//
-		// SerialNumberResponse applicationNo =
-		// bearerClient.getResource(serialNumberRequest);
-		// System.out.println(applicationNo.getId());
-		// provisionalCalendar.setApplicationNo(applicationNo.getId());
 		return ProvisionalCalendarDTO.builder().id(provisionalCalendar.getId())
 				.dateOfInput(provisionalCalendar.getDateOfInput()).language(provisionalCalendar.getLanguage())
 				.submittedBy(provisionalCalendar.getSubmittedBy())
@@ -617,14 +605,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				// .atTime(23, 59, 59);
 				predicate = cb.and(predicate, cb.between(root.get("dateOfInput"), startDate, endDate));
 			}
-			// if (inputStatus != null && !inputStatus.trim().isEmpty()) {
-			// predicate = cb.and(predicate, cb.equal(root.get("inputStatus"),
-			// inputStatus));
-			// }
-			// if (submittedBy != null && !submittedBy.trim().isEmpty()) {
-			// predicate = cb.and(predicate, cb.equal(root.get("submittedBy"), "%" +
-			// submittedBy + "%"));
-			// }
 
 			if (inputStatus != null && !inputStatus.trim().isEmpty()) {
 				predicate = cb.and(predicate,
@@ -667,17 +647,16 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						if (!instance.isEmpty()) {
 							InputInstance inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
-								if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
-									BaseUser user = userRepository.findById(inputInstance.getCreatedBy()).get();
-									inputInstance.setPendingAt(user.getFirstName() + " " + user.getLastName());
+								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
+									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
+										inputInstance.setPendingAt(null);
+									}
+									dto.setInputStatus(provisionalCalendar.getCurrentStatus());
+									inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+									inputInstance = inputInstanceRepository.save(inputInstance);
+									inputInstance = inputInstanceRepository.findById(inputInstance.getId()).get();
 								}
-								dto.setInputStatus(provisionalCalendar.getCurrentStatus());
-								inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
-								inputInstance = inputInstanceRepository.save(inputInstance);
-								inputInstance = inputInstanceRepository.findById(inputInstance.getId()).get();
 							}
-							System.out.println("@@@@@@@@@@");
-							System.out.println(inputInstance);
 							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
 						}
 						response.add(dto);
