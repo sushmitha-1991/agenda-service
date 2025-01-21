@@ -27,8 +27,8 @@ public class ProvisionalCalendarDTOMapper {
         .listOfDocumentTableOfficeFootnote(dto.getListOfDocumentTableOfficeFootnote())
         .listOfDocumentTableOfficeNote(dto.getListOfDocumentTableOfficeNote())
         .dateOfInputTableOffice(dto.getDateOfInputTableOffice())
-        .inputText(dto.getInputTextTableOffice())
-            .dateOfSittingInputsTableOffice(dto.getDateOfSittingInputsTableOffice())
+        .inputTextTableOffice(dto.getInputTextTableOffice())
+        .dateOfSittingInputsTableOffice(dto.getDateOfSittingInputsTableOffice())
         .generatedFlag(dto.getGeneratedFlag())
         .content(dto.getContent())
         // adding the new field input status
