@@ -130,6 +130,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					}
 					responseDTO.setInputStatus(provisionalCalendar.getCurrentStatus());
 					entity.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+					System.out.println("entity");
+					entity=inputInstanceRepository.save(entity);
 				}
 			}
 			InputInstanceDTO dto = InputInstanceMapper.toDTO(entity);
