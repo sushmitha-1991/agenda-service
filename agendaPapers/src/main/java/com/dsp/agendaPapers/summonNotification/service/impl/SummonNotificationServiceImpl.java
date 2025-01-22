@@ -89,7 +89,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	@Override
 	public SummonNotificationDTO saveSummonNotification(SummonNotificationDTO summonNotificationDTO) {
 		log.debug("Entering save Summon Notification with SummonNotificationDTO: {}", summonNotificationDTO);
-
 		Long houseId = null;
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (principal instanceof UserDetailsDTO) {
@@ -117,7 +116,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 		}
 
 		try {
-			System.out.println("### AppNo - " + summonNotificationDTO.getApplicationNo());
 
 			// Convert DTO to entity
 			SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
@@ -174,9 +172,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 					.templateContentHindi(summonNotificationDTO.getTemplateContentHindi()).build();
 			log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
 			// Save ApplicationPapers data
-			System.out.println("### AppNo - " + summonNotificationDTO.getApplicationNo());
 			applicationPapersService.saveApplicationPapers(applicationPapersDTO);
-			System.out.println("### AppNo - " + summonNotificationDTO.getApplicationNo());
 
 			log.debug("Saved ApplicationPapers data.");
 			// Convert saved entity back to DTO
@@ -184,17 +180,15 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			responseDTO.setTemplateId(summonNotificationDTO.getTemplateId());
 			responseDTO.setTemplateHindiId(summonNotificationDTO.getTemplateHindiId());
 
-			if (summonNotificationDTO.getApplicationNo() != null) {
+			if (!StringUtils.isBlank(summonNotificationDTO.getApplicationNo())) {
 				// Get the Draft ID from draft table using appNo
 				Long draftId = documentRepository.getIdByApplicationNo(summonNotificationDTO.getApplicationNo());
 				if (draftId == null) {
 					throw new IllegalArgumentException(
 							"Draft not found for applicationNo: " + summonNotificationDTO.getApplicationNo());
 				}
-				System.out.println("### draftId - " + draftId);
 				// Delete the record from workflow history using draft id
-				// historyRepository.deleteByDraftId(draftId);
-
+				historyRepository.deleteByDraftId(draftId);
 				// soft delete from draft document table also
 				documentRepository.softDeleteById(draftId);
 			}
