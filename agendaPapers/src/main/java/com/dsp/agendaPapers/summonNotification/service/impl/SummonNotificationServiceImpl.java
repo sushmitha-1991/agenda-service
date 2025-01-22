@@ -183,14 +183,14 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			if (!StringUtils.isBlank(summonNotificationDTO.getApplicationNo())) {
 				// Get the Draft ID from draft table using appNo
 				Long draftId = documentRepository.getIdByApplicationNo(summonNotificationDTO.getApplicationNo());
-				if (draftId == null) {
-					throw new IllegalArgumentException(
-							"Draft not found for applicationNo: " + summonNotificationDTO.getApplicationNo());
+				if (draftId != null) {
+					// throw new IllegalArgumentException(
+					// "Draft not found for applicationNo: " +
+					// Delete the record from workflow history using draft id
+					historyRepository.deleteByDraftId(draftId);
+					// soft delete from draft document table also
+					documentRepository.softDeleteById(draftId);
 				}
-				// Delete the record from workflow history using draft id
-				historyRepository.deleteByDraftId(draftId);
-				// soft delete from draft document table also
-				documentRepository.softDeleteById(draftId);
 			}
 
 			log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
