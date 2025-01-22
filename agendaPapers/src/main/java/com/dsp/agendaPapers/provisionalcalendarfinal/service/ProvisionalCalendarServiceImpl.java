@@ -126,7 +126,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					.orElseThrow(() -> new Exception("InputInstance not found for refId: " + responseDTO.getId()));
 			if (entity.getApplicationInstanceId() != null) {
 				if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
-					if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
+					if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")
+					|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")) {
 						entity.setPendingAt(null);
 					}
 					responseDTO.setInputStatus(provisionalCalendar.getCurrentStatus());
@@ -650,7 +651,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 							InputInstance inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
 								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
-									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
+									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
+									 || provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) 
+									{
 										inputInstance.setPendingAt(null);
 									}
 									dto.setInputStatus(provisionalCalendar.getCurrentStatus());
