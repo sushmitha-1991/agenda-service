@@ -36,6 +36,7 @@ import com.dsp.agendaPapers.repository.MasterLSSRepository;
 import com.dsp.agendaPapers.repository.MastersRSSRepository;
 import com.dsp.agendaPapers.repository.MyUserRepository;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -131,7 +132,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					responseDTO.setInputStatus(provisionalCalendar.getCurrentStatus());
 					entity.setCurrentStatus(provisionalCalendar.getCurrentStatus());
 					System.out.println("entity");
-					entity=inputInstanceRepository.save(entity);
+					entity = inputInstanceRepository.save(entity);
 				}
 			}
 			InputInstanceDTO dto = InputInstanceMapper.toDTO(entity);
@@ -490,27 +491,25 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		if (principal instanceof UserDetailsDTO) {
 			houseId = ((UserDetailsDTO) principal).getHouseId();
 		}
-
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(provisionalCalendarGenerateDTO.getApplicationId());
-
 		if (houseId == 1) {
 			serialNumberRequest.setSessionId(provisionalCalendarGenerateDTO.getRssNo());
-
 		} else if (houseId == 2) {
 			serialNumberRequest.setSessionId(provisionalCalendarGenerateDTO.getLssNo());
 		}
-		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+		if (StringUtils.isBlank(provisionalCalendarGenerateDTO.getApplicationNo())) {
+			SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+			provisionalCalendarGenerateDTO.setApplicationNo(applicationNo.getId());
+		}
 		// changes ends here
 		// Check if ProvisionalCalendar with the given ID exists
 		Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository
 				.findById(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId());
-
 		if (optionalProvisionalCalendar.isEmpty()) {
 			throw new ResourceNotFoundException("ProvisionalCalendar with ID "
 					+ provisionalCalendarGenerateDTO.getProvisionalCalendarInputId() + " not found");
 		}
-
 		// Retrieve the existing ProvisionalCalendar entity
 		ProvisionalCalendar provisionalCalendar = optionalProvisionalCalendar.get();
 
@@ -519,9 +518,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		provisionalCalendar.setStatus(provisionalCalendarGenerateDTO.getStatus());
 		provisionalCalendar.setCurrentStatus(provisionalCalendarGenerateDTO.getStatus());
 		provisionalCalendar.setApplicationId(provisionalCalendarGenerateDTO.getApplicationId());
-
+		provisionalCalendar.setApplicationNo(provisionalCalendarGenerateDTO.getApplicationNo());
 		// changes on 07-01-2025
-		provisionalCalendar.setApplicationNo(applicationNo.getId());
+
 		// ends here
 		// changes for generated flag
 		provisionalCalendar.setGeneratedFlag(true);
@@ -539,7 +538,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		return ProvisionalCalendarGenerateDTO.builder().id(updatedProvisionalCalendar.getId())
 				.content(updatedProvisionalCalendar.getContent()).status(updatedProvisionalCalendar.getStatus())
 				.provisionalCalendarInputId(provisionalCalendarGenerateDTO.getProvisionalCalendarInputId())
-				.applicationId(provisionalCalendarGenerateDTO.getApplicationId()).build();
+				.applicationId(provisionalCalendarGenerateDTO.getApplicationId())
+				.applicationNo(updatedProvisionalCalendar.getApplicationNo()).build();
 	}
 
 	// update for the input status and remarks testing
@@ -657,7 +657,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 									inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
 									System.out.println("input instance");
 									inputInstance = inputInstanceRepository.save(inputInstance);
-									// inputInstance = inputInstanceRepository.findById(inputInstance.getId()).get();
+									// inputInstance =
+									// inputInstanceRepository.findById(inputInstance.getId()).get();
 								}
 							}
 							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));

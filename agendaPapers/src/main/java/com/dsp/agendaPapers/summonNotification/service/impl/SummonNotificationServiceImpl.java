@@ -98,7 +98,6 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			serialNumberRequest.setSessionId(Long.parseLong(summonNotificationDTO.getSessionNo()));
 			summonNotificationDTO.setRajyasabhaSessionNo("");
 		}
-
 		if (StringUtils.isBlank(summonNotificationDTO.getApplicationNo())) {
 			// Fetch a new application number
 			SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);

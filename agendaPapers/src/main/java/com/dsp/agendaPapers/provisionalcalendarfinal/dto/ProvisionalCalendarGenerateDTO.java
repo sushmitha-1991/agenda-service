@@ -20,4 +20,6 @@ public class ProvisionalCalendarGenerateDTO {
 	private Long lssNo;
 	private Long rssNo;
 
+	private String applicationNo;
+
 }
