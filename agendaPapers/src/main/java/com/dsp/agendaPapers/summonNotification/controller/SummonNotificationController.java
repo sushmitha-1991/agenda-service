@@ -54,19 +54,20 @@ public class SummonNotificationController {
 				"Summon Notifications retrieved successfully", summonNotificationDTOs, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-	
+
 	@Operation(summary = "Get Summon Notification By SessionNo", description = "Retrieve all Summon Notification By its SessionNo.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Summon Notification retrieved successfully"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@GetMapping("/get/sessionNo/{sessionNo}")
-	public ResponseEntity<GenericResponse<List<SummonNotificationDTO>>> getAllSummonNotificationBySessionNo(@PathVariable String sessionNo) {
-		List<SummonNotificationDTO> summonNotificationDTO = summonNotificationService.getAllSummonNotificationBySessionNo(sessionNo);
+	public ResponseEntity<GenericResponse<List<SummonNotificationDTO>>> getAllSummonNotificationBySessionNo(
+			@PathVariable String sessionNo) {
+		List<SummonNotificationDTO> summonNotificationDTO = summonNotificationService
+				.getAllSummonNotificationBySessionNo(sessionNo);
 		GenericResponse<List<SummonNotificationDTO>> response = new GenericResponse<>(true,
 				"Summon notifications retrieved successfully", summonNotificationDTO, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-	
 
 	@Operation(summary = "Get Summon Notification By Id", description = "Retrieve all Summon Notification By its Id.")
 	@ApiResponses(value = {
@@ -96,7 +97,8 @@ public class SummonNotificationController {
 	}
 
 	@Operation(summary = "Delete a Summon Notification by ID", description = "Deletes a specific summonNotification by its ID.")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Summon Notification deleted successfully"),
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Summon Notification deleted successfully"),
 			@ApiResponse(responseCode = "404", description = "SummonNotification not found"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@DeleteMapping("/delete/{id}")

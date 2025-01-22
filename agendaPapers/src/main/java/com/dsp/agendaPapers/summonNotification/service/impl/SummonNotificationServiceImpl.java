@@ -35,8 +35,10 @@ import com.dsp.agendaPapers.mapper.SummonNotificationMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberRequest;
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberResponse;
 import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
+import com.dsp.agendaPapers.repository.DraftDocumentRepository;
 import com.dsp.agendaPapers.repository.MasterLSSRepository;
 import com.dsp.agendaPapers.repository.MastersRSSRepository;
+import com.dsp.agendaPapers.repository.WorkflowHistoryRepository;
 import com.dsp.agendaPapers.response.GenericResponse;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
@@ -74,6 +76,12 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 	@Autowired
 	private ApplicationPapersRepository applicationPapersRepository;
 
+	@Autowired
+	private WorkflowHistoryRepository historyRepository;
+
+	@Autowired
+	private DraftDocumentRepository documentRepository;
+
 	@Value("${template.service.url}") // URL to validate template ID
 	private String templateServiceUrl;
 
@@ -107,14 +115,10 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 				throw new ExternalServiceException("Failed to generate application number");
 			}
 		}
-		// else {
-		// // If the application number is provided, ensure it is used
-		// // SerialNumberResponse applicationNo =
-		// bearerClient.getResource(serialNumberRequest);
-		// summonNotificationDTO.setApplicationNo(applicationNo.getId());
-		// }
 
 		try {
+			System.out.println("### AppNo - " + summonNotificationDTO.getApplicationNo());
+
 			// Convert DTO to entity
 			SummonNotification summonNotification = summonNotificationMapper.toEntity(summonNotificationDTO);
 			log.debug("Converted SummonNotificationDTO to entity: {}", summonNotification);
@@ -170,12 +174,31 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 					.templateContentHindi(summonNotificationDTO.getTemplateContentHindi()).build();
 			log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
 			// Save ApplicationPapers data
+			System.out.println("### AppNo - " + summonNotificationDTO.getApplicationNo());
 			applicationPapersService.saveApplicationPapers(applicationPapersDTO);
+			System.out.println("### AppNo - " + summonNotificationDTO.getApplicationNo());
+
 			log.debug("Saved ApplicationPapers data.");
 			// Convert saved entity back to DTO
 			responseDTO.setApplicationInstanceDTO(savedInstanceDTO);
 			responseDTO.setTemplateId(summonNotificationDTO.getTemplateId());
 			responseDTO.setTemplateHindiId(summonNotificationDTO.getTemplateHindiId());
+
+			if (summonNotificationDTO.getApplicationNo() != null) {
+				// Get the Draft ID from draft table using appNo
+				Long draftId = documentRepository.getIdByApplicationNo(summonNotificationDTO.getApplicationNo());
+				if (draftId == null) {
+					throw new IllegalArgumentException(
+							"Draft not found for applicationNo: " + summonNotificationDTO.getApplicationNo());
+				}
+				System.out.println("### draftId - " + draftId);
+				// Delete the record from workflow history using draft id
+				// historyRepository.deleteByDraftId(draftId);
+
+				// soft delete from draft document table also
+				documentRepository.softDeleteById(draftId);
+			}
+
 			log.debug("Returning SummonNotificationDTO with ApplicationInstanceDTO and Template ID: {}", responseDTO);
 			return responseDTO;
 		} catch (ResourceNotFoundException e) {
@@ -332,9 +355,10 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			throw new RuntimeException("Failed to retrieve Summon Notification by ID", e);
 		}
 	}
+
 	private ApplicationInstanceDTO fetchApplicationInstanceData(String applicationNo) {
 		String url = applicationInstanceServiceUrl + "/getApplicationNo/" + applicationNo;
-		
+
 		log.debug("Fetching ApplicationInstance by applicationNo from URL: {}", url);
 		try {
 
@@ -346,7 +370,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 						applicationNo);
 				throw new RuntimeException("Failed to fetch ApplicationInstance, response is null");
 			}
-			
+
 			ApplicationInstanceDTO instanceDTO = response.getBody().getData();
 			log.debug("Fetched ApplicationInstanceDTO: {}", instanceDTO);
 			return instanceDTO;
