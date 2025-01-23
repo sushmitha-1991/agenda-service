@@ -644,24 +644,27 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				houseId = ((UserDetailsDTO) principal).getHouseId();
 			}
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
+				
+				provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
+				if (!(provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
+						|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft"))) {
+					if (provisionalCalendar.getGeneratedFlag()!=null && 
+					provisionalCalendar.getGeneratedFlag())
+						provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
+				}
+				provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 
 				if (houseId == 1) {
 					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
-						provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
-						if (!(provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
-								|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft"))) {
-							if (provisionalCalendar.getGeneratedFlag())
-								provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
-						}
-						provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
 						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
 
 						if (!instance.isEmpty()) {
 							InputInstance inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
-								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
+								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
+								|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft") ) {
 									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
 											|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
 										inputInstance.setPendingAt(null);
@@ -680,12 +683,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					}
 				} else if (houseId == 2) {
 					if (provisionalCalendar.getLokSabhaSessionNo() != null) {
+
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
-						// Optional<InputInstance> instance =
-						// inputInstanceRepository.findByRefId(dto.getId());
-						// if (!instance.isEmpty()) {
-						// dto.setInputInstanceDTO(InputInstanceMapper.toDTO(instance.get()));
-						// }
+
 						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
 
 						if (!instance.isEmpty()) {
@@ -700,22 +700,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					}
 				}
 			}
-			// for (ProvisionalCalendarDTO singleDTO : response) {
-			// try {
-			// InputInstanceDTO responseDTO =
-			// inputInstanceRepository.findByRefId(singleDTO.getId())
-			// .map(InputInstanceMapper::toDTO)
-			// .orElseThrow(
-			// () -> new Exception("InputInstance not found for refId: " +
-			// singleDTO.getId()));
-			// singleDTO.setInputInstanceDTO(responseDTO);
-			// } catch (Exception e) {
-			// System.err
-			// .println("Input Instance not found for Provisional Calendar with ID: " +
-			// singleDTO.getId());
-			// e.printStackTrace();
-			// }
-			// }
+		
 		} catch (Exception ex) {
 			// Log and rethrow the exception for debugging
 			System.err.println("Error occurred while fetching Provisional Calendar entries: " + ex.getMessage());
