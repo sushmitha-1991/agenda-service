@@ -115,22 +115,28 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	}
 
 	// getById ProvisionalCalender
-
 	@Override
 	public ProvisionalCalendarDTO getProvisionalCalendarById(Long id) {
 		ProvisionalCalendar provisionalCalendar = provisionalCalendarRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("ProvisionalCalendar not found with id " + id));
+		provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
+		if (!(provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
+				|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft"))) {
+			if (provisionalCalendar.getGeneratedFlag())
+				provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
+		}
+		provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 		ProvisionalCalendarDTO responseDTO = mapToDto(provisionalCalendar);
 		try {
 			InputInstance entity = inputInstanceRepository.findByRefId(responseDTO.getId())
 					.orElseThrow(() -> new Exception("InputInstance not found for refId: " + responseDTO.getId()));
 			if (entity.getApplicationInstanceId() != null) {
-				if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
+				if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
+						|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
 					if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")
-					|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")) {
+							|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")) {
 						entity.setPendingAt(null);
 					}
-					responseDTO.setInputStatus(provisionalCalendar.getCurrentStatus());
 					entity.setCurrentStatus(provisionalCalendar.getCurrentStatus());
 					System.out.println("entity");
 					entity = inputInstanceRepository.save(entity);
@@ -299,7 +305,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// if (houseAbbr == "LS") {
 		// serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
 		// }
-
 		SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
 		ProvisionalCalendar provisionalCalendar = ProvisionalCalendar.builder()
 				.dateOfInput(inputDTO.getDateOfInput())
@@ -316,14 +321,13 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.lokSabhaSessionNumber(inputDTO.getLokSabhaSessionNumber())
 				.rajyaSabhaSession(inputDTO.getRajyaSabhaSession())
 				.documentDate(inputDTO.getDateOfInput())
-				// .applicationNo(applicationNo)
 				.applicationNo(applicationNo.getId())
 				// Set applicationNo
 				.inputRefNo(applicationNo.getId())
+				.generatedFlag(false)
 				// input status and remarks
 				.currentStatus(inputDTO.getInputStatus()).inputStatus(inputDTO.getInputStatus())
 				.remarks(inputDTO.getRemarks()).refId(inputDTO.getId()).build();
-
 		// changes for LS and RS
 		if (houseId == 1) {
 			MastersRajyaSabha session = mastersRSSRepository.findById(inputDTO.getRsSessionNo())
@@ -644,6 +648,13 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				if (houseId == 1) {
 					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
+						provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
+						if (!(provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
+								|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft"))) {
+							if (provisionalCalendar.getGeneratedFlag())
+								provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
+						}
+						provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
 						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
 
@@ -652,8 +663,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 							if (inputInstance.getApplicationInstanceId() != null) {
 								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")) {
 									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
-									 || provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) 
-									{
+											|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
 										inputInstance.setPendingAt(null);
 									}
 									dto.setInputStatus(provisionalCalendar.getCurrentStatus());
