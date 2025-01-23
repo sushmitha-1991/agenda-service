@@ -117,6 +117,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	// getById ProvisionalCalender
 	@Override
 	public ProvisionalCalendarDTO getProvisionalCalendarById(Long id) {
+		Long houseId=getHouseId();
 		ProvisionalCalendar provisionalCalendar = provisionalCalendarRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("ProvisionalCalendar not found with id " + id));
 		provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
@@ -136,8 +137,17 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")
 							|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")) {
 						entity.setPendingAt(null);
+						entity.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+
+					} else {
+						if (houseId == 1) {
+							entity.setPendingAt("Legeslative Section");
+						} else if (houseId == 2) {
+							entity.setPendingAt("Table Office A");
+						}
+						entity.setCurrentStatus("In Progress");
+
 					}
-					entity.setCurrentStatus(provisionalCalendar.getCurrentStatus());
 					System.out.println("entity");
 					entity = inputInstanceRepository.save(entity);
 				}
@@ -612,12 +622,12 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			// changes by Sushmitha
 			Long houseId = getHouseId();
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
-				
+
 				provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
 				if (!(provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
 						|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft"))) {
-					if (provisionalCalendar.getGeneratedFlag()!=null && 
-					provisionalCalendar.getGeneratedFlag())
+					if (provisionalCalendar.getGeneratedFlag() != null &&
+							provisionalCalendar.getGeneratedFlag())
 						provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
 				}
 				provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
@@ -632,13 +642,19 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 							InputInstance inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
 								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
-								|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft") ) {
+										|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
 									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
 											|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
 										inputInstance.setPendingAt(null);
+										inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+									} else {
+										if (houseId == 1) {
+											inputInstance.setPendingAt("Table Office");
+										} else if (houseId == 2) {
+											inputInstance.setPendingAt("Table Office A");
+										}
+										inputInstance.setCurrentStatus("In Progress");
 									}
-									dto.setInputStatus(provisionalCalendar.getCurrentStatus());
-									inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
 									System.out.println("input instance");
 									inputInstance = inputInstanceRepository.save(inputInstance);
 									// inputInstance =
@@ -668,7 +684,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					}
 				}
 			}
-		
+
 		} catch (Exception ex) {
 			// Log and rethrow the exception for debugging
 			System.err.println("Error occurred while fetching Provisional Calendar entries: " + ex.getMessage());
@@ -708,13 +724,14 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 				.build();
 	}
+
 	private Long getHouseId() {
-        Long houseId = null;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetailsDTO) {
-            houseId = ((UserDetailsDTO) principal).getHouseId();
-        }
-        return houseId;
-    }
+		Long houseId = null;
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (principal instanceof UserDetailsDTO) {
+			houseId = ((UserDetailsDTO) principal).getHouseId();
+		}
+		return houseId;
+	}
 
 }
