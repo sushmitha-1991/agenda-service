@@ -235,13 +235,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// changes for status update by sushmitha
 		InputInstance instanceUpdate = inputInstanceRepository.findByRefId(existingEntity.getId()).get();
 		instanceUpdate.setCurrentStatus(provisionalCalendarDTO.getInputStatus());
-		Long houseId = null;
-		// String houseAbbr = "";
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal instanceof UserDetailsDTO) {
-			houseId = ((UserDetailsDTO) principal).getHouseId();
-			// houseAbbr = ((UserDetailsDTO) principal).getHouseAbbr();
-		}
+		Long houseId = getHouseId();
 		if (houseId == 1) {
 			instanceUpdate.setPendingAt("Legislative Section");
 		}
@@ -282,13 +276,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		 * eyJzdWIiOiJwbHVfcnNfc2EiLCJob3VzZUlkIjoxLCJob3VzZUFiYnIiOiJSUyIsImlhdCI6MTczNjg1Mzg3NiwiZXhwIjoxNzM2OTQwMjc2fQ
 		 * .CC18fAwLo5r4wJ6gStn2v5VdxulRq7rvno1561-clK8
 		 */
-		Long houseId = null;
-		// String houseAbbr = "";
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal instanceof UserDetailsDTO) {
-			houseId = ((UserDetailsDTO) principal).getHouseId();
-			// houseAbbr = ((UserDetailsDTO) principal).getHouseAbbr();
-		}
+		Long houseId = getHouseId();
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(inputDTO.getApplicationId());
 		if (houseId == 1) {
@@ -380,12 +368,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
 
 		// changes on 07-01-2025
-		Long houseId = null;
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal instanceof UserDetailsDTO) {
-			houseId = ((UserDetailsDTO) principal).getHouseId();
-		}
-
+		Long houseId = getHouseId();
 		// Check if provisionalCalendarInputId exists
 		Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository
 				.findById(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId());
@@ -491,11 +474,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// get application number
 		// Long applicationNo =
 		// changes on 07-01-2025
-		Long houseId = null;
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal instanceof UserDetailsDTO) {
-			houseId = ((UserDetailsDTO) principal).getHouseId();
-		}
+		Long houseId = getHouseId();
 		SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
 		serialNumberRequest.setAppId(provisionalCalendarGenerateDTO.getApplicationId());
 		if (houseId == 1) {
@@ -617,12 +596,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				predicate = cb.and(predicate,
 						cb.equal(cb.lower(root.get("inputStatus")), inputStatus.toLowerCase()));
 			}
-			// if (submittedBy != null && !submittedBy.trim().isEmpty()) {
-			// String trimmedSubmittedBy = submittedBy.trim().toLowerCase();
-			// predicate = cb.and(predicate,
-			// cb.like(cb.lower(cb.trim(root.get("submittedBy"))), "%" + trimmedSubmittedBy
-			// + "%"));
-			// }
 
 			if (submittedBy != null && !submittedBy.trim().isEmpty()) {
 				String trimmedSubmittedBy = submittedBy.replaceAll("\\s", "").toLowerCase();
@@ -634,15 +607,10 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			}
 			cq.where(predicate);
 			TypedQuery<ProvisionalCalendar> query = entityManager.createQuery(cq);
-
 			List<ProvisionalCalendar> provisionalCalendars = query.getResultList();
 			/* For Differenciating lok Sabha And Rajya Sabha */
 			// changes by Sushmitha
-			Long houseId = null;
-			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			if (principal instanceof UserDetailsDTO) {
-				houseId = ((UserDetailsDTO) principal).getHouseId();
-			}
+			Long houseId = getHouseId();
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
 				
 				provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
@@ -740,5 +708,13 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 				.build();
 	}
+	private Long getHouseId() {
+        Long houseId = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetailsDTO) {
+            houseId = ((UserDetailsDTO) principal).getHouseId();
+        }
+        return houseId;
+    }
 
 }
