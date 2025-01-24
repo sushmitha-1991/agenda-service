@@ -32,6 +32,7 @@ public class ProvisionalCalendarDTOMapper {
         .generatedFlag(dto.getGeneratedFlag())
         .content(dto.getContent())
         // adding the new field input status
+        .status(dto.getStatus())
         .inputStatus(dto.getInputStatus())
         .remarks(dto.getRemarks())
         .inputRefNo(dto.getInputRefNo())
@@ -73,18 +74,17 @@ public class ProvisionalCalendarDTOMapper {
         .listOfDocumentTableOffice(entity.getListOfDocumentTableOffice())
         .listOfDocumentTableOfficeFootnote(entity.getListOfDocumentTableOfficeFootnote())
         .listOfDocumentTableOfficeNote(entity.getListOfDocumentTableOfficeNote())
-        .dateOfInputTableOffice(entity.getDateOfInput())
-            .dateOfSittingInputsTableOffice(entity.getDateOfSittingInputsTableOffice())
+        .dateOfInputTableOffice(entity.getDateOfInputTableOffice())
+        .dateOfSittingInputsTableOffice(entity.getDateOfSittingInputsTableOffice())
         .inputTextTableOffice(entity.getInputText())
         .generatedFlag(entity.getGeneratedFlag())
         .content(entity.getContent())
-
         // adding the new field input status
         .inputStatus(entity.getInputStatus())
         .remarks(entity.getRemarks())
         .inputRefNo(entity.getInputRefNo())
         // draft status
-        // .draftStatus(entity.getDraftStatus())
+        .status(entity.getStatus())
         // application Instance
         .id(entity.getId())
         .applicationNo(entity.getApplicationNo())

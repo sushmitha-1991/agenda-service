@@ -117,7 +117,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	// getById ProvisionalCalender
 	@Override
 	public ProvisionalCalendarDTO getProvisionalCalendarById(Long id) {
-		Long houseId=getHouseId();
+		Long houseId = getHouseId();
 		ProvisionalCalendar provisionalCalendar = provisionalCalendarRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("ProvisionalCalendar not found with id " + id));
 		provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
@@ -622,25 +622,39 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			// changes by Sushmitha
 			Long houseId = getHouseId();
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
-
+				System.out.println("@@@@@@@@");
+				System.out.println(provisionalCalendar.getCurrentStatus());
 				provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
-				if (!(provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
-						|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft"))) {
-					if (provisionalCalendar.getGeneratedFlag() != null &&
-							provisionalCalendar.getGeneratedFlag())
-						provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
+				if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
+						|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
+					
+							if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
+							|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")){
+								if (provisionalCalendar.getGeneratedFlag() != null &&
+								provisionalCalendar.getGeneratedFlag())
+								{
+									provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
+
+								}
+							}	
+							else
+							{
+								provisionalCalendar.setInputStatus("In Progress");
+
+							}	
 				}
 				provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
-
+				System.out.println("###########");
+				System.out.println(provisionalCalendar);
 				if (houseId == 1) {
 					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
 						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
-
 						if (!instance.isEmpty()) {
 							InputInstance inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
+								// if(generated statusis not returned or draft)
 								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
 										|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
 									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
