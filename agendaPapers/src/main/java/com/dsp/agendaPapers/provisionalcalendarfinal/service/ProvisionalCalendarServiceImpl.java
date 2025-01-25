@@ -120,11 +120,15 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		Long houseId = getHouseId();
 		ProvisionalCalendar provisionalCalendar = provisionalCalendarRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("ProvisionalCalendar not found with id " + id));
+
 		provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
-		if (!(provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
-				|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft"))) {
-			if (provisionalCalendar.getGeneratedFlag())
+		if (provisionalCalendar.getGeneratedFlag() != null && provisionalCalendar.getGeneratedFlag()) {
+			if (!(provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
+					|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft"))) {
 				provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
+			} else {
+				provisionalCalendar.setInputStatus("In Progress");
+			}
 		}
 		provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 		ProvisionalCalendarDTO responseDTO = mapToDto(provisionalCalendar);
@@ -132,6 +136,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			InputInstance entity = inputInstanceRepository.findByRefId(responseDTO.getId())
 					.orElseThrow(() -> new Exception("InputInstance not found for refId: " + responseDTO.getId()));
 			if (entity.getApplicationInstanceId() != null) {
+
 				if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
 						|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
 					if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")
@@ -146,9 +151,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 							entity.setPendingAt("Table Office A");
 						}
 						entity.setCurrentStatus("In Progress");
-
 					}
-					System.out.println("entity");
 					entity = inputInstanceRepository.save(entity);
 				}
 			}
@@ -349,7 +352,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				provisionalCalendar);
 		savedEntity.setRefId(savedEntity.getId());
 		savedEntity = provisionalCalendarRepository.save(savedEntity);
-		System.out.println("calender input with input instance");
 		// Changes by Sushmitha Starts here
 		ProvisionalCalendarInputDTO responceDTO = mapToDtoPCinput(savedEntity);
 		InputInstance inputInstanceEntity = InputInstance.builder().id(savedEntity.getId())
@@ -622,30 +624,22 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			// changes by Sushmitha
 			Long houseId = getHouseId();
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
-				System.out.println("@@@@@@@@");
-				System.out.println(provisionalCalendar.getCurrentStatus());
 				provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
 				if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
 						|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
-					
-							if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
-							|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")){
-								if (provisionalCalendar.getGeneratedFlag() != null &&
-								provisionalCalendar.getGeneratedFlag())
-								{
-									provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
-
-								}
-							}	
-							else
-							{
-								provisionalCalendar.setInputStatus("In Progress");
-
-							}	
+					if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
+							|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
+						if (provisionalCalendar.getGeneratedFlag() != null &&
+								provisionalCalendar.getGeneratedFlag()) {
+							provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
+						}
+					} else {
+						provisionalCalendar.setInputStatus("In Progress");
+					}
+				} else {
+					provisionalCalendar.setInputStatus("In Progress");
 				}
 				provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
-				System.out.println("###########");
-				System.out.println(provisionalCalendar);
 				if (houseId == 1) {
 					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
@@ -662,36 +656,41 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 										inputInstance.setPendingAt(null);
 										inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
 									} else {
-										if (houseId == 1) {
-											inputInstance.setPendingAt("Table Office");
-										} else if (houseId == 2) {
-											inputInstance.setPendingAt("Table Office A");
-										}
+										inputInstance.setPendingAt("Legislative Section");
 										inputInstance.setCurrentStatus("In Progress");
 									}
-									System.out.println("input instance");
-									inputInstance = inputInstanceRepository.save(inputInstance);
-									// inputInstance =
-									// inputInstanceRepository.findById(inputInstance.getId()).get();
+								} else {
+									inputInstance.setCurrentStatus("In Progress");
 								}
 							}
+							inputInstance = inputInstanceRepository.save(inputInstance);
 							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
 						}
 						response.add(dto);
 					}
 				} else if (houseId == 2) {
 					if (provisionalCalendar.getLokSabhaSessionNo() != null) {
-
 						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
-
 						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
-
 						if (!instance.isEmpty()) {
 							InputInstance inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
-								dto.setInputStatus(provisionalCalendar.getCurrentStatus());
-								inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+								// if(generated statusis not returned or draft)
+								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
+										|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
+									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
+											|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
+										inputInstance.setPendingAt(null);
+										inputInstance.setCurrentStatus(provisionalCalendar.getCurrentStatus());
+									} else {
+										inputInstance.setPendingAt("Table Office A");
+										inputInstance.setCurrentStatus("In Progress");
+									}
+								} else {
+									inputInstance.setCurrentStatus("In Progress");
+								}
 							}
+							inputInstance = inputInstanceRepository.save(inputInstance);
 							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
 						}
 						response.add(dto);
