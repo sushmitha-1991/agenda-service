@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.Date;
 
+import jakarta.persistence.Column;
+
 @Builder
 @Data
 @NoArgsConstructor
@@ -24,4 +26,6 @@ public class ApplicationInstanceDTO {
       private String lokSabhaSessionNumber;
       private String lokSabhaSession;
       private String rajyaSabhaSession;
+      private String htmlContentEnglish;
+	private String htmlContentHindi;
 }

@@ -138,6 +138,9 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 					// .lokSabhaSessionNumber(summonNotificationDTO.getSessionNo())
 					// .rajyaSabhaSession(summonNotificationDTO.getRajyasabhaSessionNo())
 					// Optional from frontend
+					// download document
+					.htmlContentEnglish(summonNotificationDTO.getTemplateContent())
+					.htmlContentHindi(summonNotificationDTO.getTemplateContentHindi())
 					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
 					.build();
 
@@ -416,7 +419,10 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 					applicationInstanceDTO.setDocumentDate(updatedNotification.getSummonIssuanceDate());
 					log.debug("Setting documentDate: {}", updatedNotification.getSummonIssuanceDate());
 				}
-
+				// download the document
+				applicationInstanceDTO.setHtmlContentEnglish(updatedNotification.getTemplateContent());
+				applicationInstanceDTO.setHtmlContentHindi(updatedNotification.getTemplateContentHindi());
+				// changes ends here
 				String url = applicationInstanceServiceUrl + "/updateByApplicationNo/"
 						+ updatedNotification.getApplicationNo();
 				try {
