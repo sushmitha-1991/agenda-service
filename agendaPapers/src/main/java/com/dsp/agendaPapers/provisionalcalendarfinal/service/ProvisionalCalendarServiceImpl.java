@@ -207,7 +207,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				throw new RuntimeException("Error updating field: " + field.getName(), e);
 			}
 		}
-
+		
 		existingEntity.setCurrentStatus(existingEntity.getInputStatus());
 		existingEntity.setDocumentDate(existingEntity.getDateOfInput());
 
@@ -248,6 +248,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// changes for status update by sushmitha
 		InputInstance instanceUpdate = inputInstanceRepository.findByRefId(existingEntity.getId()).get();
 		instanceUpdate.setCurrentStatus(provisionalCalendarDTO.getInputStatus());
+		instanceUpdate.setHtmlContentEnglish(updatedEntity.getContent());
 		Long houseId = getHouseId();
 		if (houseId == 1) {
 			instanceUpdate.setPendingAt("Legislative Section");
@@ -361,6 +362,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.lokSabhaSession(savedEntity.getLokSabhaSession())
 				.lokSabhaSessionNumber(savedEntity.getLokSabhaSessionNumber())
 				.rajyaSabhaSession(savedEntity.getRajyaSabhaSession())
+				.htmlContentEnglish(savedEntity.getContent())
 				.build();
 		if (houseId == 1) {
 			inputInstanceEntity.setPendingAt("Legislative Section");
@@ -422,6 +424,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 		InputInstance inputInstance = inputInstanceRepository.findByRefId(updatedProvisionalCalendar.getId()).get();
 		inputInstance.setCurrentStatus(updatedProvisionalCalendar.getInputStatus());
+		if(provisionalCalendarTableOfficeDTO.getInputTextTableOffice()!=null)
+		inputInstance.setHtmlContentEnglish(provisionalCalendarTableOfficeDTO.getInputTextTableOffice());
+
 		if (houseId == 1) {
 			inputInstance.setPendingAt("Legislative Section");
 		}
@@ -475,6 +480,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.lokSabhaSession(provisionalCalendar.getLokSabhaSession())
 						.lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
 						.rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
+						.htmlContentEnglish(provisionalCalendar.getContent())
 						.refId(provisionalCalendar.getRefId()).build())
 				.build();
 	}
@@ -733,6 +739,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.lokSabhaSession(provisionalCalendar.getLokSabhaSession())
 						.lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
 						.rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
+						.htmlContentEnglish(provisionalCalendar.getContent())
+						
 						.refId(provisionalCalendar.getRefId()).build())
 
 				.build();

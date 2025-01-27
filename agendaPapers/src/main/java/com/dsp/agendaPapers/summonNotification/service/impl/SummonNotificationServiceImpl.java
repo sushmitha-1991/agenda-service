@@ -355,19 +355,19 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 	private ApplicationInstanceDTO fetchApplicationInstanceData(String applicationNo) {
 		String url = applicationInstanceServiceUrl + "/getApplicationNo/" + applicationNo;
-
 		log.debug("Fetching ApplicationInstance by applicationNo from URL: {}", url);
 		try {
-
+			System.out.println("!!!!!!!!!");
 			ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(url,
 					HttpMethod.GET, null, new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
 					});
+					System.out.println("@@@@@@@@@");
+					System.out.println(response);
 			if (response == null || response.getBody() == null || response.getBody().getData() == null) {
 				log.error("Response or body is null when fetching ApplicationInstance for applicationNo: {}",
 						applicationNo);
 				throw new RuntimeException("Failed to fetch ApplicationInstance, response is null");
 			}
-
 			ApplicationInstanceDTO instanceDTO = response.getBody().getData();
 			log.debug("Fetched ApplicationInstanceDTO: {}", instanceDTO);
 			return instanceDTO;
@@ -420,6 +420,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 					log.debug("Setting documentDate: {}", updatedNotification.getSummonIssuanceDate());
 				}
 				// download the document
+				System.out.println("@@@@@@@@");
 				applicationInstanceDTO.setHtmlContentEnglish(updatedNotification.getTemplateContent());
 				applicationInstanceDTO.setHtmlContentHindi(updatedNotification.getTemplateContentHindi());
 				// changes ends here

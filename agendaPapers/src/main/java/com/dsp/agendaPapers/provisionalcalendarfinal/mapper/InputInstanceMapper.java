@@ -17,6 +17,8 @@ public class InputInstanceMapper {
                 .lokSabhaSessionNumber(dto.getLokSabhaSessionNumber())
                 .rajyaSabhaSession(dto.getRajyaSabhaSession())
                 .applicationInstanceId(dto.getApplicationInstanceId())
+                .htmlContentEnglish(dto.getHtmlContentEnglish())
+                .htmlContentHindi(dto.getHtmlContentHindi())
                 .build();
     }
 
@@ -33,6 +35,8 @@ public class InputInstanceMapper {
                 .lokSabhaSessionNumber(entity.getLokSabhaSessionNumber())
                 .rajyaSabhaSession(entity.getRajyaSabhaSession())
                 .applicationInstanceId(entity.getApplicationInstanceId())
+                .htmlContentEnglish(entity.getHtmlContentEnglish())
+                .htmlContentHindi(entity.getHtmlContentHindi())
                 .build();
 
     }

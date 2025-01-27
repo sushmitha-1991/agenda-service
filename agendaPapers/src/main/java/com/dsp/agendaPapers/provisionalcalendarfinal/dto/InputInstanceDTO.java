@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.provisionalcalendarfinal.dto;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,5 +26,7 @@ public class InputInstanceDTO {
 	private String lokSabhaSessionNumber;
 	private String rajyaSabhaSession;
 	private Long applicationInstanceId;
+	private String htmlContentEnglish;
+	private String htmlContentHindi;
 
 }

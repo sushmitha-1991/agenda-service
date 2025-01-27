@@ -125,7 +125,10 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 					.applicationNo(savedNotice.getApplicationNo()) // Saved in ProrogationNotice
 					.currentStatus(savedNotice.getStatus()) // From ProrogationNotice's status
 					.documentDate(savedNotice.getIssuanceDate())
-					.publishedDocumentUrl(prorogationNoticeDTO.getPublishedDocumentUrl()) // Optional from frontend
+					.publishedDocumentUrl(prorogationNoticeDTO.getPublishedDocumentUrl())
+					.htmlContentEnglish(prorogationNoticeDTO.getTemplateContent())
+					.htmlContentHindi(prorogationNoticeDTO.getTemplateContentHindi())
+					// Optional from frontend
 					.refId(savedNotice.getId())
 					// .lokSabhaSession(prorogationNoticeDTO.getLokSabhaNo())
 					// .lokSabhaSessionNumber(prorogationNoticeDTO.getLokSabhaSessionNo())
@@ -402,7 +405,9 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 					applicationInstanceDTO.setDocumentDate(updatedNotice.getIssuanceDate());
 					log.debug("Setting documentDate: {}", updatedNotice.getIssuanceDate());
 				}
-
+				//changes for download document
+				applicationInstanceDTO.setHtmlContentEnglish(updatedNotice.getTemplateContent());
+				applicationInstanceDTO.setHtmlContentHindi(updatedNotice.getTemplateContentHindi());
 				// Call the external service to update ApplicationInstance
 				String url = applicationInstanceServiceUrl + "/updateByApplicationNo/"
 						+ updatedNotice.getApplicationNo();
