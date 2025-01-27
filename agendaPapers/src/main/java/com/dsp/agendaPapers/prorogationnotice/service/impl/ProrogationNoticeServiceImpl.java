@@ -371,12 +371,10 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 	@Override
 	public ProrogationNoticeDTO updateProrogationNotice(Long id, ProrogationNoticeDTO prorogationNoticeDTO) {
 		log.debug("Starting update for ProrogationNotice with ID: {}", id);
-
 		try {
 			// Fetch the existing ProrogationNotice
 			ProrogationNotice existingNotice = prorogationNoticeRepository.findById(id)
 					.orElseThrow(() -> new ResourceNotFoundException("ProrogationNotice not found with id: " + id));
-
 			// Update only the fields you want to change
 			existingNotice.setNotificationNo(prorogationNoticeDTO.getNotificationNo());
 			existingNotice.setStatus(prorogationNoticeDTO.getStatus());
@@ -385,17 +383,13 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
 			existingNotice.setIssuanceDateSakaEraHindi(prorogationNoticeDTO.getIssuanceDateSakaEraHindi());
 			existingNotice.setTemplateContent(prorogationNoticeDTO.getTemplateContent());
 			existingNotice.setTemplateContentHindi(prorogationNoticeDTO.getTemplateContentHindi());
-
 			// Save the updated ProrogationNotice
 			ProrogationNotice updatedNotice = prorogationNoticeRepository.save(existingNotice);
-
 			// Prepare the response DTO
 			ProrogationNoticeDTO responseDTO = prorogationNoticeMapper.toDto(updatedNotice);
-
 			// Automatically update the ApplicationInstance
 			if (updatedNotice.getStatus() != null || updatedNotice.getIssuanceDate() != null) {
 				ApplicationInstanceDTO applicationInstanceDTO = new ApplicationInstanceDTO();
-
 				// Set fields conditionally
 				if (updatedNotice.getStatus() != null) {
 					applicationInstanceDTO.setCurrentStatus(updatedNotice.getStatus());

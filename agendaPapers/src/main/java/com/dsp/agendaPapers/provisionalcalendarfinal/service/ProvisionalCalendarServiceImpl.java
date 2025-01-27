@@ -248,7 +248,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// changes for status update by sushmitha
 		InputInstance instanceUpdate = inputInstanceRepository.findByRefId(existingEntity.getId()).get();
 		instanceUpdate.setCurrentStatus(provisionalCalendarDTO.getInputStatus());
-		instanceUpdate.setHtmlContentEnglish(updatedEntity.getContent());
+		instanceUpdate.setHtmlContentEnglish(updatedEntity.getInputText());
 		Long houseId = getHouseId();
 		if (houseId == 1) {
 			instanceUpdate.setPendingAt("Legislative Section");
@@ -327,6 +327,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				// Set applicationNo
 				.inputRefNo(applicationNo.getId())
 				.generatedFlag(false)
+				.htmlContentEnglish(inputDTO.getInputText())
 				// input status and remarks
 				.currentStatus(inputDTO.getInputStatus()).inputStatus(inputDTO.getInputStatus())
 				.remarks(inputDTO.getRemarks()).refId(inputDTO.getId()).build();
@@ -362,7 +363,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.lokSabhaSession(savedEntity.getLokSabhaSession())
 				.lokSabhaSessionNumber(savedEntity.getLokSabhaSessionNumber())
 				.rajyaSabhaSession(savedEntity.getRajyaSabhaSession())
-				.htmlContentEnglish(savedEntity.getContent())
+				.htmlContentEnglish(savedEntity.getInputText())
 				.build();
 		if (houseId == 1) {
 			inputInstanceEntity.setPendingAt("Legislative Section");
@@ -380,22 +381,18 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 	@Override
 	public ProvisionalCalendarTableOfficeDTO createProvisionalCalendarTableOffice(
 			ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
-
 		// changes on 07-01-2025
 		Long houseId = getHouseId();
 		// Check if provisionalCalendarInputId exists
 		Optional<ProvisionalCalendar> optionalProvisionalCalendar = provisionalCalendarRepository
 				.findById(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId());
-
 		if (optionalProvisionalCalendar.isEmpty()) {
 			throw new ResourceNotFoundException("ProvisionalCalendar with ID "
 					+ provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId() + " not found");
 		}
-
 		// Retrieve the existing ProvisionalCalendar entity
 		ProvisionalCalendar provisionalCalendar = optionalProvisionalCalendar.get();
 		// Update the fields with values from the DTO
-
 		provisionalCalendar.setGroupchartsLS(provisionalCalendarTableOfficeDTO.getGroupchartsLS());
 		provisionalCalendar.setGroupchartsRS(provisionalCalendarTableOfficeDTO.getGroupchartsRS());
 		provisionalCalendar
@@ -410,10 +407,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		provisionalCalendar.setInputTextTableOffice(provisionalCalendarTableOfficeDTO.getInputTextTableOffice());
 		provisionalCalendar.setGeneratedFlag(provisionalCalendarTableOfficeDTO.getGeneratedFlag());
 		// adding new line for date update
-
 		// provisionalCalendar.setDateOfInput(provisionalCalendarTableOfficeDTO.getDateOfInputTableOffice());
 		provisionalCalendar.setDocumentDate(provisionalCalendarTableOfficeDTO.getDateOfInputTableOffice());
-
 		// changes on 07-01-2025
 		provisionalCalendar.setApplicationId(provisionalCalendarTableOfficeDTO.getApplicationId());
 		// 07-01-2025 ends here
@@ -421,21 +416,17 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		// Save the updated entity
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 		// Input instance status and date update
-
 		InputInstance inputInstance = inputInstanceRepository.findByRefId(updatedProvisionalCalendar.getId()).get();
 		inputInstance.setCurrentStatus(updatedProvisionalCalendar.getInputStatus());
 		if(provisionalCalendarTableOfficeDTO.getInputTextTableOffice()!=null)
 		inputInstance.setHtmlContentEnglish(provisionalCalendarTableOfficeDTO.getInputTextTableOffice());
-
 		if (houseId == 1) {
 			inputInstance.setPendingAt("Legislative Section");
 		}
 		if (houseId == 2) {
 			inputInstance.setPendingAt("Table Office A");
 		}
-
 		inputInstance = inputInstanceRepository.save(inputInstance);
-
 		return ProvisionalCalendarTableOfficeDTO.builder().id(updatedProvisionalCalendar.getId())
 				.groupchartsLS(updatedProvisionalCalendar.getGroupchartsLS())
 				.groupchartsRS(updatedProvisionalCalendar.getGroupchartsRS())
@@ -448,7 +439,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.generatedFlag(updatedProvisionalCalendar.getGeneratedFlag())
 				.provisionalCalendarInputId(provisionalCalendarTableOfficeDTO.getProvisionalCalendarInputId()).build();
 	}
-
 	// Mapper() in service
 	private ProvisionalCalendarDTO mapToDto(ProvisionalCalendar provisionalCalendar) {
 		return ProvisionalCalendarDTO.builder().id(provisionalCalendar.getId())
@@ -522,20 +512,16 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 		provisionalCalendar.setApplicationId(provisionalCalendarGenerateDTO.getApplicationId());
 		provisionalCalendar.setApplicationNo(provisionalCalendarGenerateDTO.getApplicationNo());
 		// changes on 07-01-2025
-
+		provisionalCalendar.setHtmlContentEnglish(provisionalCalendarGenerateDTO.getContent());
 		// ends here
 		// changes for generated flag
 		provisionalCalendar.setGeneratedFlag(true);
-
 		// Save the updated entity
 		ProvisionalCalendar updatedProvisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
-
 		InputInstance inputInstance = inputInstanceRepository
 				.findByRefId(updatedProvisionalCalendar.getId()).get();
-
 		inputInstance.setApplicationInstanceId(updatedProvisionalCalendar.getId());
 		inputInstance = inputInstanceRepository.save(inputInstance);
-
 		// Map the updated entity back to a ProvisionalCalendarGenerateDTO
 		return ProvisionalCalendarGenerateDTO.builder().id(updatedProvisionalCalendar.getId())
 				.content(updatedProvisionalCalendar.getContent()).status(updatedProvisionalCalendar.getStatus())
@@ -543,9 +529,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.applicationId(provisionalCalendarGenerateDTO.getApplicationId())
 				.applicationNo(updatedProvisionalCalendar.getApplicationNo()).build();
 	}
-
 	// update for the input status and remarks testing
-
 	@Override
 	public ProvisionalCalendarInputDTO updateInputStatus(Long id, String inputStatus, String remarks) {
 		// Find the ProvisionalCalendar entity by ID
@@ -739,7 +723,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 						.lokSabhaSession(provisionalCalendar.getLokSabhaSession())
 						.lokSabhaSessionNumber(provisionalCalendar.getLokSabhaSessionNumber())
 						.rajyaSabhaSession(provisionalCalendar.getRajyaSabhaSession())
-						.htmlContentEnglish(provisionalCalendar.getContent())
+						.htmlContentEnglish(provisionalCalendar.getHtmlContentEnglish())
 						
 						.refId(provisionalCalendar.getRefId()).build())
 

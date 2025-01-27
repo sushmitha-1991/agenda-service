@@ -166,6 +166,8 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 					.lokSabhaSessionNumber(summonNotification.getSessionNo())
 					.rajyaSabhaSession(summonNotification.getRajyasabhaSessionNo())
 					// ends here
+					.htmlContentEnglish(summonNotification.getTemplateContent())
+					.htmlContentHindi(summonNotification.getTemplateContentHindi())
 					// Use SummonNotification's ID as refId
 					.build();
 			log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
@@ -192,6 +194,8 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 					.lokSabhaSession(summonNotification.getLokSabhaNo())
 					.lokSabhaSessionNumber(summonNotification.getSessionNo())
 					.rajyaSabhaSession(summonNotification.getRajyasabhaSessionNo())
+					.htmlContentEnglish(summonNotification.getTemplateContent())
+					.htmlContentHindi(summonNotification.getTemplateContentHindi())
 					// From frontend
 					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
 					.build();
@@ -569,11 +573,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 					applicationInstanceDTO.setCurrentStatus(updatedNotification.getStatus());
 					log.debug("Setting currentStatus: {}", updatedNotification.getStatus());
 				}
-
+				applicationInstanceDTO.setHtmlContentEnglish(updatedNotification.getTemplateContent());
+				applicationInstanceDTO.setHtmlContentHindi(updatedNotification.getTemplateContentHindi());
 				if (updatedNotification.getEsummonIssuanceDate() != null) {
 					applicationInstanceDTO.setDocumentDate(updatedNotification.getEsummonIssuanceDate());
 					log.debug("Setting documentDate: {}", updatedNotification.getEsummonIssuanceDate());
 				}
+
 				// Call the external service to update ApplicationInstance
 				String url = applicationInstanceServiceUrl + "/updateByApplicationNo/"
 						+ updatedNotification.getApplicationNo(); // Assuming field renamed
@@ -586,6 +592,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 					throw new RuntimeException("Failed to update ApplicationInstance", e);
 				}
 			}
+		
 
 			// Fetch the updated ApplicationInstance data
 			String applicationNumber = updatedNotification.getApplicationNo(); // Get the applicationNo for the
