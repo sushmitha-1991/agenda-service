@@ -131,9 +131,14 @@ public class ProvisionalCalendarFinalController {
 		
 
 		ProvisionalCalendarInputDTO createdInput = provisionalCalendarService.createProvisionalCalendarInput(inputDTO);
-		
+		//Document ""Ref-SNLS<Session No.>01"" has been submitted to <Next User Name> successfully
+		// return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
+		// 		"Provisional Calendar Input created successfully", createdInput, HttpStatus.CREATED.value()));
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
-				"Provisional Calendar Input created successfully", createdInput, HttpStatus.CREATED.value()));
+				"Document '"+createdInput.getInputInstanceDTO().getApplicationNo()
+				+"'' has been submitted to '"+createdInput.getInputInstanceDTO().getPendingAt()
+				+"' successfully", createdInput, HttpStatus.CREATED.value()));
 	}
 
 	@PostMapping("/table-office")
@@ -146,9 +151,17 @@ public class ProvisionalCalendarFinalController {
 			@Valid @RequestBody ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
 		ProvisionalCalendarTableOfficeDTO createdTableOffice = provisionalCalendarService
 				.createProvisionalCalendarTableOffice(provisionalCalendarTableOfficeDTO);
-		return ResponseEntity.status(HttpStatus.CREATED)
+				
+				return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new GenericResponse<>(true, "Provisional Calendar Table Office created successfully",
 						createdTableOffice, HttpStatus.CREATED.value()));
+		
+		// return ResponseEntity.status(HttpStatus.CREATED)
+		// 		.body(new GenericResponse<>(true, 
+		// 		"Document '"+createdTableOffice()
+		// 		+"'' has been submitted to '"+createdTableOffice.getPendingAt()
+		// 		+"' successfully",
+		// 				createdTableOffice, HttpStatus.CREATED.value()));
 	}
 
 	@PostMapping("/generate")
