@@ -100,6 +100,7 @@ public class ProvisionalCalendarFinalController {
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	public ResponseEntity<GenericResponse<ProvisionalCalendarDTO>> updateProvisionalCalendar(@PathVariable Long id,
 			@Valid @RequestBody ProvisionalCalendarDTO provisionalCalendarDTO) {
+
 		ProvisionalCalendarDTO updatedCalendar = provisionalCalendarService.updateProvisionalCalendar(id,
 				provisionalCalendarDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
@@ -128,17 +129,20 @@ public class ProvisionalCalendarFinalController {
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	public ResponseEntity<GenericResponse<ProvisionalCalendarInputDTO>> createProvisionalCalendarInput(
 			@Valid @RequestBody ProvisionalCalendarInputDTO inputDTO) {
-		
 
 		ProvisionalCalendarInputDTO createdInput = provisionalCalendarService.createProvisionalCalendarInput(inputDTO);
-		//Document ""Ref-SNLS<Session No.>01"" has been submitted to <Next User Name> successfully
-		// return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
-		// 		"Provisional Calendar Input created successfully", createdInput, HttpStatus.CREATED.value()));
+		// Document ""Ref-SNLS<Session No.>01"" has been submitted to <Next User Name>
+		// successfully
+		// return ResponseEntity.status(HttpStatus.CREATED).body(new
+		// GenericResponse<>(true,
+		// "Provisional Calendar Input created successfully", createdInput,
+		// HttpStatus.CREATED.value()));
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
-				"Document '"+createdInput.getInputInstanceDTO().getApplicationNo()
-				+"'' has been submitted to '"+createdInput.getInputInstanceDTO().getPendingAt()
-				+"' successfully", createdInput, HttpStatus.CREATED.value()));
+				"Document '" + createdInput.getInputInstanceDTO().getApplicationNo()
+						+ "' has been submitted to '" + createdInput.getInputInstanceDTO().getPendingAt()
+						+ "' successfully",
+				createdInput, HttpStatus.CREATED.value()));
 	}
 
 	@PostMapping("/table-office")
@@ -151,17 +155,17 @@ public class ProvisionalCalendarFinalController {
 			@Valid @RequestBody ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
 		ProvisionalCalendarTableOfficeDTO createdTableOffice = provisionalCalendarService
 				.createProvisionalCalendarTableOffice(provisionalCalendarTableOfficeDTO);
-				
-				return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new GenericResponse<>(true, "Provisional Calendar Table Office created successfully",
-						createdTableOffice, HttpStatus.CREATED.value()));
-		
 		// return ResponseEntity.status(HttpStatus.CREATED)
-		// 		.body(new GenericResponse<>(true, 
-		// 		"Document '"+createdTableOffice()
-		// 		+"'' has been submitted to '"+createdTableOffice.getPendingAt()
-		// 		+"' successfully",
-		// 				createdTableOffice, HttpStatus.CREATED.value()));
+		// .body(new GenericResponse<>(true, "Provisional Calendar Table Office created
+		// successfully",
+		// createdTableOffice, HttpStatus.CREATED.value()));
+
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(new GenericResponse<>(true,
+						"Document '" + createdTableOffice.getApplicationNo()
+								+ "'' has been Updated at '" + createdTableOffice.getPendingAt()
+								+ "' successfully",
+						createdTableOffice, HttpStatus.CREATED.value()));
 	}
 
 	@PostMapping("/generate")
@@ -176,8 +180,15 @@ public class ProvisionalCalendarFinalController {
 
 		ProvisionalCalendarGenerateDTO createdGenerate = provisionalCalendarService
 				.createProvisionalCalendarGenerate(provisionalCalendarGenerateDTO);
+		// return ResponseEntity.status(HttpStatus.CREATED).body(new
+		// GenericResponse<>(true,
+		// "Provisional Calendar generated successfully", createdGenerate,
+		// HttpStatus.CREATED.value()));
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
-				"Provisional Calendar generated successfully", createdGenerate, HttpStatus.CREATED.value()));
+				"Document '" + createdGenerate.getApplicationNo()
+						+ "'' has been Generated successfully",
+				createdGenerate, HttpStatus.CREATED.value()));
 	}
 
 	// for the input status
@@ -196,9 +207,14 @@ public class ProvisionalCalendarFinalController {
 		}
 
 		ProvisionalCalendarInputDTO updatedDTO = provisionalCalendarService.updateInputStatus(id, inputStatus, remarks);
-
+		String message = "";
+		message = "Document '" + updatedDTO.getInputInstanceDTO().getApplicationNo()
+				+ "' has been returned with remarks to '"
+				+ updatedDTO.getInputInstanceDTO().getPendingAt()
+				+ "' successfully";
 		return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
-				"Provisional Calendar Input updated successfully", updatedDTO, HttpStatus.OK.value()));
+				message,
+				updatedDTO, HttpStatus.OK.value()));
 	}
 
 	// for generated the ref id
@@ -208,40 +224,55 @@ public class ProvisionalCalendarFinalController {
 		return bearerClient.getResource(serialNumberRequest);
 	}
 
+	public ResponseEntity<GenericResponse<Object>> buildResponse(boolean success, String message, Object data,
+			HttpStatus status) {
+		return ResponseEntity.status(status).body(new GenericResponse<>(success, message, data, status.value()));
+	}
 	// get ALl with filter I am checking for newly deployed Working code
 
-//	@GetMapping("/getAllfilter")
-//	@Operation(summary = "Get all Provisional Calendar entries between specific dates and by submittedBy")
-//	@ApiResponses(value = {
-//			@ApiResponse(responseCode = "200", description = "All Provisional Calendar entries retrieved successfully"),
-//			@ApiResponse(responseCode = "404", description = "No Provisional Calendar entries found"),
-//			@ApiResponse(responseCode = "500", description = "Internal server error") })
-//	public ResponseEntity<GenericResponse<List<ProvisionalCalendarDTO>>> getAllProvisionalCalendars(
-//			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-//			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-//			@RequestParam(required = false) String inputStatus, @RequestParam(required = false) String submittedBy) {
-//		System.out.println("filter $$$$$");
-//
-//		try {
-//
-//			List<ProvisionalCalendarDTO> calendarDTOs = provisionalCalendarService
-//					.getAllProvisionalCalendarsBetweenDates(startDate, endDate, inputStatus, submittedBy);
-//			System.out.println(calendarDTOs);
-//
-//			if (calendarDTOs == null || calendarDTOs.isEmpty()) {
-//				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericResponse<>(true,
-//						"No Provisional Calendar entries found", calendarDTOs, HttpStatus.NOT_FOUND.value()));
-//			}
-//
-//			return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
-//					"All Provisional Calendar entries retrieved successfully", calendarDTOs, HttpStatus.OK.value()));
-//		} catch (RuntimeException ex) {
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body(new GenericResponse<>(false, "An error occurred while fetching Provisional Calendar entries",
-//							null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
-//		}
-//	}
-
+	// @GetMapping("/getAllfilter")
+	// @Operation(summary = "Get all Provisional Calendar entries between specific
+	// dates and by submittedBy")
+	// @ApiResponses(value = {
+	// @ApiResponse(responseCode = "200", description = "All Provisional Calendar
+	// entries retrieved successfully"),
+	// @ApiResponse(responseCode = "404", description = "No Provisional Calendar
+	// entries found"),
+	// @ApiResponse(responseCode = "500", description = "Internal server error") })
+	// public ResponseEntity<GenericResponse<List<ProvisionalCalendarDTO>>>
+	// getAllProvisionalCalendars(
+	// @RequestParam(required = false) @DateTimeFormat(iso =
+	// DateTimeFormat.ISO.DATE) LocalDate startDate,
+	// @RequestParam(required = false) @DateTimeFormat(iso =
+	// DateTimeFormat.ISO.DATE) LocalDate endDate,
+	// @RequestParam(required = false) String inputStatus, @RequestParam(required =
+	// false) String submittedBy) {
+	// System.out.println("filter $$$$$");
+	//
+	// try {
+	//
+	// List<ProvisionalCalendarDTO> calendarDTOs = provisionalCalendarService
+	// .getAllProvisionalCalendarsBetweenDates(startDate, endDate, inputStatus,
+	// submittedBy);
+	// System.out.println(calendarDTOs);
+	//
+	// if (calendarDTOs == null || calendarDTOs.isEmpty()) {
+	// return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new
+	// GenericResponse<>(true,
+	// "No Provisional Calendar entries found", calendarDTOs,
+	// HttpStatus.NOT_FOUND.value()));
+	// }
+	//
+	// return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
+	// "All Provisional Calendar entries retrieved successfully", calendarDTOs,
+	// HttpStatus.OK.value()));
+	// } catch (RuntimeException ex) {
+	// return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	// .body(new GenericResponse<>(false, "An error occurred while fetching
+	// Provisional Calendar entries",
+	// null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
+	// }
+	// }
 
 	@GetMapping("/getAllfilter")
 	@Operation(summary = "Get all Provisional Calendar entries between specific dates and by submittedBy")
@@ -254,8 +285,7 @@ public class ProvisionalCalendarFinalController {
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 			@RequestParam(required = false) String inputStatus,
-			@RequestParam(required = false) String submittedBy
-	) {
+			@RequestParam(required = false) String submittedBy) {
 		try {
 			// Fetch filtered provisional calendar entries
 			List<ProvisionalCalendarDTO> calendarDTOs = provisionalCalendarService
@@ -268,8 +298,7 @@ public class ProvisionalCalendarFinalController {
 								true,
 								"No Provisional Calendar entries found",
 								calendarDTOs,
-								HttpStatus.NOT_FOUND.value()
-						));
+								HttpStatus.NOT_FOUND.value()));
 			}
 
 			// Return a successful response with the data
@@ -278,8 +307,7 @@ public class ProvisionalCalendarFinalController {
 							true,
 							"All Provisional Calendar entries retrieved successfully",
 							calendarDTOs,
-							HttpStatus.OK.value()
-					));
+							HttpStatus.OK.value()));
 		} catch (RuntimeException ex) {
 			// Log the exception for debugging
 			ex.printStackTrace();
@@ -290,8 +318,7 @@ public class ProvisionalCalendarFinalController {
 							false,
 							"An error occurred while fetching Provisional Calendar entries",
 							null,
-							HttpStatus.INTERNAL_SERVER_ERROR.value()
-					));
+							HttpStatus.INTERNAL_SERVER_ERROR.value()));
 		}
 	}
 
