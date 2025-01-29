@@ -192,8 +192,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 
 		if (provisionalCalendarRepository.existsById(id)) {
 			ProvisionalCalendar existingEntity = provisionalCalendarRepository.findById(id).get();
-			ProvisionalCalendar entityNew = ProvisionalCalendarDTOMapper.toEntity(provisionalCalendarDTO);
 
+			ProvisionalCalendar entityNew = ProvisionalCalendarDTOMapper.toEntity(provisionalCalendarDTO);
 			Field[] fields = entityNew.getClass().getDeclaredFields();
 			for (Field field : fields) {
 				field.setAccessible(true); // Allow access to private fields
@@ -208,7 +208,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 					throw new RuntimeException("Error updating field: " + field.getName(), e);
 				}
 			}
-			existingEntity.setCurrentStatus(existingEntity.getInputStatus());
+			// existingEntity.setCurrentStatus(existingEntity.getInputStatus());
 			existingEntity.setDocumentDate(existingEntity.getDateOfInput());
 			ProvisionalCalendar updatedEntity = provisionalCalendarRepository.save(existingEntity);
 			// changes for status update by sushmitha
@@ -226,6 +226,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			instanceUpdate = inputInstanceRepository.save(instanceUpdate);
 			// ends here
 			return mapToDto(updatedEntity);
+			
 		} else {
 			throw new ResourceNotFoundException("ProvisionalCalendar with ID "
 					+ id + " not found");

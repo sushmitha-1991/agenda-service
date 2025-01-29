@@ -104,7 +104,9 @@ public class ProvisionalCalendarFinalController {
 		ProvisionalCalendarDTO updatedCalendar = provisionalCalendarService.updateProvisionalCalendar(id,
 				provisionalCalendarDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
-				"Provisional Calendar updated successfully", updatedCalendar, HttpStatus.OK.value()));
+		"Document '" + updatedCalendar.getInputRefNo()
+								+ "'' has been Updated successfully",
+				updatedCalendar, HttpStatus.OK.value()));
 	}
 	/**
 	 * Soft delete a Provisional Calendar entry.
