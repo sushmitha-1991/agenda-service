@@ -59,7 +59,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(
-				(authz) -> authz.requestMatchers("/agendapapers/api-docs/**", "agendapapers/swagger-ui/**", "agendapapers/swagger-ui.html").permitAll()
+				(authz) -> authz.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 						.anyRequest().authenticated())
 				.csrf(AbstractHttpConfigurer::disable).authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
