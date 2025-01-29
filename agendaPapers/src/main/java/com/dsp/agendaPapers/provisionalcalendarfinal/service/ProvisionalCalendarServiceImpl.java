@@ -434,6 +434,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 				.rajyaSabhaSessionNo(provisionalCalendar.getRajyaSabhaSession())
 				.generatedFlag(provisionalCalendar.getGeneratedFlag()).content(provisionalCalendar.getContent())
 				.inputStatus(provisionalCalendar.getInputStatus()).remarks(provisionalCalendar.getRemarks())
+				.inputRefNo(provisionalCalendar.getInputRefNo())
 				.applicationId(provisionalCalendar.getApplicationId())
 				.applicationInstanceDTO(ApplicationInstanceDTO.builder().id(provisionalCalendar.getId())
 						.applicationId(provisionalCalendar.getApplicationId())
