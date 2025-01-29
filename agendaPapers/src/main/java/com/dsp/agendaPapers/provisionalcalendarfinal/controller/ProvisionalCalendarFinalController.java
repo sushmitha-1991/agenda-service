@@ -105,7 +105,7 @@ public class ProvisionalCalendarFinalController {
 				provisionalCalendarDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
 		"Document '" + updatedCalendar.getInputRefNo()
-								+ "'' has been Updated successfully",
+								+ "' has been Updated successfully",
 				updatedCalendar, HttpStatus.OK.value()));
 	}
 	/**
