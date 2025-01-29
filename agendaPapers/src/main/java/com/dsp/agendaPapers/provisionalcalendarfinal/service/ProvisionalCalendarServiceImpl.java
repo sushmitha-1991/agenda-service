@@ -597,30 +597,18 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 			Long houseId = getHouseId();
 			for (ProvisionalCalendar provisionalCalendar : provisionalCalendars) {
 				provisionalCalendar.setStatus(provisionalCalendar.getCurrentStatus());
-				if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
-						|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
-					if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
-							|| provisionalCalendar.getCurrentStatus().equalsIgnoreCase("published")) {
-						if (provisionalCalendar.getGeneratedFlag() != null &&
-								provisionalCalendar.getGeneratedFlag()) {
-							provisionalCalendar.setInputStatus(provisionalCalendar.getCurrentStatus());
-						}
-					} else {
-						provisionalCalendar.setInputStatus("In Progress");
-					}
-				} else {
-					provisionalCalendar.setInputStatus("In Progress");
-				}
 				provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
 				if (houseId == 1) {
 					if (provisionalCalendar.getRsSessionNo() != null) {
 						// Convert entities to DTOs
-						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
-						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
+						// ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
+						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(provisionalCalendar.getId());
+						InputInstance inputInstance=new InputInstance();
 						if (!instance.isEmpty()) {
-							InputInstance inputInstance = instance.get();
+							 inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
 								// if(generated statusis not returned or draft)
+
 								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
 										|| !provisionalCalendar.getCurrentStatus().equalsIgnoreCase("draft")) {
 									if (provisionalCalendar.getCurrentStatus().equalsIgnoreCase("approved")
@@ -633,19 +621,24 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 									}
 								} else {
 									inputInstance.setCurrentStatus("In Progress");
+
 								}
 							}
 							inputInstance = inputInstanceRepository.save(inputInstance);
-							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
 						}
+						provisionalCalendar.setInputStatus(inputInstance.getCurrentStatus());
+						provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
+						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
+						dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
+
 						response.add(dto);
 					}
 				} else if (houseId == 2) {
 					if (provisionalCalendar.getLokSabhaSessionNo() != null) {
-						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
-						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(dto.getId());
+						Optional<InputInstance> instance = inputInstanceRepository.findByRefId(provisionalCalendar.getId());
+						InputInstance inputInstance=new InputInstance();
 						if (!instance.isEmpty()) {
-							InputInstance inputInstance = instance.get();
+							 inputInstance = instance.get();
 							if (inputInstance.getApplicationInstanceId() != null) {
 								// if(generated statusis not returned or draft)
 								if (!provisionalCalendar.getCurrentStatus().equalsIgnoreCase("returned")
@@ -663,10 +656,14 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
 								}
 							}
 							inputInstance = inputInstanceRepository.save(inputInstance);
-							dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
 						}
+						provisionalCalendar.setInputStatus(inputInstance.getCurrentStatus());
+						provisionalCalendar = provisionalCalendarRepository.save(provisionalCalendar);
+						ProvisionalCalendarDTO dto = ProvisionalCalendarDTOMapper.toDTO(provisionalCalendar);
+						dto.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstance));
 						response.add(dto);
 					}
+					
 				}
 			}
 
