@@ -162,9 +162,7 @@ public class ProvisionalCalendarFinalController {
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new GenericResponse<>(true,
-						"Provisional Calender '" + createdTableOffice.getApplicationNo()
-								+ "'' has been Updated at '" + createdTableOffice.getPendingAt()
-								+ "' successfully",
+						"Provisional Calender has been created successfully",
 						createdTableOffice, HttpStatus.CREATED.value()));
 	}
 
@@ -177,18 +175,38 @@ public class ProvisionalCalendarFinalController {
 	public ResponseEntity<GenericResponse<ProvisionalCalendarGenerateDTO>> createProvisionalCalendarGenerate(
 			@Valid @RequestBody ProvisionalCalendarGenerateDTO provisionalCalendarGenerateDTO) {
 		// for ref id
+		String message="";
+		System.out.println("@@@");
+		System.out.println(provisionalCalendarGenerateDTO.getApplicationNo());
+		if (StringUtils.isBlank(provisionalCalendarGenerateDTO.getApplicationNo())) {
+
+					message="Provisional Calender has been created successfully";
+		} else {
+			
+					message ="Provisional Calender has been updated successfully.";
+					
+		}
 
 		ProvisionalCalendarGenerateDTO createdGenerate = provisionalCalendarService
 				.createProvisionalCalendarGenerate(provisionalCalendarGenerateDTO);
-		if (StringUtils.isBlank(provisionalCalendarGenerateDTO.getApplicationNo())) {
+		System.out.println("@@@");
+		System.out.println(provisionalCalendarGenerateDTO.getApplicationNo());
+		
 			return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
-					"Provisional Calender has been created successfully",
+					message,
 					createdGenerate, HttpStatus.CREATED.value()));
-		} else {
-			return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
-					"Provisional Calender has been updated successfully",
-					createdGenerate, HttpStatus.CREATED.value()));
-		}
+		
+		/*if(provisionalCalendarGenerateDTO.getApplicationNo()=="" || 
+				provisionalCalendarGenerateDTO.getApplicationNo()==null)
+				{
+					message="Provisional Calender has been created successfully.";
+
+				}
+				else
+				{
+					message="Provisional Calender has been updated successfully.";
+				}
+ */
 	}
 
 	// for the input status
