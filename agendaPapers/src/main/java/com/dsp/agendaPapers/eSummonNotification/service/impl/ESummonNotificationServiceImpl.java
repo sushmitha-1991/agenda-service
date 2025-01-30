@@ -125,21 +125,14 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 				MastersLokSabhaSession session = masterLSSRepository
 						.findById(masterLSSRepository.findLatestByCreatedBy())
 						.get();
-				summonNotification.setLokSabhaNo(session.getSessionNumber());
-				summonNotification.setSessionNo(session.getLokSabha().getLokSabhaNumber());
+				summonNotification.setSessionNo(session.getSessionNumber());
+				summonNotification.setLokSabhaNo(session.getLokSabha().getLokSabhaNumber());
 				summonNotification.setRajyasabhaSessionNo("");
 
 			}
 			// Save SummonNotification entity initially to generate the ID
 			ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
 			log.debug("Initial save of E-SummonNotification to generate ID: {}", savedNotification);
-
-			// String applicationNo = generateApplicationNo(
-			// 		eSummonNotificationDTO.getLokSabhaNo(),
-			// 		eSummonNotificationDTO.getSessionNo(),
-			// 		eSummonNotificationDTO.getRajyasabhaSessionNo(),
-			// 		savedNotification.getId());
-			// savedNotification.setApplicationNo(applicationNo);
 			savedNotification = eSummonNotificationRepository.save(savedNotification);
 
 			// Save the SummonNotification entity again with the generated Application No
@@ -240,41 +233,6 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			throw e;
 		}
 	}
-
-	// public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
-	// 	String url = masterServiceUrl + "/serial-number";
-
-	// 	SerialNumberResponse res = new SerialNumberResponse();
-	// 	try {
-	// 		// RestTemplate restTemplate = new RestTemplate();
-	// 		// return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
-	// 		System.out.println("@@@@@@@@@@");
-	// 		ResponseEntity<GenericResponse<SerialNumberResponse>> response = restTemplate.exchange(url,
-	// 				HttpMethod.POST, new HttpEntity<>(request),
-	// 				new ParameterizedTypeReference<GenericResponse<SerialNumberResponse>>() {
-	// 				});
-	// 		System.out.println(response);
-	// 		System.out.println("applicationNo");
-	// 		SerialNumberResponse applicationNo = response.getBody().getData();
-	// 		System.out.println(applicationNo);
-	// 		// return savedInstance;
-	// 		return res;
-	// 	} catch (Exception e) {
-	// 		System.err.println("Error during API call: " + e.getMessage());
-	// 		throw e;
-	// 	}
-	// }
-
-	// private String generateApplicationNo(String lokSabhaNo, String sessionNo, String rajyaSabhaSessionNo, Long id) {
-	// 	if (lokSabhaNo != null && !lokSabhaNo.isEmpty() && sessionNo != null && !sessionNo.isEmpty()) {
-	// 		return "ES-LS" + "-" + lokSabhaNo + "-" + sessionNo + "-" + id;
-	// 	} else if (rajyaSabhaSessionNo != null && !rajyaSabhaSessionNo.isEmpty()) {
-	// 		return "ES-RS" + "-" + rajyaSabhaSessionNo + "-" + id;
-	// 	} else {
-	// 		throw new IllegalArgumentException("Insufficient data to generate application number");
-	// 	}
-	// }
-
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
 		String url = applicationInstanceServiceUrl + "/create";
 		log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url,
