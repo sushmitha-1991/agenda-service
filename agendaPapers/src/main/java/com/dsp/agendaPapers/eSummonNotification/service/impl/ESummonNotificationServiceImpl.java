@@ -520,6 +520,15 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 			// Save the updated ESummonNotification
 			ESummonNotification updatedNotification = eSummonNotificationRepository.save(existingNotification);
 
+			Optional<InputInstance> inputInstance=inputInstanceRepository.findByRefId(updatedNotification.getId());
+			if(inputInstance!=null)
+			{
+				InputInstance instance=inputInstance.get();
+				instance.setCurrentStatus(updatedNotification.getStatus());
+				instance.setHtmlContentEnglish(updatedNotification.getTemplateContent());
+				instance.setHtmlContentHindi(updatedNotification.getTemplateContentHindi());
+				instance=inputInstanceRepository.save(instance);
+			}
 			// Prepare the response DTO
 			ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(updatedNotification);
 
