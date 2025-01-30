@@ -3,6 +3,7 @@ package com.dsp.agendaPapers.provisionalcalendarfinal.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -104,10 +105,11 @@ public class ProvisionalCalendarFinalController {
 		ProvisionalCalendarDTO updatedCalendar = provisionalCalendarService.updateProvisionalCalendar(id,
 				provisionalCalendarDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(new GenericResponse<>(true,
-		"Document '" + updatedCalendar.getInputRefNo()
-								+ "' has been Updated successfully",
+				"Provisional Calender Input '" + updatedCalendar.getInputRefNo()
+						+ "' has been Updated successfully",
 				updatedCalendar, HttpStatus.OK.value()));
 	}
+
 	/**
 	 * Soft delete a Provisional Calendar entry.
 	 */
@@ -141,7 +143,7 @@ public class ProvisionalCalendarFinalController {
 		// HttpStatus.CREATED.value()));
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
-				"Document '" + createdInput.getInputInstanceDTO().getApplicationNo()
+				"Provisional Calender Input '" + createdInput.getInputInstanceDTO().getApplicationNo()
 						+ "' has been submitted to '" + createdInput.getInputInstanceDTO().getPendingAt()
 						+ "' successfully",
 				createdInput, HttpStatus.CREATED.value()));
@@ -157,14 +159,10 @@ public class ProvisionalCalendarFinalController {
 			@Valid @RequestBody ProvisionalCalendarTableOfficeDTO provisionalCalendarTableOfficeDTO) {
 		ProvisionalCalendarTableOfficeDTO createdTableOffice = provisionalCalendarService
 				.createProvisionalCalendarTableOffice(provisionalCalendarTableOfficeDTO);
-		// return ResponseEntity.status(HttpStatus.CREATED)
-		// .body(new GenericResponse<>(true, "Provisional Calendar Table Office created
-		// successfully",
-		// createdTableOffice, HttpStatus.CREATED.value()));
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new GenericResponse<>(true,
-						"Document '" + createdTableOffice.getApplicationNo()
+						"Provisional Calender '" + createdTableOffice.getApplicationNo()
 								+ "'' has been Updated at '" + createdTableOffice.getPendingAt()
 								+ "' successfully",
 						createdTableOffice, HttpStatus.CREATED.value()));
@@ -182,15 +180,15 @@ public class ProvisionalCalendarFinalController {
 
 		ProvisionalCalendarGenerateDTO createdGenerate = provisionalCalendarService
 				.createProvisionalCalendarGenerate(provisionalCalendarGenerateDTO);
-		// return ResponseEntity.status(HttpStatus.CREATED).body(new
-		// GenericResponse<>(true,
-		// "Provisional Calendar generated successfully", createdGenerate,
-		// HttpStatus.CREATED.value()));
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
-				"Document '" + createdGenerate.getApplicationNo()
-						+ "'' has been Generated successfully",
-				createdGenerate, HttpStatus.CREATED.value()));
+		if (StringUtils.isBlank(provisionalCalendarGenerateDTO.getApplicationNo())) {
+			return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
+					"Provisional Calender has been created successfully",
+					createdGenerate, HttpStatus.CREATED.value()));
+		} else {
+			return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(true,
+					"Provisional Calender has been updated successfully",
+					createdGenerate, HttpStatus.CREATED.value()));
+		}
 	}
 
 	// for the input status
@@ -210,7 +208,7 @@ public class ProvisionalCalendarFinalController {
 
 		ProvisionalCalendarInputDTO updatedDTO = provisionalCalendarService.updateInputStatus(id, inputStatus, remarks);
 		String message = "";
-		message = "Document '" + updatedDTO.getInputInstanceDTO().getApplicationNo()
+		message = "Provisional Calender Input '" + updatedDTO.getInputInstanceDTO().getApplicationNo()
 				+ "' has been returned with remarks to '"
 				+ updatedDTO.getInputInstanceDTO().getPendingAt()
 				+ "' successfully";
