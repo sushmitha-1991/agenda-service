@@ -341,23 +341,27 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
         }
         inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
         // update application no in document_metadata table by uuid
-        for (int i = 0; i < responceDTO.getListOfDocument().size(); i++) {           
-            String uuid = String.valueOf(responceDTO.getListOfDocument().get(i).get("documentUuid"));
-            try {
-				int uuidExist=inputInstanceRepository.checkUuidExists(uuid);
-                System.out.println("UUUUUUUUUUUUUU");
-				System.err.println(uuidExist);
-				if (uuidExist==1) {
-					inputInstanceRepository.updateApplicationNoByUUID(uuid, inputInstanceEntity.getApplicationNo());
-				}
-            } catch (Exception e) {
-                System.out.println("Error in Updating $$$$$$$$$");
-                throw new ResourceNotFoundException("error in updating application no in document meta data");
-            }
+        if (responceDTO.getListOfDocument().size() > 0) {
+            for (int i = 0; i < responceDTO.getListOfDocument().size(); i++) {
+                String uuid = String.valueOf(responceDTO.getListOfDocument().get(i).get("documentUuid"));
+                try {
+                    if (!StringUtils.isBlank(uuid)) {
+                        int uuidExist = inputInstanceRepository.checkUuidExists(uuid);
+                        System.out.println("UUUUUUUUUUUUUU");
+                        System.err.println(uuidExist);
+                        if (uuidExist == 1) {
+                            inputInstanceRepository.updateApplicationNoByUUID(uuid, inputInstanceEntity.getApplicationNo());
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error in Updating $$$$$$$$$");
+                    throw new ResourceNotFoundException("error in updating application no in document meta data");
+                }
 
+            }
         }
-		System.out.println("!!!!!!!!!!!!!!!!");
-		System.out.println(responceDTO);
+        System.out.println("!!!!!!!!!!!!!!!!");
+        System.out.println(responceDTO);
         responceDTO.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstanceEntity));
         // Ends Here
         return responceDTO;
