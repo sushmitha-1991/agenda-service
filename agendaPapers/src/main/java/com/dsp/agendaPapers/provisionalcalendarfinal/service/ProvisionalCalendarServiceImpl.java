@@ -262,21 +262,6 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
         Long houseId = getHouseId();
         SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
         serialNumberRequest.setAppId(inputDTO.getApplicationId());
-        if (houseId == 1) {
-            serialNumberRequest.setSessionId(inputDTO.getRsSessionNo());
-        }
-        if (houseId == 2) {
-            serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
-        }
-        // System.out.println("house abbr");
-        // System.out.println(houseAbbr);
-        // if (houseAbbr=="RS") {
-        // serialNumberRequest.setSessionId(inputDTO.getRsSessionNo());
-        // }
-        // if (houseAbbr == "LS") {
-        // serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
-        // }
-        SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
         ProvisionalCalendar provisionalCalendar = ProvisionalCalendar.builder()
                 .dateOfInput(inputDTO.getDateOfInput())
                 .language(inputDTO.getLanguage()).submittedBy(inputDTO.getSubmittedBy())
@@ -292,9 +277,9 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
                 .lokSabhaSessionNumber(inputDTO.getLokSabhaSessionNumber())
                 .rajyaSabhaSession(inputDTO.getRajyaSabhaSession())
                 .documentDate(inputDTO.getDateOfInput())
-                .applicationNo(applicationNo.getId())
+                // .applicationNo(applicationNo.getId())
                 // Set applicationNo
-                .inputRefNo(applicationNo.getId())
+                // .inputRefNo(applicationNo.getId())
                 .generatedFlag(false)
                 .htmlContentEnglish(inputDTO.getInputText())
                 // input status and remarks
@@ -309,6 +294,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
             provisionalCalendar.setLokSabhaSessionNo(null);
             provisionalCalendar.setLokSabhaSession("");
             provisionalCalendar.setLokSabhaSessionNumber("");
+            serialNumberRequest.setSessionId(inputDTO.getRsSessionNo());
 
         } else if (houseId == 2) {
             MastersLokSabhaSession session = masterLSSRepository
@@ -318,6 +304,13 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
             provisionalCalendar.setLokSabhaSessionNumber(session.getSessionNumber());
             provisionalCalendar.setLokSabhaSession(session.getLokSabha().getLokSabhaNumber());
             provisionalCalendar.setRajyaSabhaSession("");
+            serialNumberRequest.setSessionId(inputDTO.getLokSabhaSessionNo());
+
+        }
+        if (StringUtils.isBlank(inputDTO.getInputRefNo())) {
+            SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+            provisionalCalendar.setApplicationNo(applicationNo.getId());
+            provisionalCalendar.setInputRefNo(applicationNo.getId());
         }
         ProvisionalCalendar savedEntity = provisionalCalendarRepository.save(
                 provisionalCalendar);
@@ -362,10 +355,15 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
         }
         System.out.println("!!!!!!!!!!!!!!!!");
         System.out.println(responceDTO);
+        if (!StringUtils.isBlank(inputDTO.getInputRefNo())) {
+            // Get the Draft ID from draft table using appNo
+            String res = bearerClient.deleteDraftEntry(inputDTO.getInputRefNo());
+            System.out.println("res:::::::"+res);
+            // /delete-save-as-draft
+        }
         responceDTO.setInputInstanceDTO(InputInstanceMapper.toDTO(inputInstanceEntity));
         // Ends Here
         return responceDTO;
-
     }
     // save provisional calender tableOffice()
 
