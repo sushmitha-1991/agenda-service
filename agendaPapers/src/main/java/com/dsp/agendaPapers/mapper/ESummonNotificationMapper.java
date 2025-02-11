@@ -1,5 +1,7 @@
 package com.dsp.agendaPapers.mapper;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Component;
 
 
@@ -37,7 +39,7 @@ public class ESummonNotificationMapper {
 	                .templateType(eSummonNotification.getTemplateType())
 	                .draftStatus(eSummonNotification.getDraftStatus())
 	                .customTemplate(eSummonNotification.getCustomTemplate())
-	                .eSummonStartAt(eSummonNotification.getESummonStartAt())
+	                .esummonStartAt(eSummonNotification.getEsummonStartAt())
 	                // Uncomment if recursive mapping is needed
 	                // .parentNotification(toDTO(eSummonNotification.getParentNotification()))
 	                .build();
@@ -64,7 +66,8 @@ public class ESummonNotificationMapper {
 	                .templateType(dto.getTemplateType())
 	                .draftStatus(dto.getDraftStatus())
 	                .customTemplate(dto.getCustomTemplate())
-	                .eSummonStartAt(dto.getESummonStartAt())
+	                
+	                .esummonStartAt(dto.getEsummonStartAt())
 	                // Uncomment if recursive mapping is needed
 	                // .parentNotification(toEntity(dto.getParentNotification()))
 	                .build();

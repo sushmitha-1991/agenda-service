@@ -38,7 +38,7 @@ public class ESummonNotificationDTO {
 	
 	private Boolean draftStatus = false;
 	
-	private LocalDateTime eSummonStartAt;
+	private LocalDateTime esummonStartAt;
 
 	//private LocalDateTime summonStartAt;
 	

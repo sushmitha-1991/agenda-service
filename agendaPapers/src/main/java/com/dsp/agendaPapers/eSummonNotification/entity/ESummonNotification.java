@@ -60,9 +60,9 @@ public class ESummonNotification extends Auditable {
 	@Column(name = "application_no", length = 50)
 	private String applicationNo;
 	
-	@JsonFormat(pattern = "dd-MM-yyyy HH:mm")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 	@Column(name = "e_summon_start_at")
-	private LocalDateTime eSummonStartAt;
+	private LocalDateTime esummonStartAt;
 
 	@Column(name = "status", nullable = false, length = 50)
 	private String status;
