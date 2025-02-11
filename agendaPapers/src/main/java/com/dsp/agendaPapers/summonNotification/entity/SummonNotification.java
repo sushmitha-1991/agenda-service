@@ -59,6 +59,11 @@ public class SummonNotification extends Auditable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 	@Column(name = "summon_start_at")
 	private LocalDateTime summonStartAt;
+	
+//	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+//	@Column(name = "summon_start_at")
+//	private OffsetDateTime summonStartAt;
+
 
 	@Column(name = "application_no", length = 50)
 	private String applicationNo;

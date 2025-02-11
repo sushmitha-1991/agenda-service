@@ -37,6 +37,8 @@ public class ESummonNotificationDTO {
 	private String esummonIssuanceDateHindi;
 	
 	private Boolean draftStatus = false;
+	
+	private LocalDateTime eSummonStartAt;
 
 	//private LocalDateTime summonStartAt;
 	
