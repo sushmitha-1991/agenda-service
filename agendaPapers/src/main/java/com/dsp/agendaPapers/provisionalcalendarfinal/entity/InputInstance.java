@@ -89,4 +89,9 @@ public class InputInstance extends Auditable {
     
     @Column(name = "application_instance_id")
     private Long applicationInstanceId;
+    //download Document changes
+    @Column(name = "html_content_en", columnDefinition = "text")
+	private String htmlContentEnglish;
+	@Column(name = "html_content_hi", columnDefinition = "text")
+	private String htmlContentHindi;
 }

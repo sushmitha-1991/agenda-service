@@ -37,6 +37,8 @@ public class ProvisionalCalendarTableOfficeDTO {
     private Long applicationId;
     private Long rssNo;
     private Long lssNo;
-    
-
+    private String applicationNo;
+    private String pendingAt;
+    private String inputStatus;
+    private String status;
 }

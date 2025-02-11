@@ -59,7 +59,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(
-				(authz) -> authz.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+				(authz) -> authz.requestMatchers("/agendapapers/v3/api-docs/**", "/agendapapers/swagger-ui/**", "/agendapapers/swagger-ui.html").permitAll()
 						.anyRequest().authenticated())
 				.csrf(AbstractHttpConfigurer::disable).authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -69,4 +69,19 @@ public class SecurityConfig {
 
 		return http.build();
 	}
+	
+	// @Bean
+	// public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	// 	http.authorizeHttpRequests(
+	// 			(authz) -> authz.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+	// 					.anyRequest().authenticated())
+	// 			.csrf(AbstractHttpConfigurer::disable).authenticationProvider(authenticationProvider())
+	// 			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+	// 	http.exceptionHandling((ex) -> ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
+	// 			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+	// 	return http.build();
+	// }
+
 }

@@ -46,10 +46,10 @@ public class ProvisionalCalendar extends ApplicationInstance {
         @Column(name = "subject", length = 128)
         private String subject;
 
-        @Column(name = "input_text", length = 4096)
+        @Column(name = "input_text", columnDefinition = "TEXT")
         private String inputText;
 
-        @Column(name = "footnote_text", length = 512)
+        @Column(name = "footnote_text", columnDefinition="TEXT")
         private String footnoteText;
 
         @Column(name = "approver_name", length = 128)
@@ -78,10 +78,10 @@ public class ProvisionalCalendar extends ApplicationInstance {
         @Convert(converter = JsonMapConverter.class)
         private List<Map<String, Object>> listOfDocumentTableOffice;
 
-        @Column(name = "list_of_document_tableoffice_footnote")
+        @Column(name = "list_of_document_tableoffice_footnote",columnDefinition="text")
         private String listOfDocumentTableOfficeFootnote;
 
-        @Column(name = "list_of_document_tableoffice_note")
+        @Column(name = "list_of_document_tableoffice_note",columnDefinition="text")
         private String listOfDocumentTableOfficeNote;
 
         @Column(name = "date_of_sitting_inputs_tableoffice", columnDefinition = "jsonb")
@@ -94,7 +94,7 @@ public class ProvisionalCalendar extends ApplicationInstance {
 
         // private Date dateOfInputTableOffice;
 
-        @Column(name = "input_text_tableoffice", length = 4096)
+        @Column(name = "input_text_tableoffice", columnDefinition="text")
         private String inputTextTableOffice;
 
         @Column(name = "submitted_by_branch_tableoffice", length = 100)

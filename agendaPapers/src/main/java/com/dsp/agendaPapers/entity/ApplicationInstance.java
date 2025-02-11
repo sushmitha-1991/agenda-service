@@ -78,8 +78,13 @@ public class ApplicationInstance extends Auditable {
 	// adding the coloumn
 	@Column(name = "document_date")
 	private LocalDate documentDate;
-	//Changes done by Sushmitha
+	// Changes done by Sushmitha
 	// private Date documentDate;
-
+	// html_content_en
+	// html_content_hi
+	@Column(name = "html_content_en", columnDefinition = "text")
+	private String htmlContentEnglish;
+	@Column(name = "html_content_hi", columnDefinition = "text")
+	private String htmlContentHindi;
 
 }
