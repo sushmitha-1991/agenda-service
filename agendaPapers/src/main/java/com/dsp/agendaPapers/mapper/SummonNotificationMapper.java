@@ -24,6 +24,7 @@ public class SummonNotificationMapper {
                 .summonIssuanceDateHindi(summonNotification.getSummonIssuanceDateHindi())
                 .notificationNo(summonNotification.getNotificationNo())
                 .summonStartAt(summonNotification.getSummonStartAt())
+                
                 .applicationNo(summonNotification.getApplicationNo())
                 .status(summonNotification.getStatus())
                 .templateContent(summonNotification.getTemplateContent())
