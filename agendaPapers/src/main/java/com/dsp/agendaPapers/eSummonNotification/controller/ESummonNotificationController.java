@@ -32,7 +32,7 @@ public class ESummonNotificationController {
 
 	@Operation(summary = "Create a new E-SummonNotification", description = "Creates a new E-SummonNotification and returns the created E-SummonNotification details.")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "201", description = "E-SummonNotification created successfully"),
+			@ApiResponse(responseCode = "201", description = "E-Summon created successfully."),
 			@ApiResponse(responseCode = "400", description = "Invalid input, object invalid"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@PostMapping("/create")
@@ -42,7 +42,7 @@ public class ESummonNotificationController {
 				.saveESummonNotification(eSummonNotificationDTO);
 		System.out.println("############" + eSummonNotificationDTO);
 		GenericResponse<ESummonNotificationDTO> response = new GenericResponse<>(true,
-				"E-SummonNotification created successfully", savedNotification, HttpStatus.CREATED.value());
+				"E-Summon created successfully.", savedNotification, HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
