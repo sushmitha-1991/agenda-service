@@ -1,10 +1,19 @@
 package com.dsp.agendaPapers.eSummonNotification.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.dsp.agendaPapers.eSummonHistory.entity.ESummonHistory;
+import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonHistory.repository.ESummonHistoryRepository;
+import com.dsp.agendaPapers.eSummonHistory.repository.PersonalDetailsRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -64,6 +73,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
+
+    @Autowired
+    private ESummonHistoryRepository eSummonHistoryRepository;
+
+    @Autowired
+    private PersonalDetailsRepository personalDetailsRepository;
+
 
     @Autowired
     private MasterLSSRepository masterLSSRepository;
@@ -137,6 +153,19 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
             log.debug("Initial save of E-SummonNotification to generate ID: {}", savedNotification);
             savedNotification = eSummonNotificationRepository.save(savedNotification);
+
+            try {
+                if (eSummonNotificationDTO.getMemberIds() != null) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    savedNotification.setMemberIds(mapper.writeValueAsString(eSummonNotificationDTO.getMemberIds()));
+                }
+            } catch (JsonProcessingException e) {
+                log.error("Error serializing member IDs", e);
+                // Handle the exception, e.g., throw a custom runtime exception or return an error response
+            }
+
+
+
 
             // Save the SummonNotification entity again with the generated Application No
             // savedNotification = eSummonNotificationRepository.save(savedNotification);
@@ -394,7 +423,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
         try {
             ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(url,
                     HttpMethod.GET, null, new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
-            });
+                    });
 
             if (response == null || response.getBody() == null || response.getBody().getData() == null) {
                 log.error("Response or body is null when fetching ApplicationInstance for applicationNo: {}",
@@ -573,7 +602,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                 ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(
                         applicationInstanceUrl, HttpMethod.GET, null,
                         new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
-                });
+                        });
 
                 if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                     ApplicationInstanceDTO applicationInstanceDTOResponse = response.getBody().getData();
@@ -627,5 +656,144 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
         // TODO Auto-generated method stub
 
     }
-
 }
+    // new Create
+
+//    @Transactional
+//    @Override
+//    public ESummonNotificationDTO saveESummonNotification(ESummonNotificationDTO eSummonNotificationDTO) {
+//        log.debug("Entering saveESummonNotification with ESummonNotificationDTO: {}", eSummonNotificationDTO);
+//
+//        Long houseId = null;
+//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        if (principal instanceof UserDetailsDTO) {
+//            houseId = ((UserDetailsDTO) principal).getHouseId();
+//        }
+//
+//        SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
+//        serialNumberRequest.setAppId(eSummonNotificationDTO.getApplicationId());
+//        if (houseId == 1) {
+//            serialNumberRequest.setSessionId(mastersRSSRepository.findLatestByCreatedBy());
+//        } else if (houseId == 2) {
+//            serialNumberRequest.setSessionId(masterLSSRepository.findLatestByCreatedBy());
+//        }
+//
+//        try {
+//            // Convert DTO to entity
+//            ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
+//            if (StringUtils.isBlank(summonNotification.getApplicationNo())) {
+//                SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+//                summonNotification.setApplicationNo(applicationNo.getId());
+//            }
+//            log.debug("Converted E-SummonNotificationDTO to entity: {}", summonNotification);
+//
+//            if (houseId == 1) {
+//                MastersRajyaSabha session = mastersRSSRepository.findById(mastersRSSRepository.findLatestByCreatedBy())
+//                        .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+//                summonNotification.setRajyasabhaSessionNo(session.getSessionNumber());
+//                summonNotification.setLokSabhaNo("");
+//                summonNotification.setSessionNo("");
+//            } else if (houseId == 2) {
+//                MastersLokSabhaSession session = masterLSSRepository
+//                        .findById(masterLSSRepository.findLatestByCreatedBy())
+//                        .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+//                summonNotification.setSessionNo(session.getSessionNumber());
+//                summonNotification.setLokSabhaNo(session.getLokSabha().getLokSabhaNumber());
+//                summonNotification.setRajyasabhaSessionNo("");
+//            }
+//
+//            // Save SummonNotification entity
+//            ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
+//            log.debug("Saved E-SummonNotification entity: {}", savedNotification);
+//
+//            // Process member IDs
+//            if (eSummonNotificationDTO.getMemberIds() != null) {
+//                List<ESummonNotificationDTO.MemberIdDTO> memberIds = eSummonNotificationDTO.getMemberIds();
+//                ObjectMapper mapper = new ObjectMapper();
+//                savedNotification.setMemberIds(mapper.writeValueAsString(memberIds));
+//
+//                for (ESummonNotificationDTO.MemberIdDTO memberId : memberIds) {
+//                    PersonalDetails member = personalDetailsRepository.findById(memberId.getId())
+//                            .orElseThrow(() -> new EntityNotFoundException("Member not found with ID: " + memberId));
+//
+//                    ESummonHistory history = ESummonHistory.builder()
+//                            .eSummon(savedNotification)
+//                            .member(member)
+//                            .documentUuid(UUID.randomUUID())
+//                            .mailSentAt(LocalDateTime.now())
+//                            .mailStatus("PENDING")
+//                            .build();
+//
+//                    eSummonHistoryRepository.save(history);
+//                }
+//            }
+//
+//            // Proceed with the rest of your existing logic...
+//
+//            // Create ApplicationInstanceDTO
+//            ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
+//                    .applicationId(eSummonNotificationDTO.getApplicationId())
+//                    .applicationNo(savedNotification.getApplicationNo())
+//                    .currentStatus(savedNotification.getStatus())
+//                    .documentDate(savedNotification.getEsummonIssuanceDate())
+//                    .publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl())
+//                    .refId(savedNotification.getId())
+//                    .lokSabhaSession(summonNotification.getLokSabhaNo())
+//                    .lokSabhaSessionNumber(summonNotification.getSessionNo())
+//                    .rajyaSabhaSession(summonNotification.getRajyasabhaSessionNo())
+//                    .htmlContentEnglish(summonNotification.getTemplateContent())
+//                    .htmlContentHindi(summonNotification.getTemplateContentHindi())
+//                    .build();
+//            log.debug("Created ApplicationInstanceDTO for microservice call: {}", applicationInstanceDTO);
+//
+//            // Call ApplicationInstance microservice
+//            ApplicationInstanceDTO savedInstanceDTO = createApplicationInstance(applicationInstanceDTO);
+//            log.debug("Saved ApplicationInstanceDTO returned from microservice: {}", savedInstanceDTO);
+//
+//            // Validate template IDs
+//            if (eSummonNotificationDTO.getTemplateId() != null) {
+//                validateTemplateId(eSummonNotificationDTO.getTemplateId());
+//            }
+//            if (eSummonNotificationDTO.getTemplateHindiId() != null) {
+//                validateTemplateId(eSummonNotificationDTO.getTemplateHindiId());
+//            }
+//
+//            // Create and save InputInstance
+//            InputInstance inputInstanceEntity = InputInstance.builder()
+//                    .applicationId(eSummonNotificationDTO.getApplicationId())
+//                    .applicationNo(savedNotification.getApplicationNo())
+//                    .currentStatus(savedNotification.getStatus())
+//                    .documentDate(savedNotification.getEsummonIssuanceDate())
+//                    .publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl())
+//                    .lokSabhaSession(summonNotification.getLokSabhaNo())
+//                    .lokSabhaSessionNumber(summonNotification.getSessionNo())
+//                    .rajyaSabhaSession(summonNotification.getRajyasabhaSessionNo())
+//                    .htmlContentEnglish(summonNotification.getTemplateContent())
+//                    .htmlContentHindi(summonNotification.getTemplateContentHindi())
+//                    .refId(savedNotification.getId())
+//                    .build();
+//            log.debug("Created InputInstance entity: {}", inputInstanceEntity);
+//
+//            inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
+//            log.debug("Saved InputInstance entity: {}", inputInstanceEntity);
+//
+//            // Convert saved InputInstance entity to DTO
+//            InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstanceEntity);
+//
+//            // Create ApplicationPapersDTO and save template content
+//            ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
+//                    .applicationId(eSummonNotificationDTO.getApplicationId())
+//                    .applicationInstanceId(savedInstanceDTO.getId())
+//                    .templateId(eSummonNotificationDTO.getTemplateId())
+//                    .templateContent(eSummonNotificationDTO.getTemplateContent())
+//                    .templateHindiId(eSummonNotificationDTO.getTemplateHindiId())
+//                    .templateContentHindi(eSummonNotificationDTO.getTemplateContentHindi())
+//                    .build();
+//            log.debug("
+//                    ::contentReference[oaicite:0]{index=0}
+//
+//
+//
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//
