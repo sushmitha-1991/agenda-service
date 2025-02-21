@@ -51,5 +51,4 @@ public class ESummonHistory extends Auditable {
 
     @Column(name = "remarks")
     private String remarks;
-
 }

@@ -79,5 +79,4 @@ public class ESummonNotification extends Auditable {
 	@Column(name = "member_ids", columnDefinition = "jsonb")
 	private String memberIds;
 
-
 }
