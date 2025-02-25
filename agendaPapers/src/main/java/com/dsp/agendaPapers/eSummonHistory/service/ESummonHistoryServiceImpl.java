@@ -14,8 +14,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,8 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
     private final ESummonNotificationRepository eSummonNotificationRepository;
     private final PersonalDetailsRepository personalDetailsRepository;
     private final ESummonHistoryMapper eSummonHistoryMapper;
+
+
 
 
 
@@ -130,40 +135,54 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
         Optional<ESummonHistory> entity = eSummonHistoryRepository.findById(id);
         return entity.map(eSummonHistoryMapper::toDTO);
     }
-    ///
 
-//    @Transactional
-//    public ESummonNotification createESummon(ESummonNotification eSummonNotification) {
-//        // Save the ESummonNotification entity
-//        ESummonNotification savedESummon = eSummonNotificationRepository.save(eSummonNotification);
-//
-//        // Parse memberIds (assuming it's a JSON array of member IDs)
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        List<Long> memberIds;
-//        try {
-//            memberIds = objectMapper.readValue(savedESummon.getMemberIds(), new TypeReference<List<Long>>() {});
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to parse member IDs", e);
-//        }
-//
-//        // Create ESummonHistory entries for each member
-//        for (Long memberId : memberIds) {
-//            PersonalDetails member = personalDetailsRepository.findById(memberId)
-//                    .orElseThrow(() -> new EntityNotFoundException("Member not found with ID: " + memberId));
-//
-//            ESummonHistory history = ESummonHistory.builder()
-//                    .eSummon(savedESummon)
-//                    .member(member)
-//                    .documentUuid(UUID.randomUUID())
-//                    .mailSentAt(LocalDateTime.now())
-//                    .mailStatus("PENDING")
-//                    .build();
-//
-//            eSummonHistoryRepository.save(history);
-//        }
-//
-//        return savedESummon;
-//    }
+    @Override
+    public List<ESummonHistoryDTO> sendESummonAndUpdateHistory(Long eSummonId, List<Long> memberIds) {
+        // Retrieve the eSummonNotification by id
+        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+        if (!optionalNotification.isPresent()) {
+            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+        }
+        ESummonNotification notification = optionalNotification.get();
+
+        // Retrieve member details using the provided memberIds
+        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+        List<ESummonHistoryDTO> historyDTOs = new ArrayList<>();
+
+        // Process each member
+        for (PersonalDetails member : members) {
+            // Simulate sending the eSummon (for example, send an email/notification)
+            System.out.println("Sending eSummon (ID: " + eSummonId + ") to member: "
+                    + member.getFullName() + ", Email: " + member.getEmailId());
+
+            // Create a new history record for the current member
+            ESummonHistory history = ESummonHistory.builder()
+                    .eSummon(notification)   // set associated eSummonNotification
+                    .member(member)          // set the member details
+                    .documentUuid(UUID.randomUUID())
+                    .mailSentAt(LocalDateTime.now())
+                    .mailStatus("SENT")
+                    .retryCount(0)
+                    .remarks("Email sent successfully")
+                    .build();
+
+            // Save the history record
+            ESummonHistory savedHistory = eSummonHistoryRepository.save(history);
+            // Map the saved entity to its DTO
+            ESummonHistoryDTO dto = eSummonHistoryMapper.toDTO(savedHistory);
+            historyDTOs.add(dto);
+        }
+        return historyDTOs;
+    }
+
+    // get by sumon id
+    @Override
+    public List<ESummonHistoryDTO> getHistoriesByESummonId(Long eSummonId) {
+        List<ESummonHistory> histories = eSummonHistoryRepository.findByeSummon_Id(eSummonId);
+        return histories.stream()
+                .map(eSummonHistoryMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }
 
 

@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,5 +30,9 @@ public interface ESummonHistoryRepository extends JpaRepository<ESummonHistory, 
                               @Param("mailSentAt") LocalDateTime mailSentAt,
                               @Param("mailStatus") String mailStatus,
                               @Param("retryCount") int retryCount);
+
+
+    // Note: "eSummon" is the property name in the entity.
+    List<ESummonHistory> findByeSummon_Id(Long eSummonId);
 }
 

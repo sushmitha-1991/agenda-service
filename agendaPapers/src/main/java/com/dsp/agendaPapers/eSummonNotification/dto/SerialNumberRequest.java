@@ -7,12 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public class SerialNumberRequest {
-	    Long appId;
-	    String sessionId;
-	}
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SerialNumberRequest {
+    Long appId;
+    String sessionId;
+}
 

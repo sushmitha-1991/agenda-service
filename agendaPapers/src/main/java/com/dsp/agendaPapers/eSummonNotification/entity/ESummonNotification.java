@@ -1,16 +1,15 @@
 package com.dsp.agendaPapers.eSummonNotification.entity;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import com.dsp.agendaPapers.entity.Auditable;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -18,8 +17,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Table(name = "e_summon", schema = "agenda_papers")
-
-
 
 public class ESummonNotification extends Auditable {
 
@@ -75,8 +72,5 @@ public class ESummonNotification extends Auditable {
 	@OneToOne
 	@JoinColumn(name = "parent_id")
 	private ESummonNotification parentNotification;
-
-	@Column(name = "member_ids", columnDefinition = "jsonb")
-	private String memberIds;
 
 }

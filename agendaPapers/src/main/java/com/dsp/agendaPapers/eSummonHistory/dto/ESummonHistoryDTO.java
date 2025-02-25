@@ -2,9 +2,11 @@ package com.dsp.agendaPapers.eSummonHistory.dto;
 
 
 
-import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -31,7 +33,14 @@ public class ESummonHistoryDTO {
     private int retryCount;
     private String remarks;
 
+
+
     // for the fetching the data
-    private ESummonNotificationDTO eSummon;
+//    private ESummonNotificationDTO eSummon;
+
+    // Optional: mapping to ESummonNotification entity
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "e_summon_id", insertable = false, updatable = false)
+    private ESummonNotification eSummon;
 }
 

@@ -1,89 +1,69 @@
-	package com.dsp.agendaPapers.eSummonNotification.dto;
+package com.dsp.agendaPapers.eSummonNotification.dto;
 
-	import java.time.LocalDate;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
+import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
+import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-	import java.time.LocalDateTime;
-	import java.util.List;
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ESummonNotificationDTO {
 
-	import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
-	import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
-	import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
+	private Long id;
 
-	import lombok.AllArgsConstructor;
-	import lombok.Builder;
-	import lombok.Data;
-	import lombok.NoArgsConstructor;
+	private String lokSabhaNo;
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public class ESummonNotificationDTO {
+	private String sessionNo;
+	
+	private String rajyasabhaSessionNo;
 
-		private Long id;
+	private LocalDate esummonIssuanceDate;
 
-		private String lokSabhaNo;
+	private String esummonIssuanceDateHindiEn;
 
-		private String sessionNo;
+	private String esummonIssuanceDateHindi;
+	
+	private Boolean draftStatus = false;
+	
+	private LocalDateTime esummonStartAt;
 
-		private String rajyasabhaSessionNo;
+	//private LocalDateTime summonStartAt;
+	
+	private Long applicationId;
+	
+	private String applicationNo;
 
-		private LocalDate esummonIssuanceDate;
+	private String status;
+	
+	
+	private SummonNotificationDTO parentNotification;
 
-		private String esummonIssuanceDateHindiEn;
-
-		private String esummonIssuanceDateHindi;
-
-		private Boolean draftStatus = false;
-
-		private LocalDateTime esummonStartAt;
-
-		//private LocalDateTime summonStartAt;
-
-		private Long applicationId;
-
-		private String applicationNo;
-
-		private String status;
-
-
-		private SummonNotificationDTO parentNotification;
-
-		private String templateContent;
-		private Boolean customTemplate;
-		private ApplicationInstanceDTO applicationInstanceDTO;
-
-		private InputInstanceDTO inputInstanceDTO;
-
-		private String currentStatus;
-
-		private String publishedDocumentUrl;
-
-		private Long templateId;
-
-		private Long templateHindiId;
-
-		private String templateContentHindi;
-
-		private String templateType;
-
-		private Long refId;
-
-
-		private List<MemberIdDTO> memberIds; // Added new field
-
-		// Inner DTO class for member IDs
-		@Data
-		@NoArgsConstructor
-		@AllArgsConstructor
-		public static class MemberIdDTO {
-			private Long id;
-		}
-
-
-
-
-
-
-	}
+	private String templateContent;
+	private Boolean customTemplate;
+	private ApplicationInstanceDTO applicationInstanceDTO;
+	
+	private InputInstanceDTO inputInstanceDTO;
+	
+	private String currentStatus;
+	
+	private String publishedDocumentUrl;
+	
+	private Long templateId;
+	
+	private Long templateHindiId;
+	
+	private String templateContentHindi;
+	
+	private String templateType;
+	
+	private Long refId;
+	
+}

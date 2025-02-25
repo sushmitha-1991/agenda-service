@@ -4,7 +4,9 @@ package com.dsp.agendaPapers.eSummonHistory.controller;
 import com.dsp.agendaPapers.eSummonHistory.dto.ESummonHistoryDTO;
 import com.dsp.agendaPapers.eSummonHistory.service.ESummonHistoryService;
 import com.dsp.agendaPapers.eSummonHistory.service.ESummonHistoryServiceImpl;
+import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
+import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
 import com.dsp.agendaPapers.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ import java.util.Optional;
 public class ESummonHistoryController {
 
     private final ESummonHistoryService eSummonHistoryService;
+
+    @Autowired
+    private ESummonNotificationService eSummonNotificationService;
 
 
     // ✅ Create an E-Summon History entry
@@ -100,6 +105,44 @@ public class ESummonHistoryController {
 //    }
 
 
+    @PostMapping("/sending-esummon")
+    public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request) {
+        try {
+            List<ESummonHistoryDTO> historyDTOs = eSummonHistoryService.sendESummonAndUpdateHistory(
+                    request.getId(), request.getMembers()
+            );
+            GenericResponse<List<ESummonHistoryDTO>> response = new GenericResponse<>(
+                    true,
+                    "eSummon sent successfully.",
+                    historyDTOs,
+                    HttpStatus.OK.value()
+            );
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            GenericResponse<?> response = new GenericResponse<>(
+                    false,
+                    "Error: " + ex.getMessage(),
+                    null,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+
+    // get by sumon id
+    @GetMapping("/by-esummon/{eSummonId}")
+    public ResponseEntity<?> getHistoriesByESummonId(@PathVariable Long eSummonId) {
+        List<ESummonHistoryDTO> dtos = eSummonHistoryService.getHistoriesByESummonId(eSummonId);
+
+        GenericResponse<List<ESummonHistoryDTO>> response = new GenericResponse<>(
+                true,
+                "Histories fetched successfully.",
+                dtos,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
+    }
     }
 
 

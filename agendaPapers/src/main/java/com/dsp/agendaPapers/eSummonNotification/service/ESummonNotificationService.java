@@ -1,9 +1,10 @@
 package com.dsp.agendaPapers.eSummonNotification.service;
 
-import java.util.List;
-
+import com.dsp.agendaPapers.eSummonHistory.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
-import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
+
+import java.util.List;
 
 
 public interface ESummonNotificationService {
@@ -19,5 +20,7 @@ public interface ESummonNotificationService {
 	ESummonNotificationDTO updateESummonNotification(Long id, ESummonNotificationDTO eSummonNotificationDTO);
 
 	List<ESummonNotificationDTO> getAllESummonNotificationBySessionNo(String sessionNo);
+
+	List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds);
 
 }
