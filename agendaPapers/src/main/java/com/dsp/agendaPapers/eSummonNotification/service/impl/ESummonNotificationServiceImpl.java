@@ -10,6 +10,8 @@ import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonHistory.repository.PersonalDetailsRepository;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
+import com.dsp.agendaPapers.eSummonNotification.entityrecord.ESummonMembers;
+import com.dsp.agendaPapers.eSummonNotification.repository.ESummonMembersRepository;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
 import com.dsp.agendaPapers.entity.MastersLokSabhaSession;
@@ -27,6 +29,7 @@ import com.dsp.agendaPapers.repository.MasterLSSRepository;
 import com.dsp.agendaPapers.repository.MastersRSSRepository;
 import com.dsp.agendaPapers.response.GenericResponse;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +85,9 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     @Autowired
     private PersonalDetailsRepository personalDetailsRepository;
+
+    @Autowired
+    private  ESummonMembersRepository eSummonMembersRepository;
 
     @Transactional
     @Override
@@ -627,25 +633,55 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     }
 
-    @Override
-    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
-        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
-        if (!optionalNotification.isPresent()) {
-            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+    // old code but updating into the db
+//    @Override
+//    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
+//        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+//        if (!optionalNotification.isPresent()) {
+//            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+//        }
+//        ESummonNotification notification = optionalNotification.get();
+//
+//        // Retrieve the list of PersonalDetails using memberIds
+//        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+//
+//        // Simulate sending the eSummon to each member
+//        for (PersonalDetails member : members) {
+//            System.out.println("Sending eSummon (ID: " + eSummonId + ") to member: "
+//                    + member.getFullName() + ", Email: " + member.getEmailId());
+//        }
+//
+//        // Return the member details that were processed
+//        return members;
+//    }
+
+
+
+        @Override
+        public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
+            Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+            if (!optionalNotification.isPresent()) {
+                throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+            }
+
+            // Retrieve the list of PersonalDetails using memberIds
+            List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+
+            // Save data into e_summon_members table
+            List<ESummonMembers> summonMembersList = memberIds.stream()
+                    .map(memberId -> new ESummonMembers(eSummonId, memberId))
+                    .collect(Collectors.toList());
+
+            eSummonMembersRepository.saveAll(summonMembersList);
+
+            // Simulate sending the eSummon to each member
+            for (PersonalDetails member : members) {
+                System.out.println("Sending eSummon (ID: " + eSummonId + ") to member: "
+                        + member.getFullName() + ", Email: " + member.getEmailId());
+            }
+
+            // Return the member details that were processed
+            return members;
         }
-        ESummonNotification notification = optionalNotification.get();
-
-        // Retrieve the list of PersonalDetails using memberIds
-        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
-
-        // Simulate sending the eSummon to each member
-        for (PersonalDetails member : members) {
-            System.out.println("Sending eSummon (ID: " + eSummonId + ") to member: "
-                    + member.getFullName() + ", Email: " + member.getEmailId());
-        }
-
-        // Return the member details that were processed
-        return members;
     }
 
-}
