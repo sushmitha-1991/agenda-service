@@ -34,6 +34,12 @@ public interface ESummonHistoryService {
      */
     List<ESummonHistoryDTO> getHistoriesByESummonId(Long eSummonId);
 
+    void sendESummonAndCreateHistory(Long eSummonId, List<Long> memberIds);
+
+    List<ESummonHistoryDTO> sendESummonToAllMembers(Long eSummonId);
+
+
+
 
 }
 

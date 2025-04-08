@@ -183,6 +183,126 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
                 .map(eSummonHistoryMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional
+    public void sendESummonAndCreateHistory(Long eSummonId, List<Long> memberIds) {
+        // Fetch eSummon Notification
+        ESummonNotification eSummon = eSummonNotificationRepository.findById(eSummonId)
+                .orElseThrow(() -> new ResourceNotFoundException("ESummon not found with ID: " + eSummonId));
+
+        // Fetch all member details
+        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+
+        List<ESummonHistory> historyList = new ArrayList<>();
+
+        for (PersonalDetails member : members) {
+            // Simulate email sending
+            System.out.println("Sending eSummon to: " + member.getFullName() + " at " + member.getEmailId());
+
+            // Create DTO (if needed) or directly create entity
+            ESummonHistoryDTO dto = new ESummonHistoryDTO();
+            dto.setESummonId(eSummonId);
+            dto.setMemberId(member.getId());
+            dto.setMailSentAt(LocalDateTime.now());
+            dto.setMailStatus("SENT"); // or "PENDING", "FAILED"
+            dto.setRetryCount(0);
+            dto.setRemarks("Mail sent successfully");
+            dto.setEmailId(member.getEmailId());
+            dto.setDocumentUuid(UUID.randomUUID()); // Or pass actual document UUID if available
+
+            // Convert to entity
+            ESummonHistory history = eSummonHistoryMapper.toEntity(dto, eSummon, member);
+            historyList.add(history);
+        }
+
+        // Save all history records in batch
+        eSummonHistoryRepository.saveAll(historyList);
+    }
+
+
+//    @Override
+//    @Transactional
+//    public List<ESummonHistoryDTO> sendESummonToAllMembers(Long eSummonId) {
+//
+//        ESummonNotification eSummon = eSummonNotificationRepository.findById(eSummonId)
+//                .orElseThrow(() -> new ResourceNotFoundException("eSummon not found with ID: " + eSummonId));
+//
+//        List<Long> memberIds = personalDetailsRepository.findMemberIdsByESummonId(eSummonId);
+//
+//        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+//
+//        List<ESummonHistory> historyList = new ArrayList<>();
+//
+//        for (PersonalDetails member : members) {
+//            System.out.println("Sending email to: " + member.getFullName() + ", Email: " + member.getEmailId());
+//
+//            ESummonHistory history = ESummonHistory.builder()
+//                    .eSummon(eSummon)
+//                    .member(member)
+//                    .emailId(member.getEmailId())
+//                    .mailStatus("SENT") // You can update based on actual email send result
+//                    .mailSentAt(LocalDateTime.now())
+//                    .retryCount(0)
+//                    .remarks("Email sent successfully")
+//                    .build();
+//
+//            historyList.add(history);
+//        }
+//
+//        eSummonHistoryRepository.saveAll(historyList);
+//
+//        return historyList.stream()
+//                .map(eSummonHistoryMapper::toDTO)
+//                .collect(Collectors.toList());
+//    }
+
+
+    @Override
+    @Transactional
+    public List<ESummonHistoryDTO> sendESummonToAllMembers(Long eSummonId) {
+
+        ESummonNotification eSummon = eSummonNotificationRepository.findById(eSummonId)
+                .orElseThrow(() -> new ResourceNotFoundException("eSummon not found with ID: " + eSummonId));
+
+        List<Long> memberIds = personalDetailsRepository.findMemberIdsByESummonId(eSummonId);
+        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+
+        List<ESummonHistory> historyList = new ArrayList<>();
+
+        for (PersonalDetails member : members) {
+            // Skip if email is null or blank
+            if (member.getEmailId() == null || member.getEmailId().isBlank()) {
+                System.out.println("Skipping member with null/blank email: " + member.getFullName());
+                continue;
+            }
+
+            System.out.println("Sending email to: " + member.getFullName() + ", Email: " + member.getEmailId());
+
+            ESummonHistory history = ESummonHistory.builder()
+                    .eSummon(eSummon)
+                    .member(member)
+                    .emailId(member.getEmailId())
+                    .mailStatus("SENT")
+                    .mailSentAt(LocalDateTime.now())
+                    .retryCount(0)
+                    .remarks("Email sent successfully")
+                    .documentUuid(UUID.randomUUID()) // Ensures not-null value
+                    .build();
+
+            historyList.add(history);
+        }
+
+        if (!historyList.isEmpty()) {
+            eSummonHistoryRepository.saveAll(historyList);
+        }
+
+        return historyList.stream()
+                .map(eSummonHistoryMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+
 }
 
 

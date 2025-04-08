@@ -143,6 +143,21 @@ public class ESummonHistoryController {
         );
         return ResponseEntity.ok(response);
     }
+
+    // for the mail based on the esumon id
+
+    @PostMapping("/send-all-email/{eSummonId}")
+    public ResponseEntity<GenericResponse<List<ESummonHistoryDTO>>> sendESummonToAllMembers(@PathVariable Long eSummonId) {
+        List<ESummonHistoryDTO> result = eSummonHistoryService.sendESummonToAllMembers(eSummonId);
+        GenericResponse<List<ESummonHistoryDTO>> response = new GenericResponse<>(
+                true,
+                "eSummon sent successfully to all members",
+                result,
+                200
+        );
+        return ResponseEntity.ok(response);
+    }
+
     }
 
 

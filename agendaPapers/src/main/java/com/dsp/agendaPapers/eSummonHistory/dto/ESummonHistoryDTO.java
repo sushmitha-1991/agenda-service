@@ -32,6 +32,7 @@ public class ESummonHistoryDTO {
     private LocalDateTime lastRetryDatetime;
     private int retryCount;
     private String remarks;
+    private String emailId;
 
 
 

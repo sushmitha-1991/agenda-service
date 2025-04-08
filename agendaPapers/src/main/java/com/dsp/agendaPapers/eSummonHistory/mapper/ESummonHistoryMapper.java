@@ -164,6 +164,7 @@ public class ESummonHistoryMapper {
                 .lastRetryDatetime(entity.getLastRetryDatetime())
                 .retryCount(entity.getRetryCount())
                 .remarks(entity.getRemarks())
+                .emailId(entity.getEmailId())
 //                .eSummon(eSummonNotificationDTO) // Set nested ESummonNotificationDTO
                 .build();
     }
@@ -184,6 +185,7 @@ public class ESummonHistoryMapper {
                 .lastRetryDatetime(dto.getLastRetryDatetime())
                 .retryCount(dto.getRetryCount())
                 .remarks(dto.getRemarks())
+                .emailId(dto.getEmailId())
                 .build();
     }
 }
