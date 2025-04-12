@@ -1,5 +1,6 @@
-package com.dsp.agendaPapers.esumonmail;
+package com.dsp.agendaPapers.eSummonNotification.service;
 
+import com.dsp.agendaPapers.eSummonNotification.dto.EmailRequestDTO;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;

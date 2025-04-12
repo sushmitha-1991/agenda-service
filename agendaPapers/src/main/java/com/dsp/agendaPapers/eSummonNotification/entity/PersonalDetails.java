@@ -1,4 +1,4 @@
-package com.dsp.agendaPapers.eSummonHistory.entity;
+package com.dsp.agendaPapers.eSummonNotification.entity;
 
 
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;

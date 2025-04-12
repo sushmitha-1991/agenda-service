@@ -1,9 +1,9 @@
-package com.dsp.agendaPapers.eSummonHistory.controller;
+package com.dsp.agendaPapers.eSummonNotification.controller;
 
 
-import com.dsp.agendaPapers.eSummonHistory.dto.ESummonHistoryDTO;
-import com.dsp.agendaPapers.eSummonHistory.service.ESummonHistoryService;
-import com.dsp.agendaPapers.eSummonHistory.service.ESummonHistoryServiceImpl;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
+import com.dsp.agendaPapers.eSummonNotification.service.impl.ESummonHistoryServiceImpl;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;

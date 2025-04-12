@@ -1,9 +1,9 @@
-package com.dsp.agendaPapers.eSummonHistory.service;
+package com.dsp.agendaPapers.eSummonNotification.service;
 
 
 
-import com.dsp.agendaPapers.eSummonHistory.dto.ESummonHistoryDTO;
-import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 
 import java.util.List;
 import java.util.Optional;

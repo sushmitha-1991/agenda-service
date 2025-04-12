@@ -1,6 +1,6 @@
 package com.dsp.agendaPapers.eSummonNotification.controller;
 
-import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;

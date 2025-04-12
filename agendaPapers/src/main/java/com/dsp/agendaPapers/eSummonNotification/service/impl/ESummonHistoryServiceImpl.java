@@ -1,14 +1,15 @@
-package com.dsp.agendaPapers.eSummonHistory.service;
+package com.dsp.agendaPapers.eSummonNotification.service.impl;
 
 
-import com.dsp.agendaPapers.eSummonHistory.dto.ESummonHistoryDTO;
-import com.dsp.agendaPapers.eSummonHistory.entity.ESummonHistory;
-import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
-import com.dsp.agendaPapers.eSummonHistory.mapper.ESummonHistoryMapper;
-import com.dsp.agendaPapers.eSummonHistory.repository.ESummonHistoryRepository;
-import com.dsp.agendaPapers.eSummonHistory.repository.PersonalDetailsRepository;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.mapper.ESummonHistoryMapper;
+import com.dsp.agendaPapers.eSummonNotification.repository.ESummonHistoryRepository;
+import com.dsp.agendaPapers.eSummonNotification.repository.PersonalDetailsRepository;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
+import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

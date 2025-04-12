@@ -1,8 +1,8 @@
-package com.dsp.agendaPapers.eSummonHistory.repository;
+package com.dsp.agendaPapers.eSummonNotification.repository;
 
 
 
-import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

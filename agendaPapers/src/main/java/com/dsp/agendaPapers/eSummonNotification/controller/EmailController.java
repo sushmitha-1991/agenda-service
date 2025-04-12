@@ -1,5 +1,7 @@
-package com.dsp.agendaPapers.esumonmail;
+package com.dsp.agendaPapers.eSummonNotification.controller;
 
+import com.dsp.agendaPapers.eSummonNotification.service.EmailService;
+import com.dsp.agendaPapers.eSummonNotification.dto.EmailRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

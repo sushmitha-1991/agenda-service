@@ -1,7 +1,7 @@
-package com.dsp.agendaPapers.eSummonHistory.repository;
+package com.dsp.agendaPapers.eSummonNotification.repository;
 
 
-import com.dsp.agendaPapers.eSummonHistory.entity.ESummonHistory;
+import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

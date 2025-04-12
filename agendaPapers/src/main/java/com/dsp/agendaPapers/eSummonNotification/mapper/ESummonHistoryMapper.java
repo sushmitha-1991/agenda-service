@@ -1,4 +1,4 @@
-package com.dsp.agendaPapers.eSummonHistory.mapper;
+package com.dsp.agendaPapers.eSummonNotification.mapper;
 
 
 
@@ -45,12 +45,12 @@ package com.dsp.agendaPapers.eSummonHistory.mapper;
 // new Code
 
 
-import com.dsp.agendaPapers.eSummonHistory.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
 
-import com.dsp.agendaPapers.eSummonHistory.entity.ESummonHistory;
+import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
-import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import org.springframework.stereotype.Component;
 
 //@Component
@@ -117,11 +117,11 @@ import org.springframework.stereotype.Component;
 
 
 
-import com.dsp.agendaPapers.eSummonHistory.dto.ESummonHistoryDTO;
-import com.dsp.agendaPapers.eSummonHistory.entity.ESummonHistory;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
-import com.dsp.agendaPapers.eSummonHistory.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import org.springframework.stereotype.Component;
 
 @Component

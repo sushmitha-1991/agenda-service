@@ -1,4 +1,4 @@
-package com.dsp.agendaPapers.eSummonHistory.dto;
+package com.dsp.agendaPapers.eSummonNotification.dto;
 
 
 

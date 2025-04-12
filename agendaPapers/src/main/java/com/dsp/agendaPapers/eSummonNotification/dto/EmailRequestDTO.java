@@ -1,4 +1,4 @@
-package com.dsp.agendaPapers.esumonmail;
+package com.dsp.agendaPapers.eSummonNotification.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
