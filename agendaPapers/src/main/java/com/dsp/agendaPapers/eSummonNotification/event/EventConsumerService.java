@@ -11,22 +11,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 @Component
-public class EventConsumerService { 
-        
-    @Autowired
-    ESummonHistoryService esummonHistoryService;
-    
-    public static final Logger log = LoggerFactory.getLogger(EventConsumerService.class);
+public class EventConsumerService {
 
-    @KafkaListener(topics = "esummon", groupId = "group_id")
-    public void consumeEvent (String esummonId) {
+    private static final Logger logger = LoggerFactory.getLogger(EventConsumerService.class);
+
+    @Autowired
+    private ESummonHistoryService esummonHistoryService;
+
+    @KafkaListener(topics = "${kafka.topic.esummon:esummon}", groupId = "${kafka.consumer.group-id:group_id}")
+    public void consumeEvent(String esummonId) {
+        logger.info("Kafka Consumer received message: {}", esummonId);
         try {
-            System.out.println("ESummon Consumer activated for ID : " + esummonId);
-            Long id = Long.valueOf(esummonId);
+            Long id = Long.parseLong(esummonId);
             esummonHistoryService.sendESummonToAllMembers(id);
+        } catch (NumberFormatException nfe) {
+            logger.error("Invalid ESummon ID received: {}", esummonId, nfe);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while processing eSummon ID [{}]: {}", esummonId, e.getMessage(), e);
         }
     }
+
 
 }

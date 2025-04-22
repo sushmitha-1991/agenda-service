@@ -13,13 +13,20 @@ import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +38,13 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
     private final ESummonNotificationRepository eSummonNotificationRepository;
     private final PersonalDetailsRepository personalDetailsRepository;
     private final ESummonHistoryMapper eSummonHistoryMapper;
+    private final RestTemplate restTemplate;
+
+    @Value("${email.api.url}")
+    private String emailApiUrl;
+
+    @Value("${email.from}")
+    private String emailFrom;
 
 
 
@@ -221,7 +235,7 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
         eSummonHistoryRepository.saveAll(historyList);
     }
 
-
+// not working code
 //    @Override
 //    @Transactional
 //    public List<ESummonHistoryDTO> sendESummonToAllMembers(Long eSummonId) {
@@ -258,55 +272,150 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
 //                .collect(Collectors.toList());
 //    }
 
+// working code v1
+//    @Override
+//    @Transactional
+//    public List<ESummonHistoryDTO> sendESummonToAllMembers(Long eSummonId) {
+//
+//        ESummonNotification eSummon = eSummonNotificationRepository.findById(eSummonId)
+//                .orElseThrow(() -> new ResourceNotFoundException("eSummon not found with ID: " + eSummonId));
+//
+//        List<Long> memberIds = personalDetailsRepository.findMemberIdsByESummonId(eSummonId);
+//        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+//
+//        List<ESummonHistory> historyList = new ArrayList<>();
+//
+//        for (PersonalDetails member : members) {
+//            // Skip if email is null or blank
+//            if (member.getEmailId() == null || member.getEmailId().isBlank()) {
+//                System.out.println("Skipping member with null/blank email: " + member.getFullName());
+//                continue;
+//            }
+//
+//            System.out.println("Sending email to: " + member.getFullName() + ", Email: " + member.getEmailId());
+//
+//            ESummonHistory history = ESummonHistory.builder()
+//                    .eSummon(eSummon)
+//                    .member(member)
+//                    .emailId(member.getEmailId())
+//                    .mailStatus("SENT")
+//                    .mailSentAt(LocalDateTime.now())
+//                    .retryCount(0)
+//                    .remarks("Email sent successfully")
+//                    .documentUuid(UUID.randomUUID()) // Ensures not-null value
+//                    .build();
+//
+//            historyList.add(history);
+//        }
+//
+//        if (!historyList.isEmpty()) {
+//            eSummonHistoryRepository.saveAll(historyList);
+//        }
+//
+//        return historyList.stream()
+//                .map(eSummonHistoryMapper::toDTO)
+//                .collect(Collectors.toList());
+//    }
 
+    // v2 new code for the using kafka
     @Override
     @Transactional
     public List<ESummonHistoryDTO> sendESummonToAllMembers(Long eSummonId) {
-
         ESummonNotification eSummon = eSummonNotificationRepository.findById(eSummonId)
                 .orElseThrow(() -> new ResourceNotFoundException("eSummon not found with ID: " + eSummonId));
 
         List<Long> memberIds = personalDetailsRepository.findMemberIdsByESummonId(eSummonId);
         List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
 
-        List<ESummonHistory> historyList = new ArrayList<>();
+        List<ESummonHistoryDTO> resultList = new ArrayList<>();
 
         for (PersonalDetails member : members) {
-            // Skip if email is null or blank
-            if (member.getEmailId() == null || member.getEmailId().isBlank()) {
-                System.out.println("Skipping member with null/blank email: " + member.getFullName());
-                continue;
+            try {
+                if (member.getEmailId() == null || member.getEmailId().isBlank()) {
+                    System.out.println("Skipping member with null/blank email: " + member.getFullName());
+                    continue;
+                }
+
+                // Check if email already sent
+                Optional<ESummonHistory> existingHistoryOpt = eSummonHistoryRepository.findByESummonAndMember(eSummon, member);
+                ESummonHistory history;
+
+                if (existingHistoryOpt.isPresent()) {
+                    history = existingHistoryOpt.get();
+                    if ("SENT".equalsIgnoreCase(history.getMailStatus())) {
+                        System.out.println("Email already sent to: " + member.getEmailId());
+                        continue;
+                    }
+                } else {
+                    // Create initial pending record
+                    history = ESummonHistory.builder()
+                            .eSummon(eSummon)
+                            .member(member)
+                            .emailId(member.getEmailId())
+                            .mailSentAt(LocalDateTime.now())
+                            .mailStatus("PENDING")
+                            .retryCount(0)
+                            .documentUuid(UUID.randomUUID())
+                            .remarks("Pending send")
+                            .build();
+
+                    history = eSummonHistoryRepository.save(history);
+                }
+
+                // Send email using external API
+                boolean isSuccess = sendEmailViaAPI(member.getEmailId(), "ESummon Subject", "Please find attached eSummon", null); // Replace null with actual file
+
+                if (isSuccess) {
+                    history.setMailStatus("SENT");
+                    history.setMailSentAt(LocalDateTime.now());
+                    history.setRetryCount(history.getRetryCount() + 1);
+                    history.setRemarks("Email sent successfully");
+                } else {
+                    history.setRetryCount(history.getRetryCount() + 1);
+                    history.setRemarks("Email sending failed");
+                }
+
+                eSummonHistoryRepository.save(history);
+                resultList.add(eSummonHistoryMapper.toDTO(history));
+
+            } catch (Exception e) {
+                System.out.println("Error while processing member: " + member.getEmailId());
+                e.printStackTrace();
             }
-
-            System.out.println("Sending email to: " + member.getFullName() + ", Email: " + member.getEmailId());
-
-            ESummonHistory history = ESummonHistory.builder()
-                    .eSummon(eSummon)
-                    .member(member)
-                    .emailId(member.getEmailId())
-                    .mailStatus("SENT")
-                    .mailSentAt(LocalDateTime.now())
-                    .retryCount(0)
-                    .remarks("Email sent successfully")
-                    .documentUuid(UUID.randomUUID()) // Ensures not-null value
-                    .build();
-
-            historyList.add(history);
         }
 
-        if (!historyList.isEmpty()) {
-            eSummonHistoryRepository.saveAll(historyList);
-        }
-
-        return historyList.stream()
-                .map(eSummonHistoryMapper::toDTO)
-                .collect(Collectors.toList());
+        return resultList;
     }
 
+    private boolean sendEmailViaAPI(String toEmail, String subject, String body, File file) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+            MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+            bodyMap.add("emailfrom", emailFrom);
+            bodyMap.add("emailto", toEmail);
+            bodyMap.add("emailsub", subject);
+            bodyMap.add("emailbody", body);
+
+            if (file != null) {
+                bodyMap.add("file", new FileSystemResource(file));
+            }
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(emailApiUrl, requestEntity, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                Map<String, Object> res = response.getBody();
+                return res != null && "S".equals(res.get("message"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 }
-
-
 
 
 

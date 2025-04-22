@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.eSummonNotification.controller;
 
 
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
 import com.dsp.agendaPapers.eSummonNotification.service.impl.ESummonHistoryServiceImpl;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
@@ -9,6 +10,8 @@ import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
 import com.dsp.agendaPapers.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,10 @@ public class ESummonHistoryController {
 
     @Autowired
     private ESummonNotificationService eSummonNotificationService;
+
+    private final EventProducerService eventProducerService;
+
+    private static final Logger logger = LoggerFactory.getLogger(ESummonHistoryController.class);
 
 
     // ✅ Create an E-Summon History entry
@@ -144,20 +151,34 @@ public class ESummonHistoryController {
         return ResponseEntity.ok(response);
     }
 
-    // for the mail based on the esumon id
+    // for the mail based on the esumon id v1 code working
+//    @PostMapping("/send-all-email/{eSummonId}")
+//    public ResponseEntity<GenericResponse<List<ESummonHistoryDTO>>> sendESummonToAllMembers(@PathVariable Long eSummonId) {
+//        List<ESummonHistoryDTO> result = eSummonHistoryService.sendESummonToAllMembers(eSummonId);
+//        GenericResponse<List<ESummonHistoryDTO>> response = new GenericResponse<>(
+//                true,
+//                "eSummon sent successfully to all members",
+//                result,
+//                200
+//        );
+//        return ResponseEntity.ok(response);
+//    }
 
+// for the mail with kafka v2 code
     @PostMapping("/send-all-email/{eSummonId}")
-    public ResponseEntity<GenericResponse<List<ESummonHistoryDTO>>> sendESummonToAllMembers(@PathVariable Long eSummonId) {
-        List<ESummonHistoryDTO> result = eSummonHistoryService.sendESummonToAllMembers(eSummonId);
-        GenericResponse<List<ESummonHistoryDTO>> response = new GenericResponse<>(
-                true,
-                "eSummon sent successfully to all members",
-                result,
-                200
-        );
-        return ResponseEntity.ok(response);
+    public ResponseEntity<GenericResponse<String>> triggerESummonEmailKafka(@PathVariable Long eSummonId) {
+        try {
+            logger.info("Triggering Kafka event for eSummon ID: {}", eSummonId);
+            eventProducerService.generateEvent(String.valueOf(eSummonId));
+            return ResponseEntity.ok(new GenericResponse<>(true, "eSummon email processing triggered", "Triggered", 200));
+        } catch (Exception e) {
+            logger.error("Error triggering Kafka for eSummon ID {}: {}", eSummonId, e.getMessage(), e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new GenericResponse<>(false, "Failed to trigger eSummon email processing", e.getMessage(), 500));
+        }
     }
 
-    }
+}
 
 
