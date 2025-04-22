@@ -18,7 +18,7 @@ public class EventConsumerService {
     @Autowired
     private ESummonHistoryService esummonHistoryService;
 
-    @KafkaListener(topics = "${kafka.topic.esummon:esummon}", groupId = "${kafka.consumer.group-id:group_id}")
+    @KafkaListener(topics = "${kafka.topic.esummon:esummon}", groupId = "${kafka.consumer.group-id:group_id1}")
     public void consumeEvent(String esummonId) {
         logger.info("Kafka Consumer received message: {}", esummonId);
         try {
