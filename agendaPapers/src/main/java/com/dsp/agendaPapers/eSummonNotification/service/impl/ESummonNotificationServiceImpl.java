@@ -1,10 +1,40 @@
 package com.dsp.agendaPapers.eSummonNotification.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import com.dsp.agendaPapers.applicationPapers.dto.ApplicationPapersDTO;
+import com.dsp.agendaPapers.applicationPapers.dto.TemplatesDTO;
+import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
+import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
+import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
+import com.dsp.agendaPapers.dto.UserDetailsDTO;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
+import com.dsp.agendaPapers.eSummonNotification.repository.PersonalDetailsRepository;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
+import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
+import com.dsp.agendaPapers.eSummonNotification.entityrecord.ESummonMembers;
+import com.dsp.agendaPapers.eSummonNotification.repository.ESummonMembersRepository;
+import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
+import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
+import com.dsp.agendaPapers.entity.MastersLokSabhaSession;
+import com.dsp.agendaPapers.entity.MastersRajyaSabha;
+import com.dsp.agendaPapers.exception.ResourceNotFoundException;
+import com.dsp.agendaPapers.mapper.ESummonNotificationMapper;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberRequest;
+import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberResponse;
+import com.dsp.agendaPapers.provisionalcalendarfinal.entity.InputInstance;
+import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
+import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.InputInstanceMapper;
+import com.dsp.agendaPapers.provisionalcalendarfinal.repository.InputInstanceRepository;
+import com.dsp.agendaPapers.repository.MasterLSSRepository;
+import com.dsp.agendaPapers.repository.MastersRSSRepository;
+import com.dsp.agendaPapers.response.GenericResponse;
+import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -17,39 +47,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import com.dsp.agendaPapers.applicationPapers.dto.ApplicationPapersDTO;
-import com.dsp.agendaPapers.applicationPapers.dto.TemplatesDTO;
-import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
-import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
-import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
-import com.dsp.agendaPapers.dto.UserDetailsDTO;
-import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
-import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
-import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
-import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
-import com.dsp.agendaPapers.entity.MastersLokSabhaSession;
-import com.dsp.agendaPapers.entity.MastersRajyaSabha;
-import com.dsp.agendaPapers.exception.ResourceNotFoundException;
-import com.dsp.agendaPapers.mapper.ESummonNotificationMapper;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberRequest;
-import com.dsp.agendaPapers.provisionalcalendarfinal.dto.SerialNumberResponse;
-import com.dsp.agendaPapers.provisionalcalendarfinal.entity.InputInstance;
-import com.dsp.agendaPapers.provisionalcalendarfinal.entity.ProvisionalCalendar;
-import com.dsp.agendaPapers.provisionalcalendarfinal.feignclient.BearerClient;
-import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.InputInstanceMapper;
-import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.ProvisionalCalendarDTOMapper;
-import com.dsp.agendaPapers.provisionalcalendarfinal.repository.InputInstanceRepository;
-import com.dsp.agendaPapers.repository.MasterLSSRepository;
-import com.dsp.agendaPapers.repository.MastersRSSRepository;
-import com.dsp.agendaPapers.response.GenericResponse;
-import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
-import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
-import com.dsp.agendaPapers.summonNotification.entity.SummonNotification;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ESummonNotificationServiceImpl implements ESummonNotificationService {
@@ -83,6 +85,16 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     @Autowired
     private InputInstanceRepository inputInstanceRepository;
+
+    @Autowired
+    private PersonalDetailsRepository personalDetailsRepository;
+
+    @Autowired
+    private  ESummonMembersRepository eSummonMembersRepository;
+
+    @Autowired
+    private EventProducerService eventProducerService;
+
 
     @Transactional
     @Override
@@ -628,4 +640,55 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     }
 
+    // old code but updating into the db
+//    @Override
+//    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
+//        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+//        if (!optionalNotification.isPresent()) {
+//            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+//        }
+//        ESummonNotification notification = optionalNotification.get();
+//
+//        // Retrieve the list of PersonalDetails using memberIds
+//        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+//
+//        // Simulate sending the eSummon to each member
+//        for (PersonalDetails member : members) {
+//            System.out.println("Sending eSummon (ID: " + eSummonId + ") to member: "
+//                    + member.getFullName() + ", Email: " + member.getEmailId());
+//        }
+//
+//        // Return the member details that were processed
+//        return members;
+//    }
+
+
+
+    // working code
+        @Override
+        public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
+            Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+            if (!optionalNotification.isPresent()) {
+                throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+            }
+
+            // Retrieve the list of PersonalDetails using memberIds
+            List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+
+            // Save data into e_summon_members table
+            List<ESummonMembers> summonMembersList = memberIds.stream()
+                    .map(memberId -> new ESummonMembers(eSummonId, memberId))
+                    .collect(Collectors.toList());
+
+            eSummonMembersRepository.saveAll(summonMembersList);
+
+            eventProducerService.generateEvent(String.valueOf(eSummonId));
+
+
+
+            // Return the member details that were processed
+            return members;
+        }
+
 }
+

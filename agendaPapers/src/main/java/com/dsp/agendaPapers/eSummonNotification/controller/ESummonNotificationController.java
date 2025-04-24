@@ -1,27 +1,19 @@
 package com.dsp.agendaPapers.eSummonNotification.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
+import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
 import com.dsp.agendaPapers.response.GenericResponse;
-import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/agendapapers/esummon")
@@ -109,5 +101,30 @@ public class ESummonNotificationController {
 		GenericResponse<String> response = new GenericResponse<>(true, "E-SummonNotification deleted successfully",
 				null, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+// working code
+	@PostMapping("/send-esummon")
+	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request) {
+		try {
+			// Call the service method and capture the returned member details
+			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers());
+			// Create a GenericResponse wrapping the member details
+			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(
+					true,
+					"eSummon sent successfully.",
+					memberDetails,
+					HttpStatus.OK.value()
+			);
+			return ResponseEntity.ok(response);
+		} catch (Exception ex) {
+			// Return an error message with a GenericResponse in case of exceptions
+			GenericResponse<?> response = new GenericResponse<>(
+					false,
+					"Error: " + ex.getMessage(),
+					null,
+					HttpStatus.BAD_REQUEST.value()
+			);
+			return ResponseEntity.badRequest().body(response);
+		}
 	}
 }

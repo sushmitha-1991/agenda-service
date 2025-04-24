@@ -1,20 +1,15 @@
 package com.dsp.agendaPapers.eSummonNotification.dto;
 
-import java.time.LocalDate;
-
-
-import java.time.LocalDateTime;
-
 import com.dsp.agendaPapers.provisionalcalendarfinal.dto.InputInstanceDTO;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 import com.dsp.agendaPapers.summonNotification.dto.SummonNotificationDTO;
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
