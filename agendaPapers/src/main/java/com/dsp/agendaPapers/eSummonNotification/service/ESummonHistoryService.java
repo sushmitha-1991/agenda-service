@@ -3,7 +3,7 @@ package com.dsp.agendaPapers.eSummonNotification.service;
 
 
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
-import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +37,9 @@ public interface ESummonHistoryService {
     void sendESummonAndCreateHistory(Long eSummonId, List<Long> memberIds);
 
     List<ESummonHistoryDTO> sendESummonToAllMembers(Long eSummonId);
+
+    List<ESummonMemberDetailsDTO> getMemberDetailsByESummonId(Long eSummonId);
+
 
 
 

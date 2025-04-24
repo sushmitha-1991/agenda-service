@@ -6,7 +6,9 @@ import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
 import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
 import com.dsp.agendaPapers.eSummonNotification.repository.PersonalDetailsRepository;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
@@ -48,6 +50,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,6 +91,10 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     @Autowired
     private  ESummonMembersRepository eSummonMembersRepository;
+
+    @Autowired
+    private EventProducerService eventProducerService;
+
 
     @Transactional
     @Override
@@ -657,6 +664,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
 
 
+    // working code
         @Override
         public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
             Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
@@ -674,14 +682,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
             eSummonMembersRepository.saveAll(summonMembersList);
 
-            // Simulate sending the eSummon to each member
-            for (PersonalDetails member : members) {
-                System.out.println("Sending eSummon (ID: " + eSummonId + ") to member: "
-                        + member.getFullName() + ", Email: " + member.getEmailId());
-            }
+            eventProducerService.generateEvent(String.valueOf(eSummonId));
+
+
 
             // Return the member details that were processed
             return members;
         }
-    }
+
+}
 

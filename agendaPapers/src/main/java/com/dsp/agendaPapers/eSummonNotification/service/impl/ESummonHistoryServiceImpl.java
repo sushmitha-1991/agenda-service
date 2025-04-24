@@ -2,6 +2,7 @@ package com.dsp.agendaPapers.eSummonNotification.service.impl;
 
 
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.mapper.ESummonHistoryMapper;
@@ -45,9 +46,6 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
 
     @Value("${email.from}")
     private String emailFrom;
-
-
-
 
 
     @Override
@@ -413,6 +411,37 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
             e.printStackTrace();
         }
         return false;
+    }
+
+
+    // working code
+    @Override
+    public List<ESummonMemberDetailsDTO> getMemberDetailsByESummonId(Long eSummonId) {
+        List<Object[]> results = eSummonHistoryRepository.getMemberDetailsByESummonId(eSummonId);
+
+        Map<Long, ESummonMemberDetailsDTO> uniqueMembers = new LinkedHashMap<>();
+
+        for (Object[] obj : results) {
+            Long memberId = obj[0] != null ? ((Number) obj[0]).longValue() : null;
+
+            // Only add if not already present
+            if (!uniqueMembers.containsKey(memberId)) {
+                ESummonMemberDetailsDTO dto = new ESummonMemberDetailsDTO();
+                dto.setMemberId(memberId);
+                dto.setFullName((String) obj[1]);
+                dto.setProfilePicture((UUID) obj[2]);
+                dto.setPartyName((String) obj[3]);
+                dto.setPartyAbbr((String) obj[4]);
+                dto.setConstituencyName((String) obj[5]);
+                dto.setConstituencyAbbr((String) obj[6]);
+                dto.setStateName((String) obj[7]);
+                dto.setMailStatus((String) obj[8]);
+                dto.setDocumentUuid((String) obj[9]); // first document UUID
+                uniqueMembers.put(memberId, dto);
+            }
+        }
+
+        return new ArrayList<>(uniqueMembers.values());
     }
 
 }

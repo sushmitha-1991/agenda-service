@@ -2,11 +2,10 @@ package com.dsp.agendaPapers.eSummonNotification.controller;
 
 
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
+import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
-import com.dsp.agendaPapers.eSummonNotification.service.impl.ESummonHistoryServiceImpl;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
-import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
 import com.dsp.agendaPapers.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/agendapapers/summon-history")
@@ -167,9 +165,12 @@ public class ESummonHistoryController {
 // for the mail with kafka v2 code
     @PostMapping("/send-all-email/{eSummonId}")
     public ResponseEntity<GenericResponse<String>> triggerESummonEmailKafka(@PathVariable Long eSummonId) {
+     System.out.println("inside controller for test");
+
         try {
             logger.info("Triggering Kafka event for eSummon ID: {}", eSummonId);
             eventProducerService.generateEvent(String.valueOf(eSummonId));
+
             return ResponseEntity.ok(new GenericResponse<>(true, "eSummon email processing triggered", "Triggered", 200));
         } catch (Exception e) {
             logger.error("Error triggering Kafka for eSummon ID {}: {}", eSummonId, e.getMessage(), e);
@@ -179,6 +180,30 @@ public class ESummonHistoryController {
         }
     }
 
+
+
+    // Endpoint to get member details based on eSummonId
+    @GetMapping("/members/{eSummonId}")
+    public ResponseEntity<GenericResponse<List<ESummonMemberDetailsDTO>>> getESummonMemberDetails(
+            @PathVariable("eSummonId") Long eSummonId) {
+
+        System.out.println("############################tetsing samar");
+        // Fetch the member details using the eSummonId
+        List<ESummonMemberDetailsDTO> details = eSummonHistoryService.getMemberDetailsByESummonId(eSummonId);
+
+        // Create and return the GenericResponse
+        GenericResponse<List<ESummonMemberDetailsDTO>> response = new GenericResponse<>(
+                true, "Data fetched successfully", details, HttpStatus.OK.value()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }
+
+
+
+
 
 
