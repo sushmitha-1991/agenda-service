@@ -247,6 +247,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             return responseDTO;
         } catch (Exception e) {
             log.error("Error in saveESummonNotification: ", e);
+            e.printStackTrace();
             throw e;
         }
     }
