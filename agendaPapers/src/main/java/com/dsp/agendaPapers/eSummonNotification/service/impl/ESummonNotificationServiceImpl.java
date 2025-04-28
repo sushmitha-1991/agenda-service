@@ -258,7 +258,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                 applicationInstanceDTO);
 
         try {
-            RestTemplate restTemplate2 = new RestTemplate();
+            RestTemplate restTemplate2 = new RestTemplate(); // testing workaround
             ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate2.exchange(url,
                     HttpMethod.POST, new HttpEntity<>(applicationInstanceDTO),
                     new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
