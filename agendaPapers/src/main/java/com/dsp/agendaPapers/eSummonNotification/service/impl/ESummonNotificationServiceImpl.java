@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Lazy;
 
 @Service
 public class ESummonNotificationServiceImpl implements ESummonNotificationService {
@@ -59,6 +60,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
     private ESummonNotificationRepository eSummonNotificationRepository;
 
     @Autowired
+    @Lazy
     private RestTemplate restTemplate;
 
     @Autowired
@@ -278,6 +280,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             throw e; // Re-throw the exception for further handling
         } catch (Exception e) {
             log.error("Error calling ApplicationInstance service: ", e);
+            e.printStackTrace();
             throw new RuntimeException("Failed to create ApplicationInstance", e);
         }
     }
