@@ -140,8 +140,11 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 					// Optional from frontend
 					// download document
 					.htmlContentEnglish(summonNotificationDTO.getTemplateContent())
-					.htmlContentHindi(summonNotificationDTO.getTemplateContentHindi())
-					.refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+					.htmlContentHindi(summonNotificationDTO.getTemplateContentHindi()).refId(savedNotification.getId()) // Use
+																														// SummonNotification's
+																														// ID
+																														// as
+																														// refId
 					.build();
 
 			if (houseId == 1) {
@@ -219,6 +222,8 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 
 	private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
 		String url = applicationInstanceServiceUrl + "/create";
+		System.out.println("### url - " + url);
+		System.out.println("### applicationInstanceDTO - " + applicationInstanceDTO);
 		log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url,
 				applicationInstanceDTO);
 
@@ -227,6 +232,7 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 					HttpMethod.POST, new HttpEntity<>(applicationInstanceDTO),
 					new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
 					});
+			System.out.println("### response - " + response);
 
 			if (response == null || response.getBody() == null || response.getBody().getData() == null) {
 				log.error("Response or body is null from ApplicationInstance service");
@@ -361,8 +367,8 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(url,
 					HttpMethod.GET, null, new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
 					});
-					System.out.println("@@@@@@@@@");
-					System.out.println(response);
+			System.out.println("@@@@@@@@@");
+			System.out.println(response);
 			if (response == null || response.getBody() == null || response.getBody().getData() == null) {
 				log.error("Response or body is null when fetching ApplicationInstance for applicationNo: {}",
 						applicationNo);
