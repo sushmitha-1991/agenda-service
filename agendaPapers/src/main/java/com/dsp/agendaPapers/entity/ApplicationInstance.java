@@ -23,33 +23,34 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Data
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "application_instance", schema = "master")
+@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "ApplicationInstance", schema = "master")
 public class ApplicationInstance extends Auditable {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "application_instance_seq")
-	@SequenceGenerator(name = "application_instance_seq", sequenceName = "master.application_instance_seq", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "application_Instance_seq")
+	@SequenceGenerator(name = "application_instance_seq", sequenceName = "application_instance_seq", allocationSize = 1)
 	private Long id;
 
 	@Column(name = "application_id", nullable = false)
 	private Long applicationId;
 
-	@Column(name = "application_no", nullable = false, length = 255)
+	@Column(name = "applicationNo", nullable = false, length = 255)
 	private String applicationNo;
 
-	@Column(name = "ref_id")
+	@Column(name = "ref_Id")
 	private Long refId;
 
-	@Column(name = "current_status", nullable = false, length = 100)
+	@Column(name = "currentStatus", nullable = false, length = 100)
 	private String currentStatus;
 
-	@Column(name = "published_document_url", length = 255)
+	@Column(name = "published_documentUrl", length = 255)
 	private String publishedDocumentUrl;
 
-	@Column(name = "process_instance_Id", length = 255)
+	@Column(name = "process_Instance_Id", length = 255)
 	private String processInstanceId;
 
 	@Column(name = "is_published")
@@ -63,17 +64,27 @@ public class ApplicationInstance extends Auditable {
 
 	@Column(name = "rajya_sabha_session", length = 30)
 	private String rajyaSabhaSession;
-	
+
+	@Column(name = "task_id", length = 255)
+	private String taskId;
+
 	@Convert(converter = MapJsonConverter.class)
 	@Column(name = "other_info", columnDefinition = "jsonb")
 	private Map<String, Object> otherInfo;
 
+	@Column(name = "draft")
+	private Boolean draft;
+
+	// adding the coloumn
 	@Column(name = "document_date")
 	private LocalDate documentDate;
-
+	// Changes done by Sushmitha
+	// private Date documentDate;
+	// html_content_en
+	// html_content_hi
 	@Column(name = "html_content_en", columnDefinition = "text")
 	private String htmlContentEnglish;
-	
 	@Column(name = "html_content_hi", columnDefinition = "text")
 	private String htmlContentHindi;
+
 }
