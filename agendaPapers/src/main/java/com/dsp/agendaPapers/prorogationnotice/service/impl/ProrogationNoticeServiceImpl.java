@@ -388,6 +388,7 @@ public class ProrogationNoticeServiceImpl implements ProrogationNoticeService {
             existingNotice.setIssuanceDateSakaEraHindi(prorogationNoticeDTO.getIssuanceDateSakaEraHindi());
             existingNotice.setTemplateContent(prorogationNoticeDTO.getTemplateContent());
             existingNotice.setTemplateContentHindi(prorogationNoticeDTO.getTemplateContentHindi());
+            existingNotice.setPresidentSigningDate(prorogationNoticeDTO.getPresidentSigningDate());
             // Save the updated ProrogationNotice
             ProrogationNotice updatedNotice = prorogationNoticeRepository.save(existingNotice);
             // Prepare the response DTO

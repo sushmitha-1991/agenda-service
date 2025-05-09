@@ -68,6 +68,7 @@ public class ProrogationNotice extends Auditable {
 	@Column(name = "template_type")
 	private String templateType;
 	
-	
+        @Column(name = "president_signing_date")
+	private LocalDate presidentSigningDate;	
 
 }

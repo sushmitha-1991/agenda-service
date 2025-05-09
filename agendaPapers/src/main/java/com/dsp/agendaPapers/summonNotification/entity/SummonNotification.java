@@ -91,4 +91,6 @@ public class SummonNotification extends Auditable {
 	@JoinColumn(name = "parent_id")
 	private SummonNotification parentNotification;
 
+        @Column(name = "president_signing_date")
+	private LocalDate presidentSigningDate;
 }

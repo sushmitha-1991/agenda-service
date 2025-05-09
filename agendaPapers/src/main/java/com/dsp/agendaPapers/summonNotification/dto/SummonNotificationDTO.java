@@ -49,4 +49,7 @@ public class SummonNotificationDTO {
 	private String templateContentHindi;
 	private String TemplateType;
 	private Long refId;
+        
+        private LocalDate presidentSigningDate;
+
 }

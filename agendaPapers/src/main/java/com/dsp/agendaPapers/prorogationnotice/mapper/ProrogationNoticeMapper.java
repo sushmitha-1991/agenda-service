@@ -27,7 +27,9 @@ public class ProrogationNoticeMapper {
 				.templateContentHindi(prorogationNotice.getTemplateContentHindi())
 				.draftFlag(prorogationNotice.getDraftFlag())
 				.customTemplate(prorogationNotice.getCustomTemplate())
-				.templateType(prorogationNotice.getTemplateType()).build();
+				.templateType(prorogationNotice.getTemplateType())
+                                .presidentSigningDate(prorogationNotice.getPresidentSigningDate())
+                                .build();
 	}
 
 	// Method to convert ProrogationNoticeDTO to ProrogationNotice entity
@@ -52,6 +54,7 @@ public class ProrogationNoticeMapper {
 		prorogationNotice.setTemplateType(prorogationNoticeDTO.getTemplateType());
 		prorogationNotice.setDraftFlag(prorogationNoticeDTO.getDraftFlag());
 		prorogationNotice.setCustomTemplate(prorogationNoticeDTO.getCustomTemplate());
+                prorogationNotice.setPresidentSigningDate(prorogationNoticeDTO.getPresidentSigningDate());
 		return prorogationNotice;
 	}
 

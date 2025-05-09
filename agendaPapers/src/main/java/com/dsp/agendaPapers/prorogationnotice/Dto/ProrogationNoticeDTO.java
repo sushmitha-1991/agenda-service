@@ -38,6 +38,7 @@ public class ProrogationNoticeDTO {
 	private Long templateHindiId;
 	private ApplicationInstanceDTO applicationInstanceDTO;
 	private Boolean customTemplate;
+    private LocalDate presidentSigningDate;
 
 
     // Getters and Setters

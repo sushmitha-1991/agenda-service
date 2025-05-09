@@ -405,6 +405,8 @@ public class SummonNotificationServiceImpl implements SummonNotificationService 
 			existingNotification.setSummonIssuanceDateHindiEn(summonNotificationDTO.getSummonIssuanceDateHindiEn());
 			existingNotification.setTemplateContent(summonNotificationDTO.getTemplateContent());
 			existingNotification.setTemplateContentHindi(summonNotificationDTO.getTemplateContentHindi());
+                        existingNotification.setPresidentSigningDate(summonNotificationDTO.getPresidentSigningDate());
+
 
 			// Save the updated SummonNotification
 			SummonNotification updatedNotification = summonNotificationRepository.save(existingNotification);
