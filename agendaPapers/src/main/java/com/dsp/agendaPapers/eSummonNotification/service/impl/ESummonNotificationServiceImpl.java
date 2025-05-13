@@ -256,15 +256,17 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     private ApplicationInstanceDTO createApplicationInstance(ApplicationInstanceDTO applicationInstanceDTO) {
         String url = applicationInstanceServiceUrl + "/create";
+        System.out.println("### url - " + url);
+        System.out.println("### applicationInstanceDTO - " + applicationInstanceDTO);
         log.debug("Calling ApplicationInstance service at URL: {} with ApplicationInstanceDTO: {}", url,
                 applicationInstanceDTO);
 
         try {
-            RestTemplate restTemplate2 = new RestTemplate(); // testing workaround
-            ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate2.exchange(url,
+            ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(url,
                     HttpMethod.POST, new HttpEntity<>(applicationInstanceDTO),
                     new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
-            });
+                    });
+            System.out.println("### response - " + response);
 
             if (response == null || response.getBody() == null || response.getBody().getData() == null) {
                 log.error("Response or body is null from ApplicationInstance service");
@@ -277,13 +279,13 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
         } catch (ResourceNotFoundException e) {
             log.error("Resource not found when calling ApplicationInstance service: {}", e.getMessage());
-            throw e; // Re-throw the exception for further handling
+            throw e;
         } catch (Exception e) {
             log.error("Error calling ApplicationInstance service: ", e);
-            e.printStackTrace();
             throw new RuntimeException("Failed to create ApplicationInstance", e);
         }
     }
+
 
     private TemplatesDTO validateTemplateId(Long templateId) {
         String masterServiceUrl = templateServiceUrl + "/getById/" + templateId; // Use '/' to separate URL segments
