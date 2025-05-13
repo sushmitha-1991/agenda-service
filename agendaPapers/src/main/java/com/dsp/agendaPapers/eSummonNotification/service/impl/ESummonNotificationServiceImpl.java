@@ -7,7 +7,7 @@ import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersReposi
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
-//import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
+import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
 import com.dsp.agendaPapers.eSummonNotification.repository.PersonalDetailsRepository;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
@@ -91,8 +91,8 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
     @Autowired
     private  ESummonMembersRepository eSummonMembersRepository;
 
- //   @Autowired
- //   private EventProducerService eventProducerService;
+    @Autowired
+    private EventProducerService eventProducerService;
 
 
     @Transactional
@@ -684,7 +684,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
             eSummonMembersRepository.saveAll(summonMembersList);
 
-            //eventProducerService.generateEvent(String.valueOf(eSummonId));
+            eventProducerService.generateEvent(String.valueOf(eSummonId));
 
 
 

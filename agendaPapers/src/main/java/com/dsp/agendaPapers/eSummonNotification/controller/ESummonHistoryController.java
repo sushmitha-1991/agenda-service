@@ -3,7 +3,7 @@ package com.dsp.agendaPapers.eSummonNotification.controller;
 
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
-//import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
+import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
@@ -28,7 +28,7 @@ public class ESummonHistoryController {
     @Autowired
     private ESummonNotificationService eSummonNotificationService;
 
-    //private final EventProducerService eventProducerService;
+    private final EventProducerService eventProducerService;
 
     private static final Logger logger = LoggerFactory.getLogger(ESummonHistoryController.class);
 
@@ -169,7 +169,7 @@ public class ESummonHistoryController {
 
         try {
             logger.info("Triggering Kafka event for eSummon ID: {}", eSummonId);
-            // eventProducerService.generateEvent(String.valueOf(eSummonId));
+            eventProducerService.generateEvent(String.valueOf(eSummonId));
 
             return ResponseEntity.ok(new GenericResponse<>(true, "eSummon email processing triggered", "Triggered", 200));
         } catch (Exception e) {
