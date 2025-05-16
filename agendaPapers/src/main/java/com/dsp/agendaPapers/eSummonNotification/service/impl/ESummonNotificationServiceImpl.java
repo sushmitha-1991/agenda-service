@@ -651,107 +651,43 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     }
 
-//v1 code with kafka evernt
-////Updated sendESummon Method with Kafka Event:
-//@Override
-//public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
-//    Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
-//    if (!optionalNotification.isPresent()) {
-//        throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
-//    }
-//
-//    ESummonNotification eSummon = optionalNotification.get();
-//
-//    // Retrieve member details
-//    List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
-//
-//    // Save to e_summon_members table
-//    List<ESummonMembers> summonMembersList = memberIds.stream()
-//            .map(memberId -> new ESummonMembers(eSummonId, memberId))
-//            .collect(Collectors.toList());
-//    eSummonMembersRepository.saveAll(summonMembersList);
-//
-//    // Save to e_summon_history table
-//    List<ESummonHistory> historyList = members.stream()
-//            .map(member -> ESummonHistory.builder()
-//                    .eSummon(eSummon)
-//                    .member(member)
-//                    .documentUuid(null) // Now allowed to be null
-//                    .mailSentAt(LocalDateTime.now())
-//                    .mailStatus("PENDING")
-//                    .retryCount(0)
-//                    .emailId(member.getEmailId()) // fixed method name
-//                    .build()
-//            ).collect(Collectors.toList());
-//    eSummonHistoryRepository.saveAll(historyList);
-//
-//    // ✅ Kafka event trigger
-//    eventProducerService.generateEvent(String.valueOf(eSummonId));
-//    return members;
-//}
 
-//v2 code kafka event
+//Updated sendESummon Method with Kafka Event:
 @Override
 public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
-    try {
-        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
-        if (!optionalNotification.isPresent()) {
-            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
-        }
-
-        ESummonNotification eSummon = optionalNotification.get();
-
-        // Retrieve member details
-        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
-
-        // Save to e_summon_members table
-        List<ESummonMembers> summonMembersList = memberIds.stream()
-                .map(memberId -> new ESummonMembers(eSummonId, memberId))
-                .collect(Collectors.toList());
-        eSummonMembersRepository.saveAll(summonMembersList);
-
-        // ✅ Filter members with valid email ID
-        List<PersonalDetails> validMembers = members.stream()
-                .filter(member -> member.getEmailId() != null && !member.getEmailId().trim().isEmpty())
-                .collect(Collectors.toList());
-
-        // Log or collect skipped members if needed
-        List<PersonalDetails> skippedMembers = members.stream()
-                .filter(member -> member.getEmailId() == null || member.getEmailId().trim().isEmpty())
-                .collect(Collectors.toList());
-
-        // Save to e_summon_history table
-        List<ESummonHistory> historyList = validMembers.stream()
-                .map(member -> ESummonHistory.builder()
-                        .eSummon(eSummon)
-                        .member(member)
-                        .documentUuid(null) // initially blank
-                        .mailSentAt(LocalDateTime.now())
-                        .mailStatus("PENDING")
-                        .retryCount(0)
-                        .emailId(member.getEmailId())
-                        .build()
-                ).collect(Collectors.toList());
-        eSummonHistoryRepository.saveAll(historyList);
-
-        // ✅ Trigger Kafka event
-        eventProducerService.generateEvent(String.valueOf(eSummonId));
-
-        // Optionally log skipped members
-        if (!skippedMembers.isEmpty()) {
-            log.warn("Skipped {} members due to missing email IDs.", skippedMembers.size());
-        }
-
-        return validMembers;
-
-    } catch (DataAccessException ex) {
-        log.error("Database error while sending eSummon for ID {}: {}", eSummonId, ex.getMessage());
-        throw new RuntimeException("Failed to save eSummon records due to database error.");
-    } catch (Exception ex) {
-        log.error("Unexpected error during eSummon processing for ID {}: {}", eSummonId, ex.getMessage(), ex);
-        throw new RuntimeException("Unexpected error occurred while processing eSummon.");
+    Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+    if (!optionalNotification.isPresent()) {
+        throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
     }
-}
 
+    ESummonNotification eSummon = optionalNotification.get();
+
+    // Retrieve member details
+    List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+
+    // Save to e_summon_members table
+    List<ESummonMembers> summonMembersList = memberIds.stream()
+            .map(memberId -> new ESummonMembers(eSummonId, memberId))
+            .collect(Collectors.toList());
+    eSummonMembersRepository.saveAll(summonMembersList);
+
+    // Save to e_summon_history table
+    List<ESummonHistory> historyList = members.stream()
+            .map(member -> ESummonHistory.builder()
+                    .eSummon(eSummon)
+                    .member(member)
+                    .documentUuid(null) // Now allowed to be null
+                    .mailSentAt(LocalDateTime.now())
+                    .mailStatus("PENDING")
+                    .retryCount(0)
+                    .emailId(member.getEmailId()) // fixed method name
+                    .build()
+            ).collect(Collectors.toList());
+    eSummonHistoryRepository.saveAll(historyList);
+
+    // ✅ Kafka event trigger
+    eventProducerService.generateEvent(String.valueOf(eSummonId));
+    return members;
+}
 }
 
