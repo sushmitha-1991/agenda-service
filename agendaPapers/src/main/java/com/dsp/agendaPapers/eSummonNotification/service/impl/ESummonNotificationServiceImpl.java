@@ -6,8 +6,10 @@ import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
 import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
+import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
+import com.dsp.agendaPapers.eSummonNotification.repository.ESummonHistoryRepository;
 import com.dsp.agendaPapers.eSummonNotification.repository.PersonalDetailsRepository;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
@@ -45,6 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -92,7 +95,10 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
     private  ESummonMembersRepository eSummonMembersRepository;
 
     @Autowired
-    private EventProducerService eventProducerService;
+    ESummonHistoryRepository eSummonHistoryRepository;
+
+    @Autowired
+    EventProducerService eventProducerService;
 
 
     @Transactional
@@ -644,55 +650,43 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     }
 
-    // old code but updating into the db
-//    @Override
-//    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
-//        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
-//        if (!optionalNotification.isPresent()) {
-//            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
-//        }
-//        ESummonNotification notification = optionalNotification.get();
-//
-//        // Retrieve the list of PersonalDetails using memberIds
-//        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
-//
-//        // Simulate sending the eSummon to each member
-//        for (PersonalDetails member : members) {
-//            System.out.println("Sending eSummon (ID: " + eSummonId + ") to member: "
-//                    + member.getFullName() + ", Email: " + member.getEmailId());
-//        }
-//
-//        // Return the member details that were processed
-//        return members;
-//    }
 
+//Updated sendESummon Method with Kafka Event:
+@Override
+public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
+    Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+    if (!optionalNotification.isPresent()) {
+        throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+    }
 
+    ESummonNotification eSummon = optionalNotification.get();
 
-    // working code
-        @Override
-        public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
-            Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
-            if (!optionalNotification.isPresent()) {
-                throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
-            }
+    // Retrieve member details
+    List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
 
-            // Retrieve the list of PersonalDetails using memberIds
-            List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+    // Save to e_summon_members table
+    List<ESummonMembers> summonMembersList = memberIds.stream()
+            .map(memberId -> new ESummonMembers(eSummonId, memberId))
+            .collect(Collectors.toList());
+    eSummonMembersRepository.saveAll(summonMembersList);
 
-            // Save data into e_summon_members table
-            List<ESummonMembers> summonMembersList = memberIds.stream()
-                    .map(memberId -> new ESummonMembers(eSummonId, memberId))
-                    .collect(Collectors.toList());
+    // Save to e_summon_history table
+    List<ESummonHistory> historyList = members.stream()
+            .map(member -> ESummonHistory.builder()
+                    .eSummon(eSummon)
+                    .member(member)
+                    .documentUuid(null) // Now allowed to be null
+                    .mailSentAt(LocalDateTime.now())
+                    .mailStatus("PENDING")
+                    .retryCount(0)
+                    .emailId(member.getEmailId()) // fixed method name
+                    .build()
+            ).collect(Collectors.toList());
+    eSummonHistoryRepository.saveAll(historyList);
 
-            eSummonMembersRepository.saveAll(summonMembersList);
-
-            eventProducerService.generateEvent(String.valueOf(eSummonId));
-
-
-
-            // Return the member details that were processed
-            return members;
-        }
-
+    // ✅ Kafka event trigger
+    eventProducerService.generateEvent(String.valueOf(eSummonId));
+    return members;
+}
 }
 

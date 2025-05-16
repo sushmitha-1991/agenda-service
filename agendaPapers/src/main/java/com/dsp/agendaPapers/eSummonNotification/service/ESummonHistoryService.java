@@ -41,8 +41,5 @@ public interface ESummonHistoryService {
     List<ESummonMemberDetailsDTO> getMemberDetailsByESummonId(Long eSummonId);
 
 
-
-
-
 }
 

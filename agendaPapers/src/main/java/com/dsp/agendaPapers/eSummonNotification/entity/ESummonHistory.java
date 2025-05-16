@@ -33,7 +33,7 @@ public class ESummonHistory extends Auditable {
     @JoinColumn(name = "member_id", nullable = false)
     private PersonalDetails member;
 
-    @Column(name = "document_uuid", nullable = false, unique = true)
+    @Column(name = "document_uuid", nullable = true, unique = true)
     private UUID documentUuid;
 
     @Column(name = "mail_sent_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

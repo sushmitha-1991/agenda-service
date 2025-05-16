@@ -41,12 +41,6 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
     private final ESummonHistoryMapper eSummonHistoryMapper;
     private final RestTemplate restTemplate;
 
-    @Value("${email.api.url}")
-    private String emailApiUrl;
-
-    @Value("${email.from}")
-    private String emailFrom;
-
 
     @Override
     @Transactional
@@ -360,58 +354,15 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
                     history = eSummonHistoryRepository.save(history);
                 }
 
-                // Send email using external API
-                boolean isSuccess = sendEmailViaAPI(member.getEmailId(), "ESummon Subject", "Please find attached eSummon", null); // Replace null with actual file
-
-                if (isSuccess) {
-                    history.setMailStatus("SENT");
-                    history.setMailSentAt(LocalDateTime.now());
-                    history.setRetryCount(history.getRetryCount() + 1);
-                    history.setRemarks("Email sent successfully");
-                } else {
-                    history.setRetryCount(history.getRetryCount() + 1);
-                    history.setRemarks("Email sending failed");
-                }
-
-                eSummonHistoryRepository.save(history);
-                resultList.add(eSummonHistoryMapper.toDTO(history));
 
             } catch (Exception e) {
-                System.out.println("Error while processing member: " + member.getEmailId());
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-        }
 
+        }
         return resultList;
     }
 
-    private boolean sendEmailViaAPI(String toEmail, String subject, String body, File file) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-            MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            bodyMap.add("emailfrom", emailFrom);
-            bodyMap.add("emailto", toEmail);
-            bodyMap.add("emailsub", subject);
-            bodyMap.add("emailbody", body);
-
-            if (file != null) {
-                bodyMap.add("file", new FileSystemResource(file));
-            }
-
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(emailApiUrl, requestEntity, Map.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                Map<String, Object> res = response.getBody();
-                return res != null && "S".equals(res.get("message"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 
 
     // working code

@@ -1,21 +1,5 @@
 package com.dsp.agendaPapers.eSummonNotification.controller;
 
-//import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
-//import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
-//import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
-//import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
-//import com.dsp.agendaPapers.response.GenericResponse;
-//import io.swagger.v3.oas.annotations.Operation;
-//import io.swagger.v3.oas.annotations.responses.ApiResponse;
-//import io.swagger.v3.oas.annotations.responses.ApiResponses;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-
-
-
-
 import java.util.List;
 
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
