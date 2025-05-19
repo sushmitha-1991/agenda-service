@@ -21,6 +21,7 @@ public class EventProducerService {
     public void generateEvent(String eSummonId) {
         try {
             kafkaTemplate.send(eSummonTopic, eSummonId);
+            //get html content english, hindi , applicationid , using e sumonid
             logger.info("Sent eSummon Kafka event for ID: {}", eSummonId);
         } catch (Exception e) {
             logger.error("Failed to send Kafka event for eSummon ID: {}", eSummonId, e);

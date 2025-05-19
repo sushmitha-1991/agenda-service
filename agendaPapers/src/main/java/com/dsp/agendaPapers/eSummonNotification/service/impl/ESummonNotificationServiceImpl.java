@@ -32,6 +32,9 @@ import com.dsp.agendaPapers.repository.MasterLSSRepository;
 import com.dsp.agendaPapers.repository.MastersRSSRepository;
 import com.dsp.agendaPapers.response.GenericResponse;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,19 +42,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.context.annotation.Lazy;
 
@@ -93,13 +96,55 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
     private PersonalDetailsRepository personalDetailsRepository;
 
     @Autowired
-    private  ESummonMembersRepository eSummonMembersRepository;
+    private ESummonMembersRepository eSummonMembersRepository;
 
     @Autowired
     ESummonHistoryRepository eSummonHistoryRepository;
 
     @Autowired
     EventProducerService eventProducerService;
+
+    @Autowired
+    private HttpServletRequest httpRequest;
+
+//working code with kafka event
+    //Updated sendESummon Method with Kafka Event:
+//    @Override
+//    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
+//        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+//        if (!optionalNotification.isPresent()) {
+//            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+//        }
+//
+//        ESummonNotification eSummon = optionalNotification.get();
+//
+//        // Retrieve member details
+//        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+//
+//        // Save to e_summon_members table
+//        List<ESummonMembers> summonMembersList = memberIds.stream()
+//                .map(memberId -> new ESummonMembers(eSummonId, memberId))
+//                .collect(Collectors.toList());
+//        eSummonMembersRepository.saveAll(summonMembersList);
+//
+//        // Save to e_summon_history table
+//        List<ESummonHistory> historyList = members.stream()
+//                .map(member -> ESummonHistory.builder()
+//                        .eSummon(eSummon)
+//                        .member(member)
+//                        .documentUuid(null) // Now allowed to be null
+//                        .mailSentAt(LocalDateTime.now())
+//                        .mailStatus("PENDING")
+//                        .retryCount(0)
+//                        .emailId(member.getEmailId()) // fixed method name
+//                        .build()
+//                ).collect(Collectors.toList());
+//        eSummonHistoryRepository.saveAll(historyList);
+//
+//        // ✅ Kafka event trigger
+//        eventProducerService.generateEvent(String.valueOf(eSummonId));
+//        return members;
+//    }
 
 
     @Transactional
@@ -128,10 +173,10 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             // Convert DTO to entity
             ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
             if (StringUtils.isBlank(summonNotification.getApplicationNo())) {
-			SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
-            System.out.println(applicationNo);
-            summonNotification.setApplicationNo(applicationNo.getId());
-			}
+                SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+                System.out.println(applicationNo);
+                summonNotification.setApplicationNo(applicationNo.getId());
+            }
             log.debug("Converted E-SummonNotificationDTO to entity: {}", summonNotification);
             System.out.println("@@@@@@@@@@@@@" + summonNotification);
 
@@ -250,7 +295,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             if (!StringUtils.isBlank(eSummonNotificationDTO.getApplicationNo())) {
                 // Get the Draft ID from draft table using appNo
                 String res = bearerClient.deleteDraftEntry(eSummonNotificationDTO.getApplicationNo());
-                System.out.println("res:::::::"+res);
+                System.out.println("res:::::::" + res);
                 // /delete-save-as-draft
             }
             return responseDTO;
@@ -417,7 +462,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
         try {
             ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(url,
                     HttpMethod.GET, null, new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
-            });
+                    });
 
             if (response == null || response.getBody() == null || response.getBody().getData() == null) {
                 log.error("Response or body is null when fetching ApplicationInstance for applicationNo: {}",
@@ -596,7 +641,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                 ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(
                         applicationInstanceUrl, HttpMethod.GET, null,
                         new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
-                });
+                        });
 
                 if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                     ApplicationInstanceDTO applicationInstanceDTOResponse = response.getBody().getData();
@@ -652,42 +697,83 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
     }
 
 
-//Updated sendESummon Method with Kafka Event:
-@Override
-public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds) {
-    Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
-    if (!optionalNotification.isPresent()) {
-        throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+    @Override
+    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds,HttpServletRequest httpRequest) {
+        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+        if (!optionalNotification.isPresent()) {
+            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+        }
+
+        ESummonNotification eSummon = optionalNotification.get();
+
+        // ✅ Convert entity to DTO and use only required fields
+        ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(eSummon);
+
+        // ✅ Step 1: Upload HTML using external API
+        String token = getTokenFromRequest();
+
+        HttpHeaders formHeaders = new HttpHeaders();
+        formHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        formHeaders.setBearerAuth(token);
+
+        MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
+        formParams.add("htmlContentEn", dto.getTemplateContent()); // use from DTO
+        formParams.add("startingPageNo", "1");
+        formParams.add("applicationId", String.valueOf(dto.getApplicationId())); // use from DTO
+
+        HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, formHeaders);
+
+        ResponseEntity<String> uploadResponse = restTemplate
+                .postForEntity("https://dspstg.sansad.in/template/upload-html-english", formRequest, String.class);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode responseJson = objectMapper.readTree(uploadResponse.getBody());
+
+            if (!responseJson.has("documentUuid") || responseJson.get("documentUuid").isNull()) {
+                throw new RuntimeException("documentUuid not found in upload-html-english response");
+            }
+
+            UUID documentUuid = UUID.fromString(responseJson.get("documentUuid").asText());
+
+            // ✅ Save to e_summon_history with documentUuid
+            List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+
+            List<ESummonMembers> summonMembersList = memberIds.stream()
+                    .map(memberId -> new ESummonMembers(eSummonId, memberId))
+                    .collect(Collectors.toList());
+            eSummonMembersRepository.saveAll(summonMembersList);
+
+            List<ESummonHistory> historyList = members.stream()
+                    .map(member -> ESummonHistory.builder()
+                            .eSummon(eSummon)
+                            .member(member)
+                            .documentUuid(documentUuid)
+                            .mailSentAt(LocalDateTime.now())
+                            .mailStatus("PENDING")
+                            .retryCount(0)
+                            .emailId(member.getEmailId())
+                            .build()
+                    ).collect(Collectors.toList());
+            eSummonHistoryRepository.saveAll(historyList);
+
+            // ✅ Kafka trigger
+            eventProducerService.generateEvent(String.valueOf(eSummonId));
+
+            return members;
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to process upload-html-english response", ex);
+        }
     }
 
-    ESummonNotification eSummon = optionalNotification.get();
+    private String getTokenFromRequest() {
+        String authorizationHeader = httpRequest.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        }
+        return null;
+    }
 
-    // Retrieve member details
-    List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
-
-    // Save to e_summon_members table
-    List<ESummonMembers> summonMembersList = memberIds.stream()
-            .map(memberId -> new ESummonMembers(eSummonId, memberId))
-            .collect(Collectors.toList());
-    eSummonMembersRepository.saveAll(summonMembersList);
-
-    // Save to e_summon_history table
-    List<ESummonHistory> historyList = members.stream()
-            .map(member -> ESummonHistory.builder()
-                    .eSummon(eSummon)
-                    .member(member)
-                    .documentUuid(null) // Now allowed to be null
-                    .mailSentAt(LocalDateTime.now())
-                    .mailStatus("PENDING")
-                    .retryCount(0)
-                    .emailId(member.getEmailId()) // fixed method name
-                    .build()
-            ).collect(Collectors.toList());
-    eSummonHistoryRepository.saveAll(historyList);
-
-    // ✅ Kafka event trigger
-    eventProducerService.generateEvent(String.valueOf(eSummonId));
-    return members;
-}
 }
 

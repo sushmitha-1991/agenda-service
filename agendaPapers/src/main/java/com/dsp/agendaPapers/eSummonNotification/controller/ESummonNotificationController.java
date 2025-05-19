@@ -1,9 +1,13 @@
 package com.dsp.agendaPapers.eSummonNotification.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +34,8 @@ public class ESummonNotificationController {
 
 	@Autowired
 	private ESummonNotificationService eSummonNotificationService;
+
+	private static final Logger log = LoggerFactory.getLogger(ESummonNotificationController.class);
 
 	@Operation(summary = "Create a new E-SummonNotification", description = "Creates a new E-SummonNotification and returns the created E-SummonNotification details.")
 	@ApiResponses(value = {
@@ -112,12 +118,38 @@ public class ESummonNotificationController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 // working code
+//	@PostMapping("/send-esummon")
+//	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request,HttpServletRequest httpRequest) {
+//		try {
+//			// Call the service method and capture the returned member details
+//			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers());
+//			// Create a GenericResponse wrapping the member details
+//			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(
+//					true,
+//					"eSummon sent successfully.",
+//					memberDetails,
+//					HttpStatus.OK.value()
+//			);
+//			return ResponseEntity.ok(response);
+//		} catch (Exception ex) {
+//			// Return an error message with a GenericResponse in case of exceptions
+//			GenericResponse<?> response = new GenericResponse<>(
+//					false,
+//					"Error: " + ex.getMessage(),
+//					null,
+//					HttpStatus.BAD_REQUEST.value()
+//			);
+//			return ResponseEntity.badRequest().body(response);
+//		}
+//	}
+
+
 	@PostMapping("/send-esummon")
-	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request) {
+	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request, HttpServletRequest httpRequest) {
 		try {
-			// Call the service method and capture the returned member details
-			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers());
-			// Create a GenericResponse wrapping the member details
+			// Pass HttpServletRequest to service method
+			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers(), httpRequest);
+
 			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(
 					true,
 					"eSummon sent successfully.",
@@ -125,8 +157,8 @@ public class ESummonNotificationController {
 					HttpStatus.OK.value()
 			);
 			return ResponseEntity.ok(response);
+
 		} catch (Exception ex) {
-			// Return an error message with a GenericResponse in case of exceptions
 			GenericResponse<?> response = new GenericResponse<>(
 					false,
 					"Error: " + ex.getMessage(),
@@ -136,4 +168,10 @@ public class ESummonNotificationController {
 			return ResponseEntity.badRequest().body(response);
 		}
 	}
+
+
+
+
+
+
 }

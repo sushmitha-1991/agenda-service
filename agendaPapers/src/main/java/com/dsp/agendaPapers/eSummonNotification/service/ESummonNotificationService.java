@@ -1,10 +1,12 @@
 package com.dsp.agendaPapers.eSummonNotification.service;
 
-import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
+import jakarta.servlet.http.HttpServletRequest;
+
 
 import java.util.List;
+
 
 
 public interface ESummonNotificationService {
@@ -21,6 +23,8 @@ public interface ESummonNotificationService {
 
 	List<ESummonNotificationDTO> getAllESummonNotificationBySessionNo(String sessionNo);
 
-	List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds);
+	List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds,HttpServletRequest httpRequest);
 
-}
+	}
+
+
