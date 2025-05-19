@@ -48,6 +48,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -696,35 +697,48 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     }
 
-
     @Override
-    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds,HttpServletRequest httpRequest) {
+    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, HttpServletRequest request) {
         Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
         if (!optionalNotification.isPresent()) {
             throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
         }
 
         ESummonNotification eSummon = optionalNotification.get();
-
-        // ✅ Convert entity to DTO and use only required fields
         ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(eSummon);
 
-        // ✅ Step 1: Upload HTML using external API
-        String token = getTokenFromRequest();
+        // ✅ Extract Bearer token from Authorization header
+        String authorizationHeader = request.getHeader("Authorization");
+        String token;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7);
+        } else {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
 
-        HttpHeaders formHeaders = new HttpHeaders();
-        formHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        formHeaders.setBearerAuth(token);
+        // ✅ Prepare the upload HTML request
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setBearerAuth(token);  // Dynamic Bearer token
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
-        formParams.add("htmlContentEn", dto.getTemplateContent()); // use from DTO
+        formParams.add("htmlContentEn", dto.getTemplateContent());
         formParams.add("startingPageNo", "1");
-        formParams.add("applicationId", String.valueOf(dto.getApplicationId())); // use from DTO
+//        formParams.add("applicationId", String.valueOf(dto.getApplicationId()));
+        formParams.add("applicationId", "24");
 
-        HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, formHeaders);
+        HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, headers);
 
-        ResponseEntity<String> uploadResponse = restTemplate
-                .postForEntity("https://dspstg.sansad.in/template/upload-html-english", formRequest, String.class);
+        ResponseEntity<String> uploadResponse;
+        try {
+            uploadResponse = restTemplate.postForEntity(
+                    "https://dspstg.sansad.in/template/upload-html-english",
+                    formRequest,
+                    String.class
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload HTML content: " + e.getMessage(), e);
+        }
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -736,7 +750,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
             UUID documentUuid = UUID.fromString(responseJson.get("documentUuid").asText());
 
-            // ✅ Save to e_summon_history with documentUuid
+            // ✅ Save eSummon members
             List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
 
             List<ESummonMembers> summonMembersList = memberIds.stream()
@@ -744,6 +758,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                     .collect(Collectors.toList());
             eSummonMembersRepository.saveAll(summonMembersList);
 
+            // ✅ Save eSummon history with document UUID
             List<ESummonHistory> historyList = members.stream()
                     .map(member -> ESummonHistory.builder()
                             .eSummon(eSummon)
@@ -753,12 +768,12 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                             .mailStatus("PENDING")
                             .retryCount(0)
                             .emailId(member.getEmailId())
-                            .build()
-                    ).collect(Collectors.toList());
+                            .build())
+                    .collect(Collectors.toList());
             eSummonHistoryRepository.saveAll(historyList);
 
-            // ✅ Kafka trigger
-            eventProducerService.generateEvent(String.valueOf(eSummonId));
+            // Optionally trigger async processing
+             eventProducerService.generateEvent(String.valueOf(eSummonId));
 
             return members;
 
@@ -766,14 +781,5 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             throw new RuntimeException("Failed to process upload-html-english response", ex);
         }
     }
-
-    private String getTokenFromRequest() {
-        String authorizationHeader = httpRequest.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            return authorizationHeader.substring(7);
-        }
-        return null;
-    }
-
 }
 

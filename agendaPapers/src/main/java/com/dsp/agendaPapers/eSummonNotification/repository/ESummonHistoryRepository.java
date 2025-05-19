@@ -81,6 +81,10 @@ import java.util.UUID;
     """, nativeQuery = true)
         List<Object[]> getMemberDetailsByESummonId(@Param("eSummonId") Long eSummonId);
 
+        // for mail
+        List<ESummonHistory> findByESummonIdAndMailStatus(Long eSummonId, String mailStatus);
+
+
 
 
     }
