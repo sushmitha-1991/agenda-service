@@ -8,6 +8,7 @@ import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
+import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonHistoryRepository;
 import com.dsp.agendaPapers.eSummonNotification.repository.PersonalDetailsRepository;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
@@ -101,8 +102,8 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
     @Autowired
     ESummonHistoryRepository eSummonHistoryRepository;
 
-//    @Autowired
-//    EventProducerService eventProducerService;
+    @Autowired
+    EventProducerService eventProducerService;
 
     @Autowired
     private HttpServletRequest httpRequest;
@@ -772,7 +773,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             eSummonHistoryRepository.saveAll(historyList);
 
             // Optionally trigger async processing
-//             eventProducerService.generateEvent(String.valueOf(eSummonId));
+             eventProducerService.generateEvent(String.valueOf(eSummonId));
 
             return members;
 
