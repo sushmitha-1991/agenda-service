@@ -35,9 +35,15 @@ public class EmailServiceImpl implements EmailService {
         formData.add("emailbody", body);
         formData.add("uuid", history.getDocumentUuid().toString());
 
+        //logger
+        log.info("[EmailService] Sending email to: {} | Subject: {}", history.getEmailId(), subject);
+
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(formData, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity(emailApiUrl, request, String.class);
+
+        // logger
+        log.info("[EmailService] Email API Response Status: {}, Body: {}", response.getStatusCode(), response.getBody());
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new Exception("Failed to send email to " + history.getEmailId() + ": " + response.getBody());

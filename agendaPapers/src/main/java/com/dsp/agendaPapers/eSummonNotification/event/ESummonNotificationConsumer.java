@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,9 +54,14 @@ public class ESummonNotificationConsumer {
 
         List<ESummonHistory> pendingEntries =
                 historyRepository.findByeSummon_IdAndMailStatus(eSummonId, "PENDING");
+         //logger
+        log.info("[Kafka-Consumer] Found {} pending eSummonHistory entries", pendingEntries.size());
 
         for (ESummonHistory history : pendingEntries) {
             try {
+                //logger
+                log.info("[Kafka-Consumer] Attempting to send email to {}", history.getEmailId());
+
                 emailService.sendEmail(history, sessionRoman, lokSabhaNoWord);
                 history.setMailStatus("SENT");
                 history.setRetryCount(history.getRetryCount() + 1);
@@ -65,6 +71,8 @@ public class ESummonNotificationConsumer {
                 log.error("Failed to send email to member: {}. Error: {}", history.getEmailId(), e.getMessage());
                 history.setRetryCount(history.getRetryCount() + 1);
                 historyRepository.save(history);
+                // logger
+                log.warn("[Kafka-Consumer] Retry count incremented and saved for: {}", history.getEmailId());
             }
         }
     }
