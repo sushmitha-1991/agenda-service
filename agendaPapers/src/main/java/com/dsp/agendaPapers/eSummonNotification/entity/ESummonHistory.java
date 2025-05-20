@@ -25,7 +25,7 @@ public class ESummonHistory extends Auditable {
     )
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "e_summon_id", nullable = false)
     private ESummonNotification eSummon;
 
@@ -40,8 +40,9 @@ public class ESummonHistory extends Auditable {
     private LocalDateTime mailSentAt;
 
     @Column(name = "mail_status", nullable = false, length = 50)
-    @Builder.Default
-    private String mailStatus = "PENDING";
+//    @Builder.Default
+//    private String mailStatus = "PENDING";
+    private String mailStatus;
 
     @Column(name = "last_retry_datetime")
     private LocalDateTime lastRetryDatetime;

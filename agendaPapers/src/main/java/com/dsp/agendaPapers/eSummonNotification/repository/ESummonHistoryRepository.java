@@ -1,7 +1,6 @@
 package com.dsp.agendaPapers.eSummonNotification.repository;
 
 
-import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
@@ -9,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +20,7 @@ import java.util.UUID;
     @Repository
     public interface ESummonHistoryRepository extends JpaRepository<ESummonHistory, Long> {
 
-        // Correct return type as Optional<ESummonHistory>
+//        // Correct return type as Optional<ESummonHistory>
         Optional<ESummonHistory> findById(Long id);
 
         @Modifying
@@ -81,11 +81,8 @@ import java.util.UUID;
     """, nativeQuery = true)
         List<Object[]> getMemberDetailsByESummonId(@Param("eSummonId") Long eSummonId);
 
-        // for mail
-        List<ESummonHistory> findByESummonIdAndMailStatus(Long eSummonId, String mailStatus);
-
-
-
+      // for email
+    List<ESummonHistory> findByeSummon_IdAndMailStatus(Long eSummonId, String mailStatus);
 
     }
 

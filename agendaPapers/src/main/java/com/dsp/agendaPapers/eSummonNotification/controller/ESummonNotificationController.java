@@ -166,12 +166,5 @@ public class ESummonNotificationController {
 					HttpStatus.BAD_REQUEST.value()
 			);
 			return ResponseEntity.badRequest().body(response);
-		}
-	}
-
-
-
-
-
-
+		}}
 }

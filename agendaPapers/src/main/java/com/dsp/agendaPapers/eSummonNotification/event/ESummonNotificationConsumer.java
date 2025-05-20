@@ -1,7 +1,6 @@
 package com.dsp.agendaPapers.eSummonNotification.event;
 
 import com.dsp.agendaPapers.eSummonNotification.email.EmailService;
-import com.dsp.agendaPapers.eSummonNotification.email.NumberConverterUtil;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonHistoryRepository;
@@ -28,27 +27,32 @@ public class ESummonNotificationConsumer {
     private ESummonNotificationRepository notificationRepository;
 
     @KafkaListener(topics = "${kafka.topic.eSummon}", groupId = "eSummonGroup")
-    public void consume(String eSummonId) {
-        log.info("Received Kafka event to send emails for eSummonId: {}", eSummonId);
+    public void consume(String eSummonIdStr) {
+        log.info("Received Kafka event with eSummonId: {}", eSummonIdStr);
 
-        Long summonId = Long.parseLong(eSummonId);
+        Long eSummonId;
+        try {
+            eSummonId = Long.parseLong(eSummonIdStr);
+        } catch (NumberFormatException e) {
+            log.error("Invalid eSummonId received: {}", eSummonIdStr);
+            return;
+        }
 
-        Optional<ESummonNotification> notificationOpt = notificationRepository.findById(summonId);
+        Optional<ESummonNotification> notificationOpt = notificationRepository.findById(eSummonId);
         if (notificationOpt.isEmpty()) {
-            log.error("No eSummonNotification found for ID: {}", summonId);
+            log.error("No eSummonNotification found for ID: {}", eSummonId);
             return;
         }
 
         ESummonNotification notification = notificationOpt.get();
+        int sessionNo = parseIntSafe(notification.getSessionNo());
+        int lokSabhaNo = parseIntSafe(notification.getLokSabhaNo());
 
-        int sessionNo = NumberConverterUtil.parseIntSafe(notification.getSessionNo());
-        int lokSabhaNo = NumberConverterUtil.parseIntSafe(notification.getLokSabhaNo());
-
-        String sessionRoman = NumberConverterUtil.toRoman(sessionNo);
-        String lokSabhaNoWord = NumberConverterUtil.toOrdinalWord(lokSabhaNo);
+        String sessionRoman = toRoman(sessionNo);
+        String lokSabhaNoWord = toOrdinalWord(lokSabhaNo);
 
         List<ESummonHistory> pendingEntries =
-                historyRepository.findByESummonIdAndMailStatus(summonId, "PENDING");
+                historyRepository.findByeSummon_IdAndMailStatus(eSummonId, "PENDING");
 
         for (ESummonHistory history : pendingEntries) {
             try {
@@ -62,6 +66,32 @@ public class ESummonNotificationConsumer {
                 history.setRetryCount(history.getRetryCount() + 1);
                 historyRepository.save(history);
             }
+        }
+    }
+
+    private String toRoman(int number) {
+        String[] romans = {
+            "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+            "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"
+        };
+        return (number > 0 && number < romans.length) ? romans[number] : String.valueOf(number);
+    }
+
+    private String toOrdinalWord(int number) {
+        String[] ordinals = {
+            "", "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh",
+            "Eighth", "Ninth", "Tenth", "Eleventh", "Twelfth", "Thirteenth", "Fourteenth",
+            "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth"
+        };
+        return (number > 0 && number < ordinals.length) ? ordinals[number] : String.valueOf(number);
+    }
+
+    private int parseIntSafe(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            log.warn("Unable to parse number from '{}'", value);
+            return 0;
         }
     }
 }
