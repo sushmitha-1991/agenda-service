@@ -2,14 +2,14 @@ package com.dsp.agendaPapers.eSummonNotification.email;
 
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -50,34 +50,5 @@ public class EmailServiceImpl implements EmailService {
         }
 
         log.info("Email successfully sent to {}", history.getEmailId());
-    }
-
-    // 🔽 Method to download file from DMS using UUID
-    private ByteArrayResource downloadFileFromUUID(UUID uuid) {
-        try {
-            String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + uuid;
-
-            ResponseEntity<byte[]> response = restTemplate.exchange(
-                    downloadUrl,
-                    HttpMethod.GET,
-                    new HttpEntity<>(new HttpHeaders()),
-                    byte[].class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                return new ByteArrayResource(response.getBody()) {
-                    @Override
-                    public String getFilename() {
-                        return uuid + ".pdf";
-                    }
-                };
-            } else {
-                log.error("Failed to download file for UUID: {}, status: {}", uuid, response.getStatusCode());
-            }
-        } catch (Exception e) {
-            log.error("Error downloading file for UUID: " + uuid, e);
-        }
-
-        return null;
     }
 }
