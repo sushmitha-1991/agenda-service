@@ -30,7 +30,7 @@ public class ESummonNotificationConsumer {
     @KafkaListener(topics = "${kafka.topic.eSummon}", groupId = "eSummonGroup")
     public void consume(String eSummonIdStr) {
         log.info("Received Kafka event with eSummonId: {}", eSummonIdStr);
-
+System.out.println("#### Received Kafka event with eSummonId ");
         Long eSummonId;
         try {
             eSummonId = Long.parseLong(eSummonIdStr);
@@ -40,6 +40,7 @@ public class ESummonNotificationConsumer {
         }
 
         Optional<ESummonNotification> notificationOpt = notificationRepository.findById(eSummonId);
+        System.out.println("### notificationOpt - " + notificationOpt);
         if (notificationOpt.isEmpty()) {
             log.error("No eSummonNotification found for ID: {}", eSummonId);
             return;

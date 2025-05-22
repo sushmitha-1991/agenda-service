@@ -721,6 +721,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.setBearerAuth(token);  // Dynamic Bearer token
 
+        System.out.println("##### dto.getTemplateContent() - " + dto.getTemplateContent());
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
         formParams.add("htmlContentEn", dto.getTemplateContent());
         formParams.add("startingPageNo", "1");
@@ -750,6 +751,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
             UUID documentUuid = UUID.fromString(responseJson.get("documentUuid").asText());
 
+            System.out.println("### documentUuid - " + documentUuid);
             // ✅ Save eSummon members
             List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
 
@@ -771,6 +773,9 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                             .build())
                     .collect(Collectors.toList());
             eSummonHistoryRepository.saveAll(historyList);
+
+            System.out.println("### saved successfully ! ");
+
 
             // Optionally trigger async processing
              eventProducerService.generateEvent(String.valueOf(eSummonId));

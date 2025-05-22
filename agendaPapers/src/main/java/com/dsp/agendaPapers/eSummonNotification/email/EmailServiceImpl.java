@@ -65,6 +65,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendEmail(ESummonHistory history, String sessionRoman, String lokSabhaNoWord) throws Exception {
         String emailApiUrl = "http://10.246.55.102/emailapi/SendEmail";
 
+        System.out.println("### sending the email started ");
         // Prepare headers with Authorization
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -86,8 +87,12 @@ public class EmailServiceImpl implements EmailService {
         if (history.getDocumentUuid() != null) {
             ByteArrayResource fileResource = downloadFileFromUUID(history.getDocumentUuid());
 
+            System.out.println("### fileResource -  " + fileResource);
+
+
             if (fileResource != null) {
                 formData.add("file", fileResource);
+                System.out.println("### inside if ####");
                 log.info("Attached file with UUID: {}", history.getDocumentUuid());
             } else {
                 log.info("Attachment not found for UUID: {}", history.getDocumentUuid());
@@ -113,6 +118,7 @@ public class EmailServiceImpl implements EmailService {
         try {
             String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + uuid;
 
+            System.out.println("### downloadFileFromUUID called");
             ResponseEntity<byte[]> response = restTemplate.exchange(
                     downloadUrl,
                     HttpMethod.GET,
@@ -128,10 +134,12 @@ public class EmailServiceImpl implements EmailService {
                     }
                 };
             } else {
-                log.error("Failed to download file for UUID: {}, Status: {}", uuid, response.getStatusCode());
+                log.info("Failed to download file for UUID: {}, Status: {}", uuid, response.getStatusCode());
+                System.out.println("#### Failed to download file for UUID");
             }
         } catch (Exception e) {
-            log.error("Error downloading file for UUID: " + uuid, e);
+            System.out.println("#### Error downloading file for UUID" + uuid);
+            log.info("Error downloading file for UUID: " + uuid, e);
         }
 
         return null;
