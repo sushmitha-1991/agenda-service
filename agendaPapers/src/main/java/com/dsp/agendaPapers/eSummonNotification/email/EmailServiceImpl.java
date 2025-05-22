@@ -85,11 +85,16 @@ public class EmailServiceImpl implements EmailService {
         // Attach file using UUID
         if (history.getDocumentUuid() != null) {
             ByteArrayResource fileResource = downloadFileFromUUID(history.getDocumentUuid());
+
             if (fileResource != null) {
                 formData.add("file", fileResource);
+                log.info("Attached file with UUID: {}", history.getDocumentUuid());
             } else {
-                log.warn("Attachment not found for UUID: {}", history.getDocumentUuid());
+                log.info("Attachment not found for UUID: {}", history.getDocumentUuid());
             }
+        }
+        else {
+            log.info("No UUID found in history to attach a file.");
         }
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(formData, headers);
