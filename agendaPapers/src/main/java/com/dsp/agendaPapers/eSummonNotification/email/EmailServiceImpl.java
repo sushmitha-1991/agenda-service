@@ -106,4 +106,12 @@ public class EmailServiceImpl implements EmailService {
 
         return null;
     }
+        private String getTokenFromRequest() {
+        String authorizationHeader = httpRequest.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        }
+        return null;
+    }
+
 }
