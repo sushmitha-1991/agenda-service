@@ -697,94 +697,180 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     }
 
-    @Override
-    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, HttpServletRequest request) {
-        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
-        if (!optionalNotification.isPresent()) {
-            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
-        }
+    // working code
+//    @Override
+//    public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, HttpServletRequest request) {
+//        Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+//        if (!optionalNotification.isPresent()) {
+//            throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+//        }
+//
+//        ESummonNotification eSummon = optionalNotification.get();
+//        ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(eSummon);
+//
+//        // ✅ Extract Bearer token from Authorization header
+//        String authorizationHeader = request.getHeader("Authorization");
+//        String token;
+//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+//            token = authorizationHeader.substring(7);
+//        } else {
+//            throw new RuntimeException("Missing or invalid Authorization header");
+//        }
+//
+//        // ✅ Prepare the upload HTML request
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//        headers.setBearerAuth(token);  // Dynamic Bearer token
+//
+//        System.out.println("##### dto.getTemplateContent() - " + dto.getTemplateContent());
+//        MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
+//        formParams.add("htmlContentEn", dto.getTemplateContent());
+//        formParams.add("startingPageNo", "1");
+////        formParams.add("applicationId", String.valueOf(dto.getApplicationId()));
+//        formParams.add("applicationId", "24");
+//
+//        HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, headers);
+//
+//        ResponseEntity<String> uploadResponse;
+//        try {
+//            uploadResponse = restTemplate.postForEntity(
+//                    "https://dspstg.sansad.in/template/upload-html-english",
+//                    formRequest,
+//                    String.class
+//            );
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to upload HTML content: " + e.getMessage(), e);
+//        }
+//
+//        try {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            JsonNode responseJson = objectMapper.readTree(uploadResponse.getBody());
+//
+//            if (!responseJson.has("documentUuid") || responseJson.get("documentUuid").isNull()) {
+//                throw new RuntimeException("documentUuid not found in upload-html-english response");
+//            }
+//
+//            UUID documentUuid = UUID.fromString(responseJson.get("documentUuid").asText());
+//
+//            System.out.println("### documentUuid - " + documentUuid);
+//            // ✅ Save eSummon members
+//            List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+//
+//            List<ESummonMembers> summonMembersList = memberIds.stream()
+//                    .map(memberId -> new ESummonMembers(eSummonId, memberId))
+//                    .collect(Collectors.toList());
+//            eSummonMembersRepository.saveAll(summonMembersList);
+//
+//            // ✅ Save eSummon history with document UUID
+//            List<ESummonHistory> historyList = members.stream()
+//                    .map(member -> ESummonHistory.builder()
+//                            .eSummon(eSummon)
+//                            .member(member)
+//                            .documentUuid(documentUuid)
+//                            .mailSentAt(LocalDateTime.now())
+//                            .mailStatus("PENDING")
+//                            .retryCount(0)
+//                            .emailId(member.getEmailId())
+//                            .build())
+//                    .collect(Collectors.toList());
+//            eSummonHistoryRepository.saveAll(historyList);
+//
+//            System.out.println("### saved successfully ! ");
+//
+//
+//            // Optionally trigger async processing
+//             eventProducerService.generateEvent(String.valueOf(eSummonId));
+//
+//            return members;
+//
+//        } catch (Exception ex) {
+//            throw new RuntimeException("Failed to process upload-html-english response", ex);
+//        }
+//    }
 
-        ESummonNotification eSummon = optionalNotification.get();
-        ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(eSummon);
-
-        // ✅ Extract Bearer token from Authorization header
-        String authorizationHeader = request.getHeader("Authorization");
-        String token;
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7);
-        } else {
-            throw new RuntimeException("Missing or invalid Authorization header");
-        }
-
-        // ✅ Prepare the upload HTML request
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBearerAuth(token);  // Dynamic Bearer token
-
-        System.out.println("##### dto.getTemplateContent() - " + dto.getTemplateContent());
-        MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
-        formParams.add("htmlContentEn", dto.getTemplateContent());
-        formParams.add("startingPageNo", "1");
-//        formParams.add("applicationId", String.valueOf(dto.getApplicationId()));
-        formParams.add("applicationId", "24");
-
-        HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, headers);
-
-        ResponseEntity<String> uploadResponse;
-        try {
-            uploadResponse = restTemplate.postForEntity(
-                    "https://dspstg.sansad.in/template/upload-html-english",
-                    formRequest,
-                    String.class
-            );
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to upload HTML content: " + e.getMessage(), e);
-        }
-
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode responseJson = objectMapper.readTree(uploadResponse.getBody());
-
-            if (!responseJson.has("documentUuid") || responseJson.get("documentUuid").isNull()) {
-                throw new RuntimeException("documentUuid not found in upload-html-english response");
-            }
-
-            UUID documentUuid = UUID.fromString(responseJson.get("documentUuid").asText());
-
-            System.out.println("### documentUuid - " + documentUuid);
-            // ✅ Save eSummon members
-            List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
-
-            List<ESummonMembers> summonMembersList = memberIds.stream()
-                    .map(memberId -> new ESummonMembers(eSummonId, memberId))
-                    .collect(Collectors.toList());
-            eSummonMembersRepository.saveAll(summonMembersList);
-
-            // ✅ Save eSummon history with document UUID
-            List<ESummonHistory> historyList = members.stream()
-                    .map(member -> ESummonHistory.builder()
-                            .eSummon(eSummon)
-                            .member(member)
-                            .documentUuid(documentUuid)
-                            .mailSentAt(LocalDateTime.now())
-                            .mailStatus("PENDING")
-                            .retryCount(0)
-                            .emailId(member.getEmailId())
-                            .build())
-                    .collect(Collectors.toList());
-            eSummonHistoryRepository.saveAll(historyList);
-
-            System.out.println("### saved successfully ! ");
-
-
-            // Optionally trigger async processing
-             eventProducerService.generateEvent(String.valueOf(eSummonId));
-
-            return members;
-
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to process upload-html-english response", ex);
-        }
+@Override
+public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, String token) {
+    Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+    if (!optionalNotification.isPresent()) {
+        throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
     }
+
+    ESummonNotification eSummon = optionalNotification.get();
+    ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(eSummon);
+
+    // ✅ Use the passed token directly (no need to extract from request)
+    if (token == null || token.isEmpty()) {
+        throw new RuntimeException("Missing or invalid Authorization token");
+    }
+
+    // ✅ Prepare the upload HTML request
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    headers.setBearerAuth(token);  // Use passed Bearer token
+
+    System.out.println("##### dto.getTemplateContent() - " + dto.getTemplateContent());
+    MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
+    formParams.add("htmlContentEn", dto.getTemplateContent());
+    formParams.add("startingPageNo", "1");
+    // formParams.add("applicationId", String.valueOf(dto.getApplicationId()));
+    formParams.add("applicationId", "24");
+
+    HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, headers);
+
+    ResponseEntity<String> uploadResponse;
+    try {
+        uploadResponse = restTemplate.postForEntity(
+                "https://dspstg.sansad.in/template/upload-html-english",
+                formRequest,
+                String.class
+        );
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to upload HTML content: " + e.getMessage(), e);
+    }
+
+    try {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode responseJson = objectMapper.readTree(uploadResponse.getBody());
+
+        if (!responseJson.has("documentUuid") || responseJson.get("documentUuid").isNull()) {
+            throw new RuntimeException("documentUuid not found in upload-html-english response");
+        }
+
+        UUID documentUuid = UUID.fromString(responseJson.get("documentUuid").asText());
+
+        System.out.println("### documentUuid - " + documentUuid);
+        // ✅ Save eSummon members
+        List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+
+        List<ESummonMembers> summonMembersList = memberIds.stream()
+                .map(memberId -> new ESummonMembers(eSummonId, memberId))
+                .collect(Collectors.toList());
+        eSummonMembersRepository.saveAll(summonMembersList);
+
+        // ✅ Save eSummon history with document UUID
+        List<ESummonHistory> historyList = members.stream()
+                .map(member -> ESummonHistory.builder()
+                        .eSummon(eSummon)
+                        .member(member)
+                        .documentUuid(documentUuid)
+                        .mailSentAt(LocalDateTime.now())
+                        .mailStatus("PENDING")
+                        .retryCount(0)
+                        .emailId(member.getEmailId())
+                        .build())
+                .collect(Collectors.toList());
+        eSummonHistoryRepository.saveAll(historyList);
+
+        System.out.println("### saved successfully ! ");
+
+        // Trigger Kafka event with token
+        eventProducerService.generateEvent(eSummonId, token);
+
+        return members;
+
+    } catch (Exception ex) {
+        throw new RuntimeException("Failed to process upload-html-english response", ex);
+    }
+}
 }
 

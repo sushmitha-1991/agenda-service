@@ -23,8 +23,13 @@ public interface ESummonNotificationService {
 
 	List<ESummonNotificationDTO> getAllESummonNotificationBySessionNo(String sessionNo);
 
-	List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds,HttpServletRequest httpRequest);
+//	List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds,HttpServletRequest httpRequest);
 
-	}
+	List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, String token);
+
+
+
+
+}
 
 

@@ -62,7 +62,7 @@ public class EmailServiceImpl implements EmailService {
 //    }
 
     @Override
-    public void sendEmail(ESummonHistory history, String sessionRoman, String lokSabhaNoWord) throws Exception {
+    public void sendEmail(ESummonHistory history, String sessionRoman, String lokSabhaNoWord,String token) throws Exception {
         String emailApiUrl = "http://10.246.55.102/emailapi/SendEmail";
 
         System.out.println("### sending the email started ");
@@ -70,7 +70,7 @@ public class EmailServiceImpl implements EmailService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.setAccept(Collections.singletonList(MediaType.ALL));
-        headers.set("Authorization", "Bearer " + getTokenFromRequest());
+        headers.set("Authorization", "Bearer " + token); // <- use passed token
 
         // Subject & Body
         String subject = String.format("Summons for %s Session of %s Lok Sabha", sessionRoman, lokSabhaNoWord);
@@ -145,11 +145,11 @@ public class EmailServiceImpl implements EmailService {
         return null;
     }
 
-    private String getTokenFromRequest() {
-        String authorizationHeader = httpRequest.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            return authorizationHeader.substring(7);
-        }
-        return null;
-    }
+//    private String getTokenFromRequest() {
+//        String authorizationHeader = httpRequest.getHeader("Authorization");
+//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+//            return authorizationHeader.substring(7);
+//        }
+//        return null;
+//    }
 }

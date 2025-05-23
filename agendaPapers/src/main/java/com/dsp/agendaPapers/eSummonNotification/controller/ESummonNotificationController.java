@@ -117,13 +117,14 @@ public class ESummonNotificationController {
 				null, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-// working code
+
+	// deplyed code
 //	@PostMapping("/send-esummon")
-//	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request,HttpServletRequest httpRequest) {
+//	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request, HttpServletRequest httpRequest) {
 //		try {
-//			// Call the service method and capture the returned member details
-//			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers());
-//			// Create a GenericResponse wrapping the member details
+//			// Pass HttpServletRequest to service method
+//			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers(), httpRequest);
+//
 //			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(
 //					true,
 //					"eSummon sent successfully.",
@@ -131,8 +132,8 @@ public class ESummonNotificationController {
 //					HttpStatus.OK.value()
 //			);
 //			return ResponseEntity.ok(response);
+//
 //		} catch (Exception ex) {
-//			// Return an error message with a GenericResponse in case of exceptions
 //			GenericResponse<?> response = new GenericResponse<>(
 //					false,
 //					"Error: " + ex.getMessage(),
@@ -140,15 +141,16 @@ public class ESummonNotificationController {
 //					HttpStatus.BAD_REQUEST.value()
 //			);
 //			return ResponseEntity.badRequest().body(response);
-//		}
-//	}
-
-
+//		}}
+// new code
 	@PostMapping("/send-esummon")
 	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request, HttpServletRequest httpRequest) {
 		try {
-			// Pass HttpServletRequest to service method
-			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers(), httpRequest);
+			String authHeader = httpRequest.getHeader("Authorization");
+			String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
+
+			// Call service with token
+			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers(), token);
 
 			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(
 					true,
@@ -166,5 +168,8 @@ public class ESummonNotificationController {
 					HttpStatus.BAD_REQUEST.value()
 			);
 			return ResponseEntity.badRequest().body(response);
-		}}
+		}
+	}
+
+
 }
