@@ -23,44 +23,6 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private HttpServletRequest httpRequest;
 
-
-
-
-//    @Override
-//    public void sendEmail(ESummonHistory history, String sessionRoman, String lokSabhaNoWord) throws Exception {
-//        String emailApiUrl = "http://10.246.55.102/emailapi/SendEmail";
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-//
-//        // 📌 Dynamic Subject & Body
-//        String subject = String.format("Summons for %s Session of %s Lok Sabha", sessionRoman, lokSabhaNoWord);
-//        String body = String.format("Summons for %s Session of %s Lok Sabha is attached for your information", sessionRoman, lokSabhaNoWord);
-//
-//        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
-//        formData.add("emailfrom", "noreply@sansad.in");
-//        formData.add("emailto", history.getEmailId());
-//        formData.add("emailsub", subject);
-//        formData.add("emailbody", body);
-//        formData.add("uuid", history.getDocumentUuid().toString());
-//
-//        //logger
-//        log.info("[EmailService] Sending email to: {} | Subject: {}", history.getEmailId(), subject);
-//
-//        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(formData, headers);
-//
-//        ResponseEntity<String> response = restTemplate.postForEntity(emailApiUrl, request, String.class);
-//
-//        // logger
-//        log.info("[EmailService] Email API Response Status: {}, Body: {}", response.getStatusCode(), response.getBody());
-//
-//        if (!response.getStatusCode().is2xxSuccessful()) {
-//            throw new Exception("Failed to send email to " + history.getEmailId() + ": " + response.getBody());
-//        }
-//
-//        log.info("Email successfully sent to {}", history.getEmailId());
-//    }
-
     @Override
     public void sendEmail(ESummonHistory history, String sessionRoman, String lokSabhaNoWord,String token) throws Exception {
         String emailApiUrl = "http://10.246.55.102/emailapi/SendEmail";
@@ -144,12 +106,4 @@ public class EmailServiceImpl implements EmailService {
 
         return null;
     }
-
-//    private String getTokenFromRequest() {
-//        String authorizationHeader = httpRequest.getHeader("Authorization");
-//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-//            return authorizationHeader.substring(7);
-//        }
-//        return null;
-//    }
 }

@@ -117,31 +117,7 @@ public class ESummonNotificationController {
 				null, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-
-	// deplyed code
-//	@PostMapping("/send-esummon")
-//	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request, HttpServletRequest httpRequest) {
-//		try {
-//			// Pass HttpServletRequest to service method
-//			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers(), httpRequest);
-//
-//			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(
-//					true,
-//					"eSummon sent successfully.",
-//					memberDetails,
-//					HttpStatus.OK.value()
-//			);
-//			return ResponseEntity.ok(response);
-//
-//		} catch (Exception ex) {
-//			GenericResponse<?> response = new GenericResponse<>(
-//					false,
-//					"Error: " + ex.getMessage(),
-//					null,
-//					HttpStatus.BAD_REQUEST.value()
-//			);
-//			return ResponseEntity.badRequest().body(response);
-//		}}
+	
 // new code
 	@PostMapping("/send-esummon")
 	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request, HttpServletRequest httpRequest) {
