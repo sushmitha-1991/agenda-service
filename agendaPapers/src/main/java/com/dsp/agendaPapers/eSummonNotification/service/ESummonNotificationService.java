@@ -24,8 +24,7 @@ public interface ESummonNotificationService {
 
 	List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, String token);
 
-
-
+	List<PersonalDetails> sendESummonV2(Long eSummonId, List<Long> memberIds, String token);
 
 }
 

@@ -8,7 +8,7 @@ import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
-import com.dsp.agendaPapers.eSummonNotification.event.EventProducerService;
+import com.dsp.agendaPapers.eSummonNotification.event.EventProducer;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonHistoryRepository;
 import com.dsp.agendaPapers.eSummonNotification.repository.PersonalDetailsRepository;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
@@ -103,7 +103,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
     ESummonHistoryRepository eSummonHistoryRepository;
 
     @Autowired
-    EventProducerService eventProducerService;
+    EventProducer eventProducerService;
 
     @Autowired
     private HttpServletRequest httpRequest;
@@ -299,6 +299,14 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                 System.out.println("res:::::::" + res);
                 // /delete-save-as-draft
             }
+            
+            // Save in esummon_member table
+            
+            // Save in esummon history table
+            
+            // generate event
+            
+            
             return responseDTO;
         } catch (Exception e) {
             log.error("Error in saveESummonNotification: ", e);
@@ -773,7 +781,7 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
         System.out.println("### saved successfully ! ");
 
         // Trigger Kafka event with token
-        eventProducerService.generateEvent(eSummonId, token);
+        eventProducerService.generateEventV2(eSummonId, token);
 
         return members;
 
@@ -781,5 +789,46 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
         throw new RuntimeException("Failed to process upload-html-english response", ex);
     }
 }
+
+
+	@Override
+	public List<PersonalDetails> sendESummonV2(Long eSummonId, List<Long> memberIds, String token) {
+		Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
+		if (!optionalNotification.isPresent()) {
+			throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
+		}
+	
+		ESummonNotification eSummon = optionalNotification.get();
+		ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(eSummon);
+	
+		// ✅ Save eSummon members
+		List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
+	
+		List<ESummonMembers> summonMembersList = memberIds.stream().map(memberId -> new ESummonMembers(eSummonId, memberId))
+				.collect(Collectors.toList());
+		eSummonMembersRepository.saveAll(summonMembersList);
+	
+		// ✅ Save eSummon history with document UUID
+		List<ESummonHistory> historyList = members.stream()
+				.map(member -> ESummonHistory.builder()
+									.eSummon(eSummon)
+									.member(member)
+									.mailSentAt(LocalDateTime.now())
+									.mailStatus("PENDING")
+									.retryCount(0)
+									.emailId(member.getEmailId())
+									.build())
+				.collect(Collectors.toList());
+		eSummonHistoryRepository.saveAll(historyList);
+	
+		System.out.println("### saved successfully ! ");
+	
+		// Trigger Kafka event with token
+		eventProducerService.generateEventV2(eSummonId, token);
+	
+		return members;
+	
+	}
+
 }
 
