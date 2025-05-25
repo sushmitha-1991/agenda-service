@@ -172,7 +172,7 @@ public class EventConsumer {
 
     
     @KafkaListener(topics = "${kafka.topic.eSummon}", groupId = "eSummonGroup")
-    public void consumeV2(String messageJson) {
+    public void consume (String messageJson) {
         try {
 
             ObjectMapper mapper = new ObjectMapper();
