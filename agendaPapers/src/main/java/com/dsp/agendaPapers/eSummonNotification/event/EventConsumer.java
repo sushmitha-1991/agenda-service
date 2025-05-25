@@ -194,7 +194,7 @@ public class EventConsumer {
             int sessionNo = parseIntSafe(notification.getSessionNo());
             int lokSabhaNo = parseIntSafe(notification.getLokSabhaNo());
             String sessionRoman = toRoman(sessionNo);
-            String lokSabhaNoWord = toOrdinalWord(lokSabhaNo);
+            String lokSabhaNoWord = toOrdinalWord(lokSabhaNo); 
 
             List<ESummonHistory> pendingEntries = historyRepository.findByeSummon_IdAndMailStatus(eSummonId, "PENDING");
 

@@ -821,7 +821,7 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
 				.collect(Collectors.toList());
 		eSummonHistoryRepository.saveAll(historyList);
 	
-		System.out.println("### saved successfully ! ");
+		log.debug("### saved successfully ! ");
 	
 		// Trigger Kafka event with token
 		eventProducerService.generateEventV2(eSummonId, token);
