@@ -181,7 +181,7 @@ public class EventConsumer {
             String token = root.get("token").asText();
         	log.info("Received Kafka event for eSummonId: {}", id);
 
-        	Long eSummonId = Long.getLong(id);
+        	Long eSummonId = Long.parseLong(id);
         	log.info("Long eSummonId: {}", eSummonId);
 
             Optional<ESummonNotification> notificationOpt = notificationRepository.findById(eSummonId);
