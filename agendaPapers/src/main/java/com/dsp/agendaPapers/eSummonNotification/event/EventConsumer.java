@@ -182,6 +182,8 @@ public class EventConsumer {
         	log.info("Received Kafka event for eSummonId: {}", id);
 
         	Long eSummonId = Long.getLong(id);
+        	log.info("Long eSummonId: {}", eSummonId);
+
             Optional<ESummonNotification> notificationOpt = notificationRepository.findById(eSummonId);
             if (notificationOpt.isEmpty()) {
                 log.error("No eSummonNotification found for ID: {}", eSummonId);
@@ -198,6 +200,8 @@ public class EventConsumer {
 
             for (ESummonHistory history : pendingEntries) {
             	UUID docUuid = generateDocument(notification, history, token);
+            	log.info("Generate document ID: {}", docUuid);
+
                 try {
                     emailService.sendEmail(history, sessionRoman, lokSabhaNoWord, token);
                     history.setMailStatus("SENT");
@@ -213,6 +217,7 @@ public class EventConsumer {
             }
 
         } catch (Exception ex) {
+        	ex.printStackTrace();
             log.error("Error processing Kafka message: {}", ex.getMessage());
         }
     }
