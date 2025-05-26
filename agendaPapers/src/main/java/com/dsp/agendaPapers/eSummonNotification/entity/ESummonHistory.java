@@ -36,6 +36,10 @@ public class ESummonHistory extends Auditable {
     @Column(name = "document_uuid", nullable = false)
     private UUID documentUuid;
 
+
+    @Column(name = "document_uuid_hindi")
+    private UUID documentUuidHindi;
+
     @Column(name = "mail_sent_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime mailSentAt;
 

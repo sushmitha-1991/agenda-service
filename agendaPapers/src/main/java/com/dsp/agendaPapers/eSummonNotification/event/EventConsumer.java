@@ -213,19 +213,34 @@ public void consume(String messageJson) {
 
     private UUID generateDocument(ESummonNotification esummon, ESummonHistory history, PersonalDetails member, String token) {
         if (StringUtils.isEmpty(token)) {
+            logger.error("Authorization token is missing or invalid.");
             throw new RuntimeException("Missing or invalid Authorization token");
         }
 
-        // ✅ Replace placeholders like ${member.name} with actual member full name
-        String templateContent = esummon.getTemplateContent();
-        String personalizedHtml = replacePlaceholders(templateContent, member);
+        logger.info("### Starting document generation for memberId: {}", member != null ? member.getId() : "Unknown");
+
+
+        String templateEn = esummon.getTemplateContent();
+        String templateHi = esummon.getTemplateContentHindi();
+
+        logger.info("### Original English Template:\n{}", templateEn);
+        logger.info("### Original Hindi Template:\n{}", templateHi);
+
+
+        String personalizedHtmlEn = replacePlaceholders(templateEn, member);
+        String personalizedHtmlHi = replacePlaceholders(templateHi, member);
+
+        logger.info("### Personalized HTML content prepared for upload.");
+        logger.info("### Personalized English HTML Content:\n{}", personalizedHtmlEn);
+        logger.info("### Personalized Hindi HTML Content:\n{}", personalizedHtmlHi);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.setBearerAuth(token);
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
-        formParams.add("htmlContentEn", personalizedHtml);
+        formParams.add("htmlContentEn", personalizedHtmlEn);
+        formParams.add("htmlContentHi", personalizedHtmlHi);
         formParams.add("startingPageNo", "1");
         formParams.add("applicationId", "24");
 
@@ -233,10 +248,13 @@ public void consume(String messageJson) {
 
         ResponseEntity<String> uploadResponse;
         try {
-            uploadResponse = restTemplate.postForEntity("https://dspstg.sansad.in/template/upload-html-english",
-                    formRequest, String.class);
+            logger.info("### Sending HTML content to document generation service...");
+            uploadResponse = restTemplate.postForEntity(
+                    "https://dspstg.sansad.in/template/upload-html-english", formRequest, String.class);
+            logger.info("### Document upload API called successfully.");
+            logger.info("### Upload HTML Response Body:\n{}", uploadResponse.getBody());
         } catch (Exception e) {
-            logger.debug("### Document generation failed");
+            logger.error("### Document upload failed: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to upload HTML content: " + e.getMessage(), e);
         }
 
@@ -245,27 +263,35 @@ public void consume(String messageJson) {
             JsonNode responseJson = objectMapper.readTree(uploadResponse.getBody());
 
             if (!responseJson.has("documentUuid") || responseJson.get("documentUuid").isNull()) {
+                logger.info("### documentUuid is missing in upload response.");
                 throw new RuntimeException("documentUuid not found in upload-html-english response");
             }
 
             UUID documentUuid = UUID.fromString(responseJson.get("documentUuid").asText());
-
-            // Persist document UUID
             history.setDocumentUuid(documentUuid);
             historyRepository.save(history);
 
-            logger.debug("### documentUuid - " + documentUuid);
+            logger.info("### Document generated successfully with UUID: {}", documentUuid);
             return documentUuid;
         } catch (Exception ex) {
+            logger.error("### Failed to process upload-html-english response: {}", ex.getMessage(), ex);
             throw new RuntimeException("Failed to process upload-html-english response", ex);
         }
     }
+
     private String replacePlaceholders(String htmlTemplate, PersonalDetails member) {
-        if (member == null || StringUtils.isEmpty(member.getFullName())) {
-            throw new RuntimeException("Member details are missing or incomplete");
+        if (member == null) {
+            logger.error("Member details are null while replacing placeholders.");
+            throw new RuntimeException("Member details are missing");
         }
 
-        // Replace ${member.name} with actual full name
-        return htmlTemplate.replace("${member.name}", member.getFullName());
+        String fullNameEn = member.getFullName() != null ? member.getFullName() : "";
+        String fullNameHi = member.getFullNameHindi() != null ? member.getFullNameHindi() : "";
+
+        logger.debug("Replacing placeholders: [member.name -> '{}', member.name.hi -> '{}']", fullNameEn, fullNameHi);
+
+        return htmlTemplate
+                .replace("${member.name}", fullNameEn)
+                .replace("${member.name.hi}", fullNameHi);
     }
 }

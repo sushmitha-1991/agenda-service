@@ -27,6 +27,7 @@ public class ESummonHistoryDTO {
     private Long memberId;
 
     private UUID documentUuid;
+    private UUID documentUuidHindi;
     private LocalDateTime mailSentAt;
     private String mailStatus;
     private LocalDateTime lastRetryDatetime;

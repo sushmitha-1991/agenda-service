@@ -704,7 +704,6 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
         // TODO Auto-generated method stub
 
     }
-
 @Override
 public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, String token) {
     Optional<ESummonNotification> optionalNotification = eSummonNotificationRepository.findById(eSummonId);
