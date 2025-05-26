@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class EventProducerService {
+public class EventProducer {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventProducerService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventProducer.class);
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -33,15 +33,33 @@ public class EventProducerService {
 //        }
 //    }
 
-    public void generateEvent(Long eSummonId, String token) {
+//    public void generateEvent(Long eSummonId, String token) {
+//        try {
+//            // Create JSON payload
+//            ObjectMapper mapper = new ObjectMapper();
+//            Map<String, Object> payload = new HashMap<>();
+//            payload.put("eSummonId", eSummonId);
+//            payload.put("token", token);
+//
+//            String jsonPayload = mapper.writeValueAsString(payload);
+//            kafkaTemplate.send(eSummonTopic, jsonPayload);
+//
+//            logger.info("Sent eSummon Kafka event for ID: {}", eSummonId);
+//        } catch (Exception e) {
+//            logger.error("Failed to send Kafka event for eSummon ID: {}", eSummonId, e);
+//        }
+//    }
+    
+    public void generateEventV2(Long eSummonId, String token) {
         try {
             // Create JSON payload
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("eSummonId", eSummonId);
+            Map<String, String> payload = new HashMap<>();
+            payload.put("eSummonId", eSummonId.toString());
             payload.put("token", token);
 
             String jsonPayload = mapper.writeValueAsString(payload);
+            logger.info("Generating event for topic: {}", eSummonTopic);
             kafkaTemplate.send(eSummonTopic, jsonPayload);
 
             logger.info("Sent eSummon Kafka event for ID: {}", eSummonId);
@@ -49,4 +67,5 @@ public class EventProducerService {
             logger.error("Failed to send Kafka event for eSummon ID: {}", eSummonId, e);
         }
     }
+
 }

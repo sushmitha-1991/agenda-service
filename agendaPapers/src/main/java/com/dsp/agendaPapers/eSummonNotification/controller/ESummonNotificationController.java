@@ -126,7 +126,7 @@ public class ESummonNotificationController {
 			String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
 
 			// Call service with token
-			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummon(request.getId(), request.getMembers(), token);
+			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummonV2(request.getId(), request.getMembers(), token);
 
 			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(
 					true,
