@@ -35,8 +35,8 @@ public class EmailServiceImpl implements EmailService {
         headers.set("Authorization", "Bearer " + token); // <- use passed token
 
         // Subject & Body
-        String subject = String.format("Summons for %s Session of %s Lok Sabha", sessionRoman, lokSabhaNoWord);
-        String body = String.format("Summons for %s Session of %s Lok Sabha is attached for your information", sessionRoman, lokSabhaNoWord);
+        String subject = String.format("Summons for IV Session of %s Lok Sabha", sessionRoman, lokSabhaNoWord);
+        String body = String.format("Summons for IV Session of %s Lok Sabha is attached for your information", sessionRoman, lokSabhaNoWord);
 
         // Build request body
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
