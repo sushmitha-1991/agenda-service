@@ -221,18 +221,18 @@ public void consume(String messageJson) {
 
 
         String templateEn = esummon.getTemplateContent();
-        String templateHi = esummon.getTemplateContentHindi();
+//        String templateHi = esummon.getTemplateContentHindi();
 
         logger.info("### Original English Template:\n{}", templateEn);
-        logger.info("### Original Hindi Template:\n{}", templateHi);
+//        logger.info("### Original Hindi Template:\n{}", templateHi);
 
 
         String personalizedHtmlEn = replacePlaceholders(templateEn, member);
-        String personalizedHtmlHi = replacePlaceholders(templateHi, member);
+//        String personalizedHtmlHi = replacePlaceholders(templateHi, member);
 
         logger.info("### Personalized HTML content prepared for upload.");
         logger.info("### Personalized English HTML Content:\n{}", personalizedHtmlEn);
-        logger.info("### Personalized Hindi HTML Content:\n{}", personalizedHtmlHi);
+//        logger.info("### Personalized Hindi HTML Content:\n{}", personalizedHtmlHi);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -240,7 +240,7 @@ public void consume(String messageJson) {
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
         formParams.add("htmlContentEn", personalizedHtmlEn);
-        formParams.add("htmlContentHi", personalizedHtmlHi);
+//        formParams.add("htmlContentHi", personalizedHtmlHi);
         formParams.add("startingPageNo", "1");
         formParams.add("applicationId", "24");
 
