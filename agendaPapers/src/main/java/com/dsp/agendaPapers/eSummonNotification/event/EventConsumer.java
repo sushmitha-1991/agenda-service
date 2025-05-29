@@ -293,11 +293,11 @@ public void consume(String messageJson) {
         String fullNameEn = member.getFullName() != null ? member.getFullName() : "";
         String fullNameHi = member.getFullNameHindi() != null ? member.getFullNameHindi() : "";
 
-        logger.debug("Replacing placeholders: [member.name -> '{}', member.name.hi -> '{}']", fullNameEn, fullNameHi);
+        logger.debug("Replacing placeholders: [member.name -> '{}', member.name_hindi -> '{}']", fullNameEn, fullNameHi);
 
         return htmlTemplate
                 .replace("${member.name}", fullNameEn)
-                .replace("${member.name.hi}", fullNameHi);
+                .replace("${member.name_hindi}", fullNameHi);
     }
 
     // for the hindi
