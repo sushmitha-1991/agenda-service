@@ -320,7 +320,7 @@ public void consume(String messageJson) {
         headers.setBearerAuth(token);
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
-        formParams.add("htmlContentHi", personalizedHtmlHi);
+        formParams.add("htmlContentEn", personalizedHtmlHi);
         formParams.add("startingPageNo", "1");
         formParams.add("applicationId", "24");
 
@@ -330,7 +330,10 @@ public void consume(String messageJson) {
         try {
             logger.info("### Sending Hindi HTML content to document generation service...");
             uploadResponse = restTemplate.postForEntity(
-                    "https://dspstg.sansad.in/template/upload-html-english", formRequest, String.class);
+                    "https://dspstg.sansad.in/template/upload-html-english",
+                    formRequest,
+                    String.class
+            );
             logger.info("### Hindi Document upload API called successfully.");
             logger.info("### Hindi Upload HTML Response Body:\n{}", uploadResponse.getBody());
         } catch (Exception e) {
@@ -358,5 +361,4 @@ public void consume(String messageJson) {
             throw new RuntimeException("Failed to process upload-html-hindi response", ex);
         }
     }
-
 }
