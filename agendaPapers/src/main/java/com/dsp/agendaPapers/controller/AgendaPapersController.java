@@ -29,7 +29,7 @@ import com.dsp.agendaPapers.service.SaveAsDraftService;
  * 
  */
 @RestController
-@RequestMapping("/agendapapers")
+@RequestMapping()
 public class AgendaPapersController {
 
 	@Autowired

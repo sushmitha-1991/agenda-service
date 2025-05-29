@@ -1,11 +1,7 @@
 package com.dsp.agendaPapers.eSummonNotification.controller;
 
 import java.util.List;
-import java.util.UUID;
 
-import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
-import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +17,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
+import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
 import com.dsp.agendaPapers.response.GenericResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/agendapapers/esummon")
+@RequestMapping("/esummon")
 public class ESummonNotificationController {
 
 	@Autowired
@@ -38,8 +37,7 @@ public class ESummonNotificationController {
 	private static final Logger log = LoggerFactory.getLogger(ESummonNotificationController.class);
 
 	@Operation(summary = "Create a new E-SummonNotification", description = "Creates a new E-SummonNotification and returns the created E-SummonNotification details.")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "201", description = "E-Summon created successfully."),
+	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "E-Summon created successfully."),
 			@ApiResponse(responseCode = "400", description = "Invalid input, object invalid"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@PostMapping("/create")
@@ -48,8 +46,8 @@ public class ESummonNotificationController {
 		ESummonNotificationDTO savedNotification = eSummonNotificationService
 				.saveESummonNotification(eSummonNotificationDTO);
 		System.out.println("############" + eSummonNotificationDTO);
-		GenericResponse<ESummonNotificationDTO> response = new GenericResponse<>(true,
-				"E-Summon created successfully.", savedNotification, HttpStatus.CREATED.value());
+		GenericResponse<ESummonNotificationDTO> response = new GenericResponse<>(true, "E-Summon created successfully.",
+				savedNotification, HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
@@ -64,14 +62,16 @@ public class ESummonNotificationController {
 				"E-Summon notifications retrieved successfully", eSummonNotificationDTOs, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-	
+
 	@Operation(summary = "Get E-summonNotification By SessionNo", description = "Retrieve all E-summonNotification By its SessionNo.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "E-SummonNotification retrieved successfully"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@GetMapping("/get/sessionNo/{sessionNo}")
-	public ResponseEntity<GenericResponse<List<ESummonNotificationDTO>>> getAllESummonNotificationBySessionNo(@PathVariable String sessionNo) {
-		List<ESummonNotificationDTO> eSummonNotificationDTO = eSummonNotificationService.getAllESummonNotificationBySessionNo(sessionNo);
+	public ResponseEntity<GenericResponse<List<ESummonNotificationDTO>>> getAllESummonNotificationBySessionNo(
+			@PathVariable String sessionNo) {
+		List<ESummonNotificationDTO> eSummonNotificationDTO = eSummonNotificationService
+				.getAllESummonNotificationBySessionNo(sessionNo);
 		GenericResponse<List<ESummonNotificationDTO>> response = new GenericResponse<>(true,
 				"E-Summon notifications retrieved successfully", eSummonNotificationDTO, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
@@ -117,7 +117,7 @@ public class ESummonNotificationController {
 				null, HttpStatus.OK.value());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-	
+
 // new code
 	@PostMapping("/send-esummon")
 	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request, HttpServletRequest httpRequest) {
@@ -126,26 +126,18 @@ public class ESummonNotificationController {
 			String token = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
 
 			// Call service with token
-			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummonV2(request.getId(), request.getMembers(), token);
+			List<PersonalDetails> memberDetails = eSummonNotificationService.sendESummonV2(request.getId(),
+					request.getMembers(), token);
 
-			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(
-					true,
-					"eSummon sent successfully.",
-					memberDetails,
-					HttpStatus.OK.value()
-			);
+			GenericResponse<List<PersonalDetails>> response = new GenericResponse<>(true, "eSummon sent successfully.",
+					memberDetails, HttpStatus.OK.value());
 			return ResponseEntity.ok(response);
 
 		} catch (Exception ex) {
-			GenericResponse<?> response = new GenericResponse<>(
-					false,
-					"Error: " + ex.getMessage(),
-					null,
-					HttpStatus.BAD_REQUEST.value()
-			);
+			GenericResponse<?> response = new GenericResponse<>(false, "Error: " + ex.getMessage(), null,
+					HttpStatus.BAD_REQUEST.value());
 			return ResponseEntity.badRequest().body(response);
 		}
 	}
-
 
 }

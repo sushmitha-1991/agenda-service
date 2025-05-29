@@ -14,8 +14,6 @@ public class RestTemplateConfig {
 	@Bean
 	public RestTemplate restTemplate() {
 		RestTemplate restTemplate = new RestTemplate();
-		System.out.println("### inside RestTemplate - " + restTemplate);
-		// Add the interceptor to the RestTemplate
 		restTemplate.getInterceptors().add(authorizationHeaderInterceptor);
 		return restTemplate;
 	}
