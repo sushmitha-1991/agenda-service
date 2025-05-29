@@ -30,14 +30,14 @@ public class PersonalDetails {
     @Column(name = "email_id", length = 255)
     private String emailId;
 
-    // ✅ Hindi name fields
+
     @Column(name = "first_name_hindi", length = 100)
     private String firstNameHindi;
 
     @Column(name = "last_name_hindi", length = 100)
     private String lastNameHindi;
 
-    // ✅ Optional: Get full Hindi name from parts
+
     @Transient
     public String getFullNameHindi() {
         return String.join(" ",
