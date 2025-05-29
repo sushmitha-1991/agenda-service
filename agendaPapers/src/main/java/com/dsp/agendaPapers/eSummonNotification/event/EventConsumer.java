@@ -330,7 +330,7 @@ public void consume(String messageJson) {
         try {
             logger.info("### Sending Hindi HTML content to document generation service...");
             uploadResponse = restTemplate.postForEntity(
-                    "https://dspstg.sansad.in/template/upload-html-hindi", formRequest, String.class);
+                    "https://dspstg.sansad.in/template/upload-html-english", formRequest, String.class);
             logger.info("### Hindi Document upload API called successfully.");
             logger.info("### Hindi Upload HTML Response Body:\n{}", uploadResponse.getBody());
         } catch (Exception e) {
