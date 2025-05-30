@@ -19,4 +19,5 @@ public class ESummonMemberDetailsDTO {
     private String stateName;
     private String mailStatus;
     private String documentUuid;
+    private UUID documentUuidHindi;
 }

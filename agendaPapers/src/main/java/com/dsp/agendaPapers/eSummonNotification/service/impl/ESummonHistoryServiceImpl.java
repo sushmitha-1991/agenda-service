@@ -388,6 +388,7 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
                 dto.setStateName((String) obj[7]);
                 dto.setMailStatus((String) obj[8]);
                 dto.setDocumentUuid((String) obj[9]); // first document UUID
+                dto.setDocumentUuidHindi(obj[10] != null ? UUID.fromString(obj[10].toString()) : null);
                 uniqueMembers.put(memberId, dto);
             }
         }

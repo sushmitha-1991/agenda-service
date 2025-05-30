@@ -65,7 +65,8 @@ import java.util.UUID;
         c.abbr AS constituency_abbr,
         s.state_name,
         MAX(h.mail_status) AS mail_status,  -- Use MAX if status is same or you want latest
-        STRING_AGG(CAST(h.document_uuid AS VARCHAR), ',') AS document_uuids
+        STRING_AGG(CAST(h.document_uuid AS VARCHAR), ',') AS document_uuids,
+        STRING_AGG(CAST(h.document_uuid_hindi AS VARCHAR), ',') AS document_uuids_hindi 
     FROM agenda_papers.e_summon_members esm
     JOIN members.personal_details pd ON esm.member_id = pd.id
     JOIN master.political_parties pp ON pd.party_id = pp.id
