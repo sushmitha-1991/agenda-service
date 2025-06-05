@@ -592,12 +592,36 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                     .orElseThrow(() -> new ResourceNotFoundException("ESummonNotification not found with id: " + id));
 
             // Update only the fields you want to change
-            existingNotification.setStatus(eSummonNotificationDTO.getStatus());
-            existingNotification.setEsummonIssuanceDateHindiEn(eSummonNotificationDTO.getEsummonIssuanceDateHindiEn());
-            existingNotification.setEsummonIssuanceDate(eSummonNotificationDTO.getEsummonIssuanceDate());
-            existingNotification.setEsummonIssuanceDateHindi(eSummonNotificationDTO.getEsummonIssuanceDateHindi());
-            existingNotification.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
-            existingNotification.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
+            if (eSummonNotificationDTO.getStatus() != null) {
+                existingNotification.setStatus(eSummonNotificationDTO.getStatus());
+            }
+
+            if (eSummonNotificationDTO.getEsummonIssuanceDateHindiEn() != null) {
+                existingNotification.setEsummonIssuanceDateHindiEn(eSummonNotificationDTO.getEsummonIssuanceDateHindiEn());
+            }
+
+            if (eSummonNotificationDTO.getEsummonIssuanceDate() != null) {
+                existingNotification.setEsummonIssuanceDate(eSummonNotificationDTO.getEsummonIssuanceDate());
+            }
+
+            if (eSummonNotificationDTO.getEsummonIssuanceDateHindi() != null) {
+                existingNotification.setEsummonIssuanceDateHindi(eSummonNotificationDTO.getEsummonIssuanceDateHindi());
+            }
+
+            if (eSummonNotificationDTO.getTemplateContent() != null) {
+                existingNotification.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
+            }
+
+            if (eSummonNotificationDTO.getTemplateContentHindi() != null) {
+                existingNotification.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
+            }
+
+            if (eSummonNotificationDTO.getDocumentList() != null) {
+                existingNotification.setDocumentList(eSummonNotificationDTO.getDocumentList());
+            }
+
+
+            
 
             // Save the updated ESummonNotification
             ESummonNotification updatedNotification = eSummonNotificationRepository.save(existingNotification);
