@@ -29,6 +29,7 @@ public class ESummonNotificationMapper {
 	                .draftStatus(eSummonNotification.getDraftStatus())
 	                .customTemplate(eSummonNotification.getCustomTemplate())
 	                .esummonStartAt(eSummonNotification.getEsummonStartAt())
+	                .documentList(eSummonNotification.getDocumentList())
 	                // Uncomment if recursive mapping is needed
 	                // .parentNotification(toDTO(eSummonNotification.getParentNotification()))
 	                .build();
