@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @Builder
@@ -39,8 +38,7 @@ public class ESummonNotificationDTO {
 	private LocalDateTime esummonStartAt;
 
 	//private LocalDateTime summonStartAt;
-	private List<Map<String, Object>> documentList;
-
+	
 	private Long applicationId;
 	
 	private String applicationNo;
@@ -69,5 +67,9 @@ public class ESummonNotificationDTO {
 	private String templateType;
 	
 	private Long refId;
+	
+	private List documentList;
+	
+	private Long houseId;
 	
 }

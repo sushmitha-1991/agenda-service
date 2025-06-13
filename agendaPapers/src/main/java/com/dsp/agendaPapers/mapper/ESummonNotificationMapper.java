@@ -2,36 +2,36 @@ package com.dsp.agendaPapers.mapper;
 
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonNotification;
+import com.dsp.agendaPapers.util.Utils;
+
 import org.springframework.stereotype.Component;
 
 @Component
 public class ESummonNotificationMapper {
 
 	// Convert entity to DTO using the builder pattern with null checks
-	 public static ESummonNotificationDTO toDTO(ESummonNotification eSummonNotification) {
-	        if (eSummonNotification == null) {
+	 public static ESummonNotificationDTO toDTO(ESummonNotification entity) {
+	        if (entity == null) {
 	            return null;
 	        }
 
 	        return ESummonNotificationDTO.builder()
-	                .id(eSummonNotification.getId())
-	                .lokSabhaNo(eSummonNotification.getLokSabhaNo())
-	                .sessionNo(eSummonNotification.getSessionNo())
-	                .rajyasabhaSessionNo(eSummonNotification.getRajyasabhaSessionNo())
-	                .esummonIssuanceDate(eSummonNotification.getEsummonIssuanceDate())
-	                .esummonIssuanceDateHindi(eSummonNotification.getEsummonIssuanceDateHindi())
-	                .esummonIssuanceDateHindiEn(eSummonNotification.getEsummonIssuanceDateHindiEn())
-	                .applicationNo(eSummonNotification.getApplicationNo())
-	                .status(eSummonNotification.getStatus())
-	                .templateContent(eSummonNotification.getTemplateContent())
-	                .templateContentHindi(eSummonNotification.getTemplateContentHindi())
-	                .templateType(eSummonNotification.getTemplateType())
-	                .draftStatus(eSummonNotification.getDraftStatus())
-	                .customTemplate(eSummonNotification.getCustomTemplate())
-	                .esummonStartAt(eSummonNotification.getEsummonStartAt())
-	                .documentList(eSummonNotification.getDocumentList())
-	                // Uncomment if recursive mapping is needed
-	                // .parentNotification(toDTO(eSummonNotification.getParentNotification()))
+	                .id(entity.getId())
+	                .lokSabhaNo(entity.getLokSabhaNo())
+	                .sessionNo(entity.getSessionNo())
+	                .rajyasabhaSessionNo(entity.getRajyasabhaSessionNo())
+	                .esummonIssuanceDate(entity.getEsummonIssuanceDate())
+	                .esummonIssuanceDateHindi(entity.getEsummonIssuanceDateHindi())
+	                .esummonIssuanceDateHindiEn(entity.getEsummonIssuanceDateHindiEn())
+	                .applicationNo(entity.getApplicationNo())
+	                .status(entity.getStatus())
+	                .templateContent(entity.getTemplateContent())
+	                .templateContentHindi(entity.getTemplateContentHindi())
+	                .templateType(entity.getTemplateType())
+	                .draftStatus(entity.getDraftStatus())
+	                .customTemplate(entity.getCustomTemplate())
+	                .esummonStartAt(entity.getEsummonStartAt())
+	                .houseId(entity.getHouseId())
 	                .build();
 	    }
 
@@ -56,10 +56,8 @@ public class ESummonNotificationMapper {
 	                .templateType(dto.getTemplateType())
 	                .draftStatus(dto.getDraftStatus())
 	                .customTemplate(dto.getCustomTemplate())
-	                
 	                .esummonStartAt(dto.getEsummonStartAt())
-	                // Uncomment if recursive mapping is needed
-	                // .parentNotification(toEntity(dto.getParentNotification()))
+	                .houseId(dto.getHouseId() == null ? Utils.getHouseId() : dto.getHouseId())
 	                .build();
 	    }
 }

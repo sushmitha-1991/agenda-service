@@ -79,5 +79,8 @@ public class ESummonNotification extends Auditable {
 	@OneToOne
 	@JoinColumn(name = "parent_id")
 	private ESummonNotification parentNotification;
+	
+	@Column(name = "house_id")
+	private Long houseId;
 
 }
