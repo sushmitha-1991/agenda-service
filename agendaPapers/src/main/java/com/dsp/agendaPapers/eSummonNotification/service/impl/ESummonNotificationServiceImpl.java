@@ -156,7 +156,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
         Long houseId = null;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetailsDTO) {
-            houseId = ((UserDetailsDTO) principal).getHouseId();
+            houseId = ((UserDetailsDTO) principal).getHouseId(); 
         }
 
         SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
@@ -172,7 +172,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
         try {
             // Convert DTO to entity
-            ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
+            ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO); 
             if (StringUtils.isBlank(summonNotification.getApplicationNo())) {
                 SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
                 System.out.println(applicationNo);
@@ -211,7 +211,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                     "Saved E-SummonNotification attributes: ID={}, LokSabhaNo={}, SessionNo={}, SummonIssuanceDate={}, Status={}, TemplateContent={}",
                     savedNotification.getId(), savedNotification.getLokSabhaNo(), savedNotification.getSessionNo(),
                     savedNotification.getEsummonIssuanceDate(), savedNotification.getStatus(),
-                    savedNotification.getTemplateContent());
+                    savedNotification.getTemplateContent()); 
 
             // Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
 //            ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()

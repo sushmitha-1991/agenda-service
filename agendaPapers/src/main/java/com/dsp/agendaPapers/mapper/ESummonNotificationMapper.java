@@ -39,7 +39,7 @@ public class ESummonNotificationMapper {
 	    public static ESummonNotification toEntity(ESummonNotificationDTO dto) {
 	        if (dto == null) {
 	            return null;
-	        }
+	        }  
 
 	        return ESummonNotification.builder()
 	                .id(dto.getId())
