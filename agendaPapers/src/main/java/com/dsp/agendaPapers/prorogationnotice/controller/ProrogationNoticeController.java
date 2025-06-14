@@ -29,7 +29,7 @@ public class ProrogationNoticeController {
 	private ProrogationNoticeService prorogationNoticeService;
 
 	@Operation(summary = "Create a new ProrogationNotice", description = "Creates a new ProrogationNotice and returns the created SummonNotification details.")
-	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "ProrogationNotice created successfully"),
+	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "Prorogation Notice created successfully"),
 			@ApiResponse(responseCode = "400", description = "Invalid input, object invalid"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@PostMapping("/create")
@@ -44,7 +44,7 @@ public class ProrogationNoticeController {
 
 	@Operation(summary = "Get propagationNotice By Id", description = "Retrieve all propagationNotice By its Id.")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "PropagationNotice retrieved successfully"),
+			@ApiResponse(responseCode = "200", description = "Propagation Notice retrieved successfully"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	@GetMapping("/get/{id}")
 	public ResponseEntity<GenericResponse<ProrogationNoticeDTO>> getPropagationNoticeById(@PathVariable Long id) {
