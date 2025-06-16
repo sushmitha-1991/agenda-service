@@ -39,6 +39,7 @@ public class eSummonFileService {
                 pd.mp_code = :mpCode
                 AND esh.is_active = true
 				  AND esh.is_deleted = false
+				  AND es.session_no IS NOT NULL
 				ORDER BY esh.created_at DESC
 				LIMIT 1
         """;
