@@ -1,6 +1,7 @@
 package com.dsp.agendaPapers.eSummonNotification.email;
 
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
+import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +35,25 @@ public class EmailServiceImpl implements EmailService {
         headers.setAccept(Collections.singletonList(MediaType.ALL));
         headers.set("Authorization", "Bearer " + token); // <- use passed token
 
+        // Get member name
+        PersonalDetails member = history.getMember();
+        String fullName = member != null && member.getFullName() != null ? member.getFullName() : "Member";
+
+
         // Subject & Body
-        String subject = String.format("Summons for IV Session of 18 Lok Sabha", sessionRoman, lokSabhaNoWord);
-        String body = String.format("Summons for IV Session of 18 Lok Sabha is attached for your information", sessionRoman, lokSabhaNoWord);
+        String subject = String.format("Summons for IV Session of Eighteenth Lok Sabha",sessionRoman, lokSabhaNoWord);
+
+
+//        String body = String.format("The Summons for IV Session of Eighteenth Lok Sabha is attached for your information", sessionRoman, lokSabhaNoWord);
+
+        String body = String.format(
+                "Dear Shri %s,\n\n" +
+                        "The Summons for IV  Session of Eighteenth  Lok Sabha is attached for your information.\n\n" +
+                        "Yours Sincerely,\n" +
+                        "Secretary General\n\n" +
+                        "E-mail Attachments: Two .pdf files for English and Hindi Summon",
+                fullName, sessionRoman, lokSabhaNoWord
+        );
 
         // Build request body
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
