@@ -19,11 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
+import com.dsp.agendaPapers.eSummonNotification.dto.eSummonFileDto;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
+import com.dsp.agendaPapers.eSummonNotification.service.eSummonFileService;
 import com.dsp.agendaPapers.response.GenericResponse;
 
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequestMapping("/summon-history")
@@ -34,6 +39,9 @@ public class ESummonHistoryController {
 
 	@Autowired
 	private ESummonNotificationService eSummonNotificationService;
+	
+	@Autowired
+	private eSummonFileService eSummonFileservice;
 
 	private static final Logger logger = LoggerFactory.getLogger(ESummonHistoryController.class);
 
@@ -188,6 +196,23 @@ public class ESummonHistoryController {
 				"Data fetched successfully", details, HttpStatus.OK.value());
 
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/mpCode/{mpCode}")
+	@Operation(summary = "Get E-Summon File By MpCode", description = "Retrieve Get E-Summon File By MpCode.")
+	@ApiResponses(value = {
+	        @ApiResponse(responseCode = "200", description = "E-Summon File retrieved successfully"),
+	        @ApiResponse(responseCode = "404", description = "E-Summon File not found"),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	})
+	public ResponseEntity<GenericResponse<List<eSummonFileDto>>> getFilesListByMpCode(@PathVariable String mpCode) {
+	    List<eSummonFileDto> dtoList = eSummonFileservice.getFilesListByMpCode(mpCode);
+	    GenericResponse<List<eSummonFileDto>> response = new GenericResponse<>(
+	            true,
+	            "Retrieved E-Summon files By MpCode",
+	            dtoList,
+	            HttpStatus.OK.value());
+	    return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 }
