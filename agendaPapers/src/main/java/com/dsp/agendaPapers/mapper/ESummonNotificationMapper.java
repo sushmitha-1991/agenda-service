@@ -31,6 +31,7 @@ public class ESummonNotificationMapper {
 	                .draftStatus(entity.getDraftStatus())
 	                .customTemplate(entity.getCustomTemplate())
 	                .esummonStartAt(entity.getEsummonStartAt())
+	                .documentList(entity.getDocumentList())
 	                .houseId(entity.getHouseId())
 	                .build();
 	    }
