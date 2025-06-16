@@ -20,6 +20,7 @@ import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
 import com.dsp.agendaPapers.eSummonNotification.dto.eSummonFileDto;
+import com.dsp.agendaPapers.eSummonNotification.dto.eSummonFileWrapperDto;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
 import com.dsp.agendaPapers.eSummonNotification.service.eSummonFileService;
@@ -205,14 +206,10 @@ public class ESummonHistoryController {
 	        @ApiResponse(responseCode = "404", description = "E-Summon File not found"),
 	        @ApiResponse(responseCode = "500", description = "Internal server error")
 	})
-	public ResponseEntity<GenericResponse<List<eSummonFileDto>>> getFilesListByMpCode(@PathVariable String mpCode) {
+	public ResponseEntity<eSummonFileWrapperDto> getFilesListByMpCode(@PathVariable String mpCode) {
 	    List<eSummonFileDto> dtoList = eSummonFileservice.getFilesListByMpCode(mpCode);
-	    GenericResponse<List<eSummonFileDto>> response = new GenericResponse<>(
-	            true,
-	            "Retrieved E-Summon files By MpCode",
-	            dtoList,
-	            HttpStatus.OK.value());
-	    return new ResponseEntity<>(response, HttpStatus.OK);
+	    eSummonFileWrapperDto wrapperDto = new eSummonFileWrapperDto(dtoList);
+	    return ResponseEntity.ok(wrapperDto);
 	}
 
 }
