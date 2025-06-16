@@ -15,4 +15,5 @@ public class eSummonFileDto {
 	
 	
     private String fileUrl;
+    private String fileName;
 }

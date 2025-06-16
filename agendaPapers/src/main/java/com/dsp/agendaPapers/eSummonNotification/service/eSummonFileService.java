@@ -35,8 +35,12 @@ public class eSummonFileService {
                 members.personal_details pd ON pd.id = esm.member_id
             LEFT JOIN 
                 agenda_papers.e_summon_history esh ON esh.e_summon_id = es.id AND esh.member_id = pd.id
-            WHERE 
+            WHERE  
                 pd.mp_code = :mpCode
+                AND esh.is_active = true
+				  AND esh.is_deleted = false
+				ORDER BY esh.created_at DESC
+				LIMIT 1
         """;
 
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -52,16 +56,18 @@ public class eSummonFileService {
             if (english != null && !english.isEmpty()) {
                 dtoList.add(eSummonFileDto.builder()
                         .fileUrl(baseUrl + english)
+                        .fileName("ESummon English")
                         .build());
             }
 
             if (hindi != null && !hindi.isEmpty()) {
                 dtoList.add(eSummonFileDto.builder()
                         .fileUrl(baseUrl + hindi)
+                        .fileName("ESummon Hindi")
                         .build());
             }
 
             return dtoList;
-        }).stream().flatMap(List::stream).toList(); // Flatten the list
+        }).stream().flatMap(List::stream).toList();
     }
 }
