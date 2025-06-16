@@ -4,6 +4,7 @@ package com.dsp.agendaPapers.eSummonNotification.service;
 import com.dsp.agendaPapers.eSummonNotification.dto.eSummonFileDto;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ public class eSummonFileService {
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    
+    @Value("${openKm.dsp1.download.endpoint}")
+    private String baseUrl;
 
     public List<eSummonFileDto> getFilesListByMpCode(String mpCode) {
         String sql = """
@@ -38,7 +42,6 @@ public class eSummonFileService {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("mpCode", mpCode);
 
-        String baseUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/";
 
         return namedParameterJdbcTemplate.query(sql, params, (rs, rowNum) -> {
             List<eSummonFileDto> dtoList = new ArrayList<>();
@@ -60,4 +63,5 @@ public class eSummonFileService {
 
             return dtoList;
         }).stream().flatMap(List::stream).toList(); // Flatten the list
-    }}
+    }
+}
