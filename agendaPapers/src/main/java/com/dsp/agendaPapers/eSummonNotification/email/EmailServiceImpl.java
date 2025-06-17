@@ -2,6 +2,8 @@ package com.dsp.agendaPapers.eSummonNotification.email;
 
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,29 +42,44 @@ public class EmailServiceImpl implements EmailService {
         String fullName = member != null && member.getFullName() != null ? member.getFullName() : "Member";
 
 
-        // Subject & Body
-        String subject = String.format("Summons for IV Session of Eighteenth Lok Sabha",sessionRoman, lokSabhaNoWord);
+        // Call session API
+        try {
+            RestTemplate tempRestTemplate = new RestTemplate();
+            ResponseEntity<String> response = tempRestTemplate.getForEntity("https://dspstg.sansad.in/master/session/current", String.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody()).path("data");
 
+                sessionRoman = root.path("sessionNumber").asText("IV");
+                int lokSabhaNo = NumberConverterUtil.parseIntSafe(root.path("lokSabhaNumber").asText("18"));
+                lokSabhaNoWord = NumberConverterUtil.toOrdinalWord(lokSabhaNo);
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to fetch session info. Using default values. Error: {}", ex.getMessage());
+        }
 
-//        String body = String.format("The Summons for IV Session of Eighteenth Lok Sabha is attached for your information", sessionRoman, lokSabhaNoWord);
-
-//        String body = String.format(
-//                "Dear Shri %s,\n\n" +
-//                        "The Summons for IV  Session of Eighteenth  Lok Sabha is attached for your information.\n\n" +
-//                        "Yours Sincerely,\n" +
-//                        "Secretary General\n\n" +
-//                        "E-mail Attachments: Two .pdf files for English and Hindi Summon",
-//                fullName, sessionRoman, lokSabhaNoWord
-//        );
+        // Prepare subject and body
+        String subject = String.format("Summons for %s Session of %s Lok Sabha", sessionRoman, lokSabhaNoWord);
 
         String body = String.format(
                 "Dear Shri %s,<br><br>" +
-                        "The Summons for IV  Session of Eighteenth  Lok Sabha is attached for your information.<br><br>" +
+                        "The Summons for %s Session of %s Lok Sabha is attached for your information.<br><br>" +
                         "Yours Sincerely,<br>" +
                         "Secretary General<br><br>" +
                         "E-mail Attachments: Two .pdf files for English and Hindi Summon",
                 fullName, sessionRoman, lokSabhaNoWord
         );
+
+////        String subject = String.format("Summons for IV Session of Eighteenth Lok Sabha",sessionRoman, lokSabhaNoWord);
+//
+//        String body = String.format(
+//                "Dear Shri %s,<br><br>" +
+//                        "The Summons for IV  Session of Eighteenth  Lok Sabha is attached for your information.<br><br>" +
+//                        "Yours Sincerely,<br>" +
+//                        "Secretary General<br><br>" +
+//                        "E-mail Attachments: Two .pdf files for English and Hindi Summon",
+//                fullName, sessionRoman, lokSabhaNoWord
+//        );
 
         // Build request body
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
