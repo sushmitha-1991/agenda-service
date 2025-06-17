@@ -46,8 +46,8 @@ public class EmailServiceImpl implements EmailService {
 //        String sessionRoman = "IV"; // default
 //        String lokSabhaNoWord = "Eighteenth"; // default
 
-        String sessionRoman = null;
-        String lokSabhaNoWord = null;
+        String sessionRoman = "";
+        String lokSabhaNoWord = "";
 
         // Call session API
 //        try {
@@ -73,17 +73,21 @@ public class EmailServiceImpl implements EmailService {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody()).path("data");
 
-                // Get session number directly (already in Roman format like "IV")
-                sessionRoman = root.path("sessionNumber").asText();
+                // Use sessionNumber directly (already Roman like "IV")
+                sessionRoman = root.path("sessionNumber").asText().trim();
 
-                // Convert Lok Sabha number (e.g., 18 → Eighteenth)
-                String lokSabhaStr = root.path("lokSabhaNumber").asText();
+                // Convert Lok Sabha number (e.g., "18" to "Eighteenth")
+                String lokSabhaStr = root.path("lokSabhaNumber").asText().trim();
                 int lokSabhaNo = NumberConverterUtil.parseIntSafe(lokSabhaStr);
-                lokSabhaNoWord = NumberConverterUtil.toOrdinalWord(lokSabhaNo);
+                lokSabhaNoWord = NumberConverterUtil.toOrdinalWord(lokSabhaNo).trim();
             }
         } catch (Exception ex) {
             log.warn("Failed to fetch session info from API. Error: {}", ex.getMessage());
         }
+
+        // Final fallback (make sure values are never empty, but not repeated)
+        if (sessionRoman.isBlank()) sessionRoman = "IV";
+        if (lokSabhaNoWord.isBlank()) lokSabhaNoWord = "Eighteenth";
 
 // 🔁 Final fallback if API failed or returned invalid data
         if (sessionRoman == null || sessionRoman.isBlank()) {
