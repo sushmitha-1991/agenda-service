@@ -42,29 +42,10 @@ public class EmailServiceImpl implements EmailService {
         String fullName = member != null && member.getFullName() != null ? member.getFullName() : "Member";
 
 
-        // Declare local variables for session and lok sabha info
-//        String sessionRoman = "IV"; // default
-//        String lokSabhaNoWord = "Eighteenth"; // default
-
         String sessionRoman = "";
         String lokSabhaNoWord = "";
 
         // Call session API
-//        try {
-//            RestTemplate tempRestTemplate = new RestTemplate();
-//            ResponseEntity<String> response = tempRestTemplate.getForEntity("https://dspstg.sansad.in/master/session/current", String.class);
-//            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-//                ObjectMapper mapper = new ObjectMapper();
-//                JsonNode root = mapper.readTree(response.getBody()).path("data");
-//
-//                sessionRoman = root.path("sessionNumber").asText("IV");
-//                int lokSabhaNo = NumberConverterUtil.parseIntSafe(root.path("lokSabhaNumber").asText("18"));
-//                lokSabhaNoWord = NumberConverterUtil.toOrdinalWord(lokSabhaNo);
-//            }
-//        } catch (Exception ex) {
-//            log.warn("Failed to fetch session info. Using default values. Error: {}", ex.getMessage());
-//        }
-
         try {
             RestTemplate tempRestTemplate = new RestTemplate();
             ResponseEntity<String> response = tempRestTemplate.getForEntity("https://dspstg.sansad.in/master/session/current", String.class);
