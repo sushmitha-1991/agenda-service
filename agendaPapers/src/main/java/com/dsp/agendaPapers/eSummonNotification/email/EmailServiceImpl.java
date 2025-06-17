@@ -46,11 +46,20 @@ public class EmailServiceImpl implements EmailService {
 
 //        String body = String.format("The Summons for IV Session of Eighteenth Lok Sabha is attached for your information", sessionRoman, lokSabhaNoWord);
 
+//        String body = String.format(
+//                "Dear Shri %s,\n\n" +
+//                        "The Summons for IV  Session of Eighteenth  Lok Sabha is attached for your information.\n\n" +
+//                        "Yours Sincerely,\n" +
+//                        "Secretary General\n\n" +
+//                        "E-mail Attachments: Two .pdf files for English and Hindi Summon",
+//                fullName, sessionRoman, lokSabhaNoWord
+//        );
+
         String body = String.format(
-                "Dear Shri %s,\n\n" +
-                        "The Summons for IV  Session of Eighteenth  Lok Sabha is attached for your information.\n\n" +
-                        "Yours Sincerely,\n" +
-                        "Secretary General\n\n" +
+                "Dear Shri %s,<br><br>" +
+                        "The Summons for IV  Session of Eighteenth  Lok Sabha is attached for your information.<br><br>" +
+                        "Yours Sincerely,<br>" +
+                        "Secretary General<br><br>" +
                         "E-mail Attachments: Two .pdf files for English and Hindi Summon",
                 fullName, sessionRoman, lokSabhaNoWord
         );
