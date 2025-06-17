@@ -43,23 +43,56 @@ public class EmailServiceImpl implements EmailService {
 
 
         // Declare local variables for session and lok sabha info
-        String sessionRoman = "IV"; // default
-        String lokSabhaNoWord = "Eighteenth"; // default
+//        String sessionRoman = "IV"; // default
+//        String lokSabhaNoWord = "Eighteenth"; // default
+
+        String sessionRoman = null;
+        String lokSabhaNoWord = null;
 
         // Call session API
+//        try {
+//            RestTemplate tempRestTemplate = new RestTemplate();
+//            ResponseEntity<String> response = tempRestTemplate.getForEntity("https://dspstg.sansad.in/master/session/current", String.class);
+//            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+//                ObjectMapper mapper = new ObjectMapper();
+//                JsonNode root = mapper.readTree(response.getBody()).path("data");
+//
+//                sessionRoman = root.path("sessionNumber").asText("IV");
+//                int lokSabhaNo = NumberConverterUtil.parseIntSafe(root.path("lokSabhaNumber").asText("18"));
+//                lokSabhaNoWord = NumberConverterUtil.toOrdinalWord(lokSabhaNo);
+//            }
+//        } catch (Exception ex) {
+//            log.warn("Failed to fetch session info. Using default values. Error: {}", ex.getMessage());
+//        }
+
         try {
             RestTemplate tempRestTemplate = new RestTemplate();
             ResponseEntity<String> response = tempRestTemplate.getForEntity("https://dspstg.sansad.in/master/session/current", String.class);
+
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody()).path("data");
 
-                sessionRoman = root.path("sessionNumber").asText("IV");
-                int lokSabhaNo = NumberConverterUtil.parseIntSafe(root.path("lokSabhaNumber").asText("18"));
+                // Get session number directly (already in Roman format like "IV")
+                sessionRoman = root.path("sessionNumber").asText();
+
+                // Convert Lok Sabha number (e.g., 18 → Eighteenth)
+                String lokSabhaStr = root.path("lokSabhaNumber").asText();
+                int lokSabhaNo = NumberConverterUtil.parseIntSafe(lokSabhaStr);
                 lokSabhaNoWord = NumberConverterUtil.toOrdinalWord(lokSabhaNo);
             }
         } catch (Exception ex) {
-            log.warn("Failed to fetch session info. Using default values. Error: {}", ex.getMessage());
+            log.warn("Failed to fetch session info from API. Error: {}", ex.getMessage());
+        }
+
+// 🔁 Final fallback if API failed or returned invalid data
+        if (sessionRoman == null || sessionRoman.isBlank()) {
+            log.warn("sessionRoman is missing. Falling back to default.");
+            sessionRoman = "Session"; // or you can leave blank ""
+        }
+        if (lokSabhaNoWord == null || lokSabhaNoWord.isBlank()) {
+            log.warn("lokSabhaNoWord is missing. Falling back to default.");
+            lokSabhaNoWord = "Lok Sabha"; // or you can leave blank ""
         }
 
         // Prepare subject and body
@@ -73,17 +106,6 @@ public class EmailServiceImpl implements EmailService {
                         "E-mail Attachments: Two .pdf files for English and Hindi Summon",
                 fullName, sessionRoman, lokSabhaNoWord
         );
-
-////        String subject = String.format("Summons for IV Session of Eighteenth Lok Sabha",sessionRoman, lokSabhaNoWord);
-//
-//        String body = String.format(
-//                "Dear Shri %s,<br><br>" +
-//                        "The Summons for IV  Session of Eighteenth  Lok Sabha is attached for your information.<br><br>" +
-//                        "Yours Sincerely,<br>" +
-//                        "Secretary General<br><br>" +
-//                        "E-mail Attachments: Two .pdf files for English and Hindi Summon",
-//                fullName, sessionRoman, lokSabhaNoWord
-//        );
 
         // Build request body
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
