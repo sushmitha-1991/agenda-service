@@ -27,7 +27,7 @@ public class EmailServiceImpl implements EmailService {
     private HttpServletRequest httpRequest;
 
     @Override
-    public void sendEmail(ESummonHistory history, String sessionRoman, String lokSabhaNoWord,String token) throws Exception {
+    public void sendEmail(ESummonHistory history, String unused1, String unused2,String token) throws Exception {
         String emailApiUrl = "http://10.246.55.102/emailapi/SendEmail";
 
         System.out.println("### sending the email started ");
@@ -41,6 +41,10 @@ public class EmailServiceImpl implements EmailService {
         PersonalDetails member = history.getMember();
         String fullName = member != null && member.getFullName() != null ? member.getFullName() : "Member";
 
+
+        // Declare local variables for session and lok sabha info
+        String sessionRoman = "IV"; // default
+        String lokSabhaNoWord = "Eighteenth"; // default
 
         // Call session API
         try {
