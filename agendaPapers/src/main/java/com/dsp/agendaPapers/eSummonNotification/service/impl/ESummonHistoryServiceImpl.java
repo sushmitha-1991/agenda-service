@@ -370,7 +370,9 @@ public class ESummonHistoryServiceImpl implements ESummonHistoryService {
     public List<ESummonMemberDetailsDTO> getMemberDetailsByESummonId(Long eSummonId) {
         List<Object[]> results = eSummonHistoryRepository.getMemberDetailsByESummonId(eSummonId);
 
-        Map<Long, ESummonMemberDetailsDTO> uniqueMembers = new LinkedHashMap<>();
+        Map<Long, ESummonMemberDetailsDTO> uniqueMembers = new HashMap<>();
+//        Map<Long, ESummonMemberDetailsDTO> uniqueMembers = new LinkedHashMap<>();
+
 
         for (Object[] obj : results) {
             Long memberId = obj[0] != null ? ((Number) obj[0]).longValue() : null;
