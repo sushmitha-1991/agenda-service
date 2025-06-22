@@ -60,9 +60,11 @@ public class EventProducer {
 
             String jsonPayload = mapper.writeValueAsString(payload);
             logger.info("Generating event for topic: {}", eSummonTopic);
+            
+            System.out.println("Sending eSummon Kafka event for key: {}" + eSummonTopic);
             kafkaTemplate.send(eSummonTopic, jsonPayload);
+            System.out.println("Sent eSummon Kafka event for ID: {}" + eSummonId);
 
-            logger.info("Sent eSummon Kafka event for ID: {}", eSummonId);
         } catch (Exception e) {
             logger.error("Failed to send Kafka event for eSummon ID: {}", eSummonId, e);
         }
