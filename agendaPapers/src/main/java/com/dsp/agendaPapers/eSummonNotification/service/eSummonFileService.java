@@ -22,30 +22,26 @@ public class eSummonFileService {
     @Value("${openKm.dsp1.download.endpoint}")
     private String baseUrl;
 
-    public List<eSummonFileDto> getFilesListByMpCode(String mpCode) {
+    public List<eSummonFileDto> getFilesListByMpCode(String mpCode, Long houseId) {
         String sql = """
-            SELECT 
-                esh.document_uuid AS english_document,
-                esh.document_uuid_hindi AS hindi_document
-            FROM 
-                agenda_papers.e_summon es
-            LEFT JOIN 
-                agenda_papers.e_summon_members esm ON esm.e_summon_id = es.id
-            LEFT JOIN 
-                members.personal_details pd ON pd.id = esm.member_id
-            LEFT JOIN 
-                agenda_papers.e_summon_history esh ON esh.e_summon_id = es.id AND esh.member_id = pd.id
-            WHERE  
+             SELECT 
+			    esh.document_uuid AS english_document,
+			    esh.document_uuid_hindi AS hindi_document
+			FROM agenda_papers.e_summon_history esh
+			JOIN members.personal_details pd ON pd.id = esh.member_id
+			            WHERE  
                 pd.mp_code = :mpCode
+                AND pd.house_id=:houseId
                 AND esh.is_active = true
 				  AND esh.is_deleted = false
-				  AND es.session_no IS NOT NULL
+				  and esh.document_uuid is not null
 				ORDER BY esh.created_at DESC
 				LIMIT 1
         """;
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("mpCode", mpCode);
+        params.addValue("houseId", houseId);
 
 
         return namedParameterJdbcTemplate.query(sql, params, (rs, rowNum) -> {
