@@ -244,50 +244,50 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                 validateTemplateId(eSummonNotificationDTO.getTemplateHindiId());
             }
 
-            InputInstance inputInstanceEntity = InputInstance.builder()
-                    // .id(savedNotification.getId())
-                    .applicationId(eSummonNotificationDTO.getApplicationId()) // From frontend
-                    .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
-                    .currentStatus(savedNotification.getStatus()) // From frontend
-                    .documentDate(savedNotification.getEsummonIssuanceDate())
-                    .publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl())
-                    .lokSabhaSession(esummon.getLokSabhaNo())
-                    .lokSabhaSessionNumber(esummon.getSessionNo())
-                    .rajyaSabhaSession(esummon.getRajyasabhaSessionNo())
-                    .htmlContentEnglish(esummon.getTemplateContent())
-                    .htmlContentHindi(esummon.getTemplateContentHindi())
-                    // From frontend
-                    .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
-                    .build();
-            System.out.println("&&&&&&&&&&&&" + inputInstanceEntity);
-            log.debug("Created InputInstance entity: {}", inputInstanceEntity);
-
-            inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
-            log.debug("Saved InputInstance entity: {}", inputInstanceEntity);
-            // Convert saved InputInstance entity to DTO
-            InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstanceEntity);
-
-            // Add InputInstanceDTO to ESummonNotificationDTO
-            // Create ApplicationPapersDTO and save template content from SummonNotification
-            ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
-                    .applicationId(eSummonNotificationDTO.getApplicationId())
-                  //  .applicationInstanceId(savedInstanceDTO.getId())
-                    .templateId(eSummonNotificationDTO.getTemplateId())
-                    .templateContent(eSummonNotificationDTO.getTemplateContent())
-                    .templateHindiId(eSummonNotificationDTO.getTemplateHindiId())
-                    .templateContentHindi(eSummonNotificationDTO.getTemplateContentHindi()).build();
-            log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
-
-            // Save ApplicationPapers data
-            applicationPapersService.saveApplicationPapers(applicationPapersDTO);
-            log.debug("Saved ApplicationPapers data.");
+//            InputInstance inputInstanceEntity = InputInstance.builder()
+//                    // .id(savedNotification.getId())
+//                    .applicationId(eSummonNotificationDTO.getApplicationId()) // From frontend
+//                    .applicationNo(savedNotification.getApplicationNo()) // Saved in SummonNotification
+//                    .currentStatus(savedNotification.getStatus()) // From frontend
+//                    .documentDate(savedNotification.getEsummonIssuanceDate())
+//                    .publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl())
+//                    .lokSabhaSession(esummon.getLokSabhaNo())
+//                    .lokSabhaSessionNumber(esummon.getSessionNo())
+//                    .rajyaSabhaSession(esummon.getRajyasabhaSessionNo())
+//                    .htmlContentEnglish(esummon.getTemplateContent())
+//                    .htmlContentHindi(esummon.getTemplateContentHindi())
+//                    // From frontend
+//                    .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
+//                    .build();
+//            System.out.println("&&&&&&&&&&&&" + inputInstanceEntity);
+//            log.debug("Created InputInstance entity: {}", inputInstanceEntity);
+//
+//            inputInstanceEntity = inputInstanceRepository.save(inputInstanceEntity);
+//            log.debug("Saved InputInstance entity: {}", inputInstanceEntity);
+//            // Convert saved InputInstance entity to DTO
+//            InputInstanceDTO inputInstanceDTO = InputInstanceMapper.toDTO(inputInstanceEntity);
+//
+//            // Add InputInstanceDTO to ESummonNotificationDTO
+//            // Create ApplicationPapersDTO and save template content from SummonNotification
+//            ApplicationPapersDTO applicationPapersDTO = ApplicationPapersDTO.builder()
+//                    .applicationId(eSummonNotificationDTO.getApplicationId())
+//                  //  .applicationInstanceId(savedInstanceDTO.getId())
+//                    .templateId(eSummonNotificationDTO.getTemplateId())
+//                    .templateContent(eSummonNotificationDTO.getTemplateContent())
+//                    .templateHindiId(eSummonNotificationDTO.getTemplateHindiId())
+//                    .templateContentHindi(eSummonNotificationDTO.getTemplateContentHindi()).build();
+//            log.debug("Created ApplicationPapersDTO: {}", applicationPapersDTO);
+//
+//            // Save ApplicationPapers data
+//            applicationPapersService.saveApplicationPapers(applicationPapersDTO);
+//            log.debug("Saved ApplicationPapers data.");
 
             // Convert saved entity back to DTO
             ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(savedNotification);
           //  responseDTO.setApplicationInstanceDTO(savedInstanceDTO); // Set the ApplicationInstanceDTO
-            log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
-            responseDTO.setInputInstanceDTO(inputInstanceDTO);
-            log.debug("Added InputInstanceDTO to response: {}", inputInstanceDTO);
+//            log.debug("Returning E-SummonNotificationDTO with ApplicationInstanceDTO: {}", responseDTO);
+//            responseDTO.setInputInstanceDTO(inputInstanceDTO);
+//            log.debug("Added InputInstanceDTO to response: {}", inputInstanceDTO);
             responseDTO.setTemplateId(eSummonNotificationDTO.getTemplateId());
             responseDTO.setTemplateHindiId(eSummonNotificationDTO.getTemplateHindiId());
 
