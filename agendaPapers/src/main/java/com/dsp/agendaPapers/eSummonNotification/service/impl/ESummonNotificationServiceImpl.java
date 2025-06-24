@@ -172,33 +172,33 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
         try {
             // Convert DTO to entity
-            ESummonNotification summonNotification = ESummonNotificationMapper.toEntity(eSummonNotificationDTO); 
-            if (StringUtils.isBlank(summonNotification.getApplicationNo())) {
+            ESummonNotification esummon = ESummonNotificationMapper.toEntity(eSummonNotificationDTO); 
+            if (StringUtils.isBlank(esummon.getApplicationNo())) {
                 SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
                 System.out.println(applicationNo);
-                summonNotification.setApplicationNo(applicationNo.getId());
+                esummon.setApplicationNo(applicationNo.getId());
             }
-            log.debug("Converted E-SummonNotificationDTO to entity: {}", summonNotification);
-            System.out.println("@@@@@@@@@@@@@" + summonNotification);
+            log.debug("Converted E-SummonNotificationDTO to entity: {}", esummon);
+            System.out.println("@@@@@@@@@@@@@" + esummon);
 
             if (houseId == 1) {
                 MastersRajyaSabha session = mastersRSSRepository.findById(mastersRSSRepository.findLatestByCreatedBy())
                         .get();
-                summonNotification.setRajyasabhaSessionNo(session.getSessionNumber());
-                summonNotification.setLokSabhaNo("");
-                summonNotification.setSessionNo("");
+                esummon.setRajyasabhaSessionNo(session.getSessionNumber());
+                esummon.setLokSabhaNo("");
+                esummon.setSessionNo("");
 
             } else if (houseId == 2) {
                 MastersLokSabhaSession session = masterLSSRepository
                         .findById(masterLSSRepository.findLatestByCreatedBy())
                         .get();
-                summonNotification.setSessionNo(session.getSessionNumber());
-                summonNotification.setLokSabhaNo(session.getLokSabha().getLokSabhaNumber());
-                summonNotification.setRajyasabhaSessionNo("");
+                esummon.setSessionNo(session.getSessionNumber());
+                esummon.setLokSabhaNo(session.getLokSabha().getLokSabhaNumber());
+                esummon.setRajyasabhaSessionNo("");
 
             }
             // Save SummonNotification entity initially to generate the ID
-            ESummonNotification savedNotification = eSummonNotificationRepository.save(summonNotification);
+            ESummonNotification savedNotification = eSummonNotificationRepository.save(esummon);
             log.debug("Initial save of E-SummonNotification to generate ID: {}", savedNotification);
             savedNotification = eSummonNotificationRepository.save(savedNotification);
 
@@ -251,11 +251,11 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                     .currentStatus(savedNotification.getStatus()) // From frontend
                     .documentDate(savedNotification.getEsummonIssuanceDate())
                     .publishedDocumentUrl(eSummonNotificationDTO.getPublishedDocumentUrl())
-                    .lokSabhaSession(summonNotification.getLokSabhaNo())
-                    .lokSabhaSessionNumber(summonNotification.getSessionNo())
-                    .rajyaSabhaSession(summonNotification.getRajyasabhaSessionNo())
-                    .htmlContentEnglish(summonNotification.getTemplateContent())
-                    .htmlContentHindi(summonNotification.getTemplateContentHindi())
+                    .lokSabhaSession(esummon.getLokSabhaNo())
+                    .lokSabhaSessionNumber(esummon.getSessionNo())
+                    .rajyaSabhaSession(esummon.getRajyasabhaSessionNo())
+                    .htmlContentEnglish(esummon.getTemplateContent())
+                    .htmlContentHindi(esummon.getTemplateContentHindi())
                     // From frontend
                     .refId(savedNotification.getId()) // Use SummonNotification's ID as refId
                     .build();
@@ -626,14 +626,15 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             // Save the updated ESummonNotification
             ESummonNotification updatedNotification = eSummonNotificationRepository.save(existingNotification);
 
-            Optional<InputInstance> inputInstance = inputInstanceRepository.findByRefId(updatedNotification.getId());
-            if (inputInstance != null) {
-                InputInstance instance = inputInstance.get();
-                instance.setCurrentStatus(updatedNotification.getStatus());
-                instance.setHtmlContentEnglish(updatedNotification.getTemplateContent());
-                instance.setHtmlContentHindi(updatedNotification.getTemplateContentHindi());
-                instance = inputInstanceRepository.save(instance);
-            }
+//            Optional<InputInstance> inputInstance = inputInstanceRepository.findByRefId(updatedNotification.getId());
+//            if (inputInstance != null) {
+//                InputInstance instance = inputInstance.get();
+//                instance.setCurrentStatus(updatedNotification.getStatus());
+//                instance.setHtmlContentEnglish(updatedNotification.getTemplateContent());
+//                instance.setHtmlContentHindi(updatedNotification.getTemplateContentHindi());
+//                instance = inputInstanceRepository.save(instance);
+//            }
+            
             // Prepare the response DTO
             ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(updatedNotification);
 
@@ -665,53 +666,53 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 //                }
 //            }
 
-            // Fetch the updated ApplicationInstance data
-            String applicationNumber = updatedNotification.getApplicationNo(); // Get the applicationNo for the
-            // ApplicationInstance
-            String applicationInstanceUrl = applicationInstanceServiceUrl + "/getApplicationNo/" + applicationNumber;
+//            // Fetch the updated ApplicationInstance data
+//            String applicationNumber = updatedNotification.getApplicationNo(); // Get the applicationNo for the
+//            // ApplicationInstance
+//            String applicationInstanceUrl = applicationInstanceServiceUrl + "/getApplicationNo/" + applicationNumber;
+//
+//            try {
+//                ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(
+//                        applicationInstanceUrl, HttpMethod.GET, null,
+//                        new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
+//                        });
+//
+//                if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+//                    ApplicationInstanceDTO applicationInstanceDTOResponse = response.getBody().getData();
+//                    if (applicationInstanceDTOResponse != null) {
+//                        responseDTO.setApplicationInstanceDTO(applicationInstanceDTOResponse); // Include
+//                        // ApplicationInstance
+//                        // data
+//                        responseDTO.setApplicationId(applicationInstanceDTOResponse.getApplicationId()); // Include
+//                        // applicationId
+//                        log.debug("Fetched ApplicationInstance for applicationNo: {}", applicationNumber);
+//                    }
+//                }
+//            } catch (Exception e) {
+//                log.error("Failed to fetch ApplicationInstance: ", e);
+//                // You can choose to handle this case as needed
+//            }
 
-            try {
-                ResponseEntity<GenericResponse<ApplicationInstanceDTO>> response = restTemplate.exchange(
-                        applicationInstanceUrl, HttpMethod.GET, null,
-                        new ParameterizedTypeReference<GenericResponse<ApplicationInstanceDTO>>() {
-                        });
-
-                if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                    ApplicationInstanceDTO applicationInstanceDTOResponse = response.getBody().getData();
-                    if (applicationInstanceDTOResponse != null) {
-                        responseDTO.setApplicationInstanceDTO(applicationInstanceDTOResponse); // Include
-                        // ApplicationInstance
-                        // data
-                        responseDTO.setApplicationId(applicationInstanceDTOResponse.getApplicationId()); // Include
-                        // applicationId
-                        log.debug("Fetched ApplicationInstance for applicationNo: {}", applicationNumber);
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Failed to fetch ApplicationInstance: ", e);
-                // You can choose to handle this case as needed
-            }
-
-            if (eSummonNotificationDTO.getTemplateContent() != null
-                    || eSummonNotificationDTO.getTemplateContentHindi() != null) {
-                Optional<ApplicationPapers> existingPapersOpt = applicationPapersRepository
-                        .findByApplicationIdAndApplicationInstanceId(eSummonNotificationDTO.getApplicationId(),
-                                responseDTO.getApplicationInstanceDTO().getId());
-
-                if (existingPapersOpt.isPresent()) {
-                    ApplicationPapers existingPapers = existingPapersOpt.get();
-                    existingPapers.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
-                    existingPapers.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
-
-                    applicationPapersRepository.save(existingPapers);
-                    log.debug("Updated ApplicationPapers with new template content.");
-                } else {
-                    log.warn("ApplicationPapers not found for ApplicationId: {} and ApplicationInstanceId: {}",
-                            eSummonNotificationDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
-                }
-            }
-
-            log.debug("Returning updated ESummonNotificationDTO with ApplicationInstance data: {}", responseDTO);
+//            if (eSummonNotificationDTO.getTemplateContent() != null
+//                    || eSummonNotificationDTO.getTemplateContentHindi() != null) {
+//                Optional<ApplicationPapers> existingPapersOpt = applicationPapersRepository
+//                        .findByApplicationIdAndApplicationInstanceId(eSummonNotificationDTO.getApplicationId(),
+//                                responseDTO.getApplicationInstanceDTO().getId());
+//
+//                if (existingPapersOpt.isPresent()) {
+//                    ApplicationPapers existingPapers = existingPapersOpt.get();
+//                    existingPapers.setTemplateContent(eSummonNotificationDTO.getTemplateContent());
+//                    existingPapers.setTemplateContentHindi(eSummonNotificationDTO.getTemplateContentHindi());
+//
+//                    applicationPapersRepository.save(existingPapers);
+//                    log.debug("Updated ApplicationPapers with new template content.");
+//                } else {
+//                    log.warn("ApplicationPapers not found for ApplicationId: {} and ApplicationInstanceId: {}",
+//                            eSummonNotificationDTO.getApplicationId(), responseDTO.getApplicationInstanceDTO().getId());
+//                }
+//            }
+//
+//            log.debug("Returning updated ESummonNotificationDTO with ApplicationInstance data: {}", responseDTO);
             return responseDTO;
 
         } catch (ResourceNotFoundException e) {
@@ -826,10 +827,13 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
 	
 		// ✅ Save eSummon members
 		List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
-	
-		List<ESummonMembers> summonMembersList = memberIds.stream().map(memberId -> new ESummonMembers(eSummonId, memberId))
-				.collect(Collectors.toList());
+		System.out.println("Member details fetched");
+		
+		List<ESummonMembers> summonMembersList = memberIds.stream()
+								.map(memberId -> new ESummonMembers(eSummonId, memberId))
+								.collect(Collectors.toList());
 		eSummonMembersRepository.saveAll(summonMembersList);
+		System.out.println("Member list saved");
 	
 		// ✅ Save eSummon history with document UUID
 		List<ESummonHistory> historyList = members.stream()
@@ -843,7 +847,8 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
 									.build())
 				.collect(Collectors.toList());
 		eSummonHistoryRepository.saveAll(historyList);
-	
+		System.out.println("History list saved");
+
 		log.debug("### saved successfully ! ");
 	
 		// Trigger Kafka event with token
