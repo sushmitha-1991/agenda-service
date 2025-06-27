@@ -420,6 +420,14 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
             inputInstance.setPendingAt("Table Office A");
         }
         inputInstance = inputInstanceRepository.save(inputInstance);
+
+        //removing draft entry for table office
+        if (!StringUtils.isBlank(provisionalCalendarTableOfficeDTO.getApplicationNo())) {
+            // Get the Draft ID from draft table using appNo
+            String res = bearerClient.deleteDraftEntry(provisionalCalendarTableOfficeDTO.getApplicationNo());
+            System.out.println("res:::::::"+res);
+            // /delete-save-as-draft
+        }
         return ProvisionalCalendarTableOfficeDTO.builder().id(updatedProvisionalCalendar.getId())
                 .groupchartsLS(updatedProvisionalCalendar.getGroupchartsLS())
                 .groupchartsRS(updatedProvisionalCalendar.getGroupchartsRS())
