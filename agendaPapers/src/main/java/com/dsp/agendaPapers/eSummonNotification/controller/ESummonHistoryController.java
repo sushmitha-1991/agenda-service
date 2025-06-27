@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dsp.agendaPapers.dto.UserDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
@@ -206,10 +208,14 @@ public class ESummonHistoryController {
 	        @ApiResponse(responseCode = "404", description = "E-Summon File not found"),
 	        @ApiResponse(responseCode = "500", description = "Internal server error")
 	})
-	public ResponseEntity<eSummonFileWrapperDto> getFilesListByMpCode(@PathVariable String mpCode) {
-	    List<eSummonFileDto> dtoList = eSummonFileservice.getFilesListByMpCode(mpCode);
+	public ResponseEntity<eSummonFileWrapperDto> getFilesListByMpCode(@PathVariable String mpCode,
+	                                                                   @AuthenticationPrincipal UserDetailsDTO currentUser) {
+	    Long houseId = currentUser.getHouseId(); 
+
+	    List<eSummonFileDto> dtoList = eSummonFileservice.getFilesListByMpCode(mpCode, houseId);
 	    eSummonFileWrapperDto wrapperDto = new eSummonFileWrapperDto(dtoList);
 	    return ResponseEntity.ok(wrapperDto);
 	}
+
 
 }

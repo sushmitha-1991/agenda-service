@@ -134,6 +134,7 @@ public class ESummonNotificationController {
 			return ResponseEntity.ok(response);
 
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			GenericResponse<?> response = new GenericResponse<>(false, "Error: " + ex.getMessage(), null,
 					HttpStatus.BAD_REQUEST.value());
 			return ResponseEntity.badRequest().body(response);
