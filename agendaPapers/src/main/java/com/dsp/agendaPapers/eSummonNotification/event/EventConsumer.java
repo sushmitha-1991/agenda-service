@@ -50,6 +50,9 @@ public class EventConsumer {
     @Lazy
     private RestTemplate restTemplate;
 
+    @Autowired
+    PersonalDetailsRepository personalDetailsRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(EventConsumer.class);
     
 
@@ -215,7 +218,111 @@ public void consume(String messageJson) {
         log.error("Error processing Kafka message: {}", ex.getMessage(), ex);
     }
 }
-// for the english
+// for the english old code working
+//    private UUID generateDocument(ESummonNotification esummon, ESummonHistory history, PersonalDetails member, String token) {
+//        if (StringUtils.isEmpty(token)) {
+//            logger.error("Authorization token is missing or invalid.");
+//            throw new RuntimeException("Missing or invalid Authorization token");
+//        }
+//
+//        logger.info("### Starting document generation for memberId: {}", member != null ? member.getId() : "Unknown");
+//
+//
+//        String templateEn = esummon.getTemplateContent();
+////        String templateHi = esummon.getTemplateContentHindi();
+//
+//        logger.info("### Original English Template:\n{}", templateEn);
+////        logger.info("### Original Hindi Template:\n{}", templateHi);
+//
+//
+//        String personalizedHtmlEn = replacePlaceholders(templateEn, member);
+////        String personalizedHtmlHi = replacePlaceholders(templateHi, member);
+//
+//        logger.info("### Personalized HTML content prepared for upload.");
+//        logger.info("### Personalized English HTML Content:\n{}", personalizedHtmlEn);
+////        logger.info("### Personalized Hindi HTML Content:\n{}", personalizedHtmlHi);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//        headers.setBearerAuth(token);
+//
+//        MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
+//        formParams.add("htmlContentEn", personalizedHtmlEn);
+////        formParams.add("htmlContentHi", personalizedHtmlHi);
+//        formParams.add("startingPageNo", "1");
+//        formParams.add("applicationId", "24");
+//
+//        HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, headers);
+//
+//        ResponseEntity<String> uploadResponse;
+//        try {
+//            logger.info("### Sending HTML content to document generation service...");
+//            uploadResponse = restTemplate.postForEntity(
+//                    "https://dspstg.sansad.in/template/upload-html-english", formRequest, String.class);
+//            logger.info("### Document upload API called successfully.");
+//            logger.info("### Upload HTML Response Body:\n{}", uploadResponse.getBody());
+//        } catch (Exception e) {
+//            logger.error("### Document upload failed: {}", e.getMessage(), e);
+//            throw new RuntimeException("Failed to upload HTML content: " + e.getMessage(), e);
+//        }
+//
+//        try {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            JsonNode responseJson = objectMapper.readTree(uploadResponse.getBody());
+//
+//            if (!responseJson.has("documentUuid") || responseJson.get("documentUuid").isNull()) {
+//                logger.info("### documentUuid is missing in upload response.");
+//                throw new RuntimeException("documentUuid not found in upload-html-english response");
+//            }
+//
+//            UUID documentUuid = UUID.fromString(responseJson.get("documentUuid").asText());
+//            history.setDocumentUuid(documentUuid);
+//            historyRepository.save(history);
+//
+//            logger.info("### Document generated successfully with UUID: {}", documentUuid);
+//            return documentUuid;
+//        } catch (Exception ex) {
+//            logger.error("### Failed to process upload-html-english response: {}", ex.getMessage(), ex);
+//            throw new RuntimeException("Failed to process upload-html-english response", ex);
+//        }
+//    }
+
+//    private String replacePlaceholders(String htmlTemplate, PersonalDetails member) {
+//        if (member == null) {
+//            logger.error("Member details are null while replacing placeholders.");
+//            throw new RuntimeException("Member details are missing");
+//        }
+//
+//        String fullNameEn = member.getFullName() != null ? member.getFullName() : "";
+//        String fullNameHi = member.getFullNameHindi() != null ? member.getFullNameHindi() : "";
+//
+//        logger.debug("Replacing placeholders: [member.name -> '{}', member.name_hindi -> '{}']", fullNameEn, fullNameHi);
+//
+//        return htmlTemplate
+//                .replace("${member.name}", fullNameEn)
+//                .replace("${member.name_hindi}", fullNameHi);
+//    }
+
+// new code
+    private String replacePlaceholders(String htmlTemplate, Long memberId) {
+        if (memberId == null) {
+            logger.error("Member ID is null while replacing placeholders.");
+            throw new RuntimeException("Member ID is missing");
+        }
+
+        String displayNameEn = personalDetailsRepository.getDisplayNameEn(memberId);
+        String displayNameHi = personalDetailsRepository.getDisplayNameHi(memberId);
+
+        if (displayNameEn == null) displayNameEn = "";
+        if (displayNameHi == null) displayNameHi = "";
+
+        logger.debug("Replacing placeholders: [member.name -> '{}', member.name_hindi -> '{}']", displayNameEn, displayNameHi);
+
+        return htmlTemplate
+                .replace("${member.name}", displayNameEn)
+                .replace("${member.name_hindi}", displayNameHi);
+    }
+    // new code for english
     private UUID generateDocument(ESummonNotification esummon, ESummonHistory history, PersonalDetails member, String token) {
         if (StringUtils.isEmpty(token)) {
             logger.error("Authorization token is missing or invalid.");
@@ -224,20 +331,12 @@ public void consume(String messageJson) {
 
         logger.info("### Starting document generation for memberId: {}", member != null ? member.getId() : "Unknown");
 
-
         String templateEn = esummon.getTemplateContent();
-//        String templateHi = esummon.getTemplateContentHindi();
-
         logger.info("### Original English Template:\n{}", templateEn);
-//        logger.info("### Original Hindi Template:\n{}", templateHi);
 
-
-        String personalizedHtmlEn = replacePlaceholders(templateEn, member);
-//        String personalizedHtmlHi = replacePlaceholders(templateHi, member);
-
-        logger.info("### Personalized HTML content prepared for upload.");
+        // ✅ Use new method with member ID
+        String personalizedHtmlEn = replacePlaceholders(templateEn, member.getId());
         logger.info("### Personalized English HTML Content:\n{}", personalizedHtmlEn);
-//        logger.info("### Personalized Hindi HTML Content:\n{}", personalizedHtmlHi);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -245,7 +344,6 @@ public void consume(String messageJson) {
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
         formParams.add("htmlContentEn", personalizedHtmlEn);
-//        formParams.add("htmlContentHi", personalizedHtmlHi);
         formParams.add("startingPageNo", "1");
         formParams.add("applicationId", "24");
 
@@ -253,14 +351,14 @@ public void consume(String messageJson) {
 
         ResponseEntity<String> uploadResponse;
         try {
-            logger.info("### Sending HTML content to document generation service...");
+            logger.info("### Sending English HTML content to document generation service...");
             uploadResponse = restTemplate.postForEntity(
                     "https://dspstg.sansad.in/template/upload-html-english", formRequest, String.class);
-            logger.info("### Document upload API called successfully.");
-            logger.info("### Upload HTML Response Body:\n{}", uploadResponse.getBody());
+            logger.info("### English Document upload API called successfully.");
+            logger.info("### English Upload HTML Response Body:\n{}", uploadResponse.getBody());
         } catch (Exception e) {
-            logger.error("### Document upload failed: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to upload HTML content: " + e.getMessage(), e);
+            logger.error("### English Document upload failed: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to upload English HTML content: " + e.getMessage(), e);
         }
 
         try {
@@ -268,7 +366,7 @@ public void consume(String messageJson) {
             JsonNode responseJson = objectMapper.readTree(uploadResponse.getBody());
 
             if (!responseJson.has("documentUuid") || responseJson.get("documentUuid").isNull()) {
-                logger.info("### documentUuid is missing in upload response.");
+                logger.info("### English documentUuid is missing in upload response.");
                 throw new RuntimeException("documentUuid not found in upload-html-english response");
             }
 
@@ -276,7 +374,7 @@ public void consume(String messageJson) {
             history.setDocumentUuid(documentUuid);
             historyRepository.save(history);
 
-            logger.info("### Document generated successfully with UUID: {}", documentUuid);
+            logger.info("### English Document generated successfully with UUID: {}", documentUuid);
             return documentUuid;
         } catch (Exception ex) {
             logger.error("### Failed to process upload-html-english response: {}", ex.getMessage(), ex);
@@ -284,23 +382,70 @@ public void consume(String messageJson) {
         }
     }
 
-    private String replacePlaceholders(String htmlTemplate, PersonalDetails member) {
-        if (member == null) {
-            logger.error("Member details are null while replacing placeholders.");
-            throw new RuntimeException("Member details are missing");
-        }
 
-        String fullNameEn = member.getFullName() != null ? member.getFullName() : "";
-        String fullNameHi = member.getFullNameHindi() != null ? member.getFullNameHindi() : "";
+//    // for the hindi old working
+//    private UUID generateHindiDocument(ESummonNotification esummon, ESummonHistory history, PersonalDetails member, String token) {
+//        if (StringUtils.isEmpty(token)) {
+//            logger.error("Authorization token is missing or invalid.");
+//            throw new RuntimeException("Missing or invalid Authorization token");
+//        }
+//
+//        logger.info("### Starting Hindi document generation for memberId: {}", member != null ? member.getId() : "Unknown");
+//
+//        String templateHi = esummon.getTemplateContentHindi();
+//        logger.info("### Original Hindi Template:\n{}", templateHi);
+//
+//        String personalizedHtmlHi = replacePlaceholders(templateHi, member);
+//        logger.info("### Personalized Hindi HTML Content:\n{}", personalizedHtmlHi);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//        headers.setBearerAuth(token);
+//
+//        MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
+//        formParams.add("htmlContentEn", personalizedHtmlHi);
+//        formParams.add("startingPageNo", "1");
+//        formParams.add("applicationId", "24");
+//
+//        HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, headers);
+//
+//        ResponseEntity<String> uploadResponse;
+//        try {
+//            logger.info("### Sending Hindi HTML content to document generation service...");
+//            uploadResponse = restTemplate.postForEntity(
+//                    "https://dspstg.sansad.in/template/upload-html-english",
+//                    formRequest,
+//                    String.class
+//            );
+//            logger.info("### Hindi Document upload API called successfully.");
+//            logger.info("### Hindi Upload HTML Response Body:\n{}", uploadResponse.getBody());
+//        } catch (Exception e) {
+//            logger.error("### Hindi Document upload failed: {}", e.getMessage(), e);
+//            throw new RuntimeException("Failed to upload Hindi HTML content: " + e.getMessage(), e);
+//        }
+//
+//        try {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            JsonNode responseJson = objectMapper.readTree(uploadResponse.getBody());
+//
+//            if (!responseJson.has("documentUuid") || responseJson.get("documentUuid").isNull()) {
+//                logger.info("### Hindi documentUuid is missing in upload response.");
+//                throw new RuntimeException("documentUuid not found in upload-html-hindi response");
+//            }
+//
+//            UUID documentUuidHindi = UUID.fromString(responseJson.get("documentUuid").asText());
+//            history.setDocumentUuidHindi(documentUuidHindi);
+//            historyRepository.save(history);
+//
+//            logger.info("### Hindi Document generated successfully with UUID: {}", documentUuidHindi);
+//            return documentUuidHindi;
+//        } catch (Exception ex) {
+//            logger.error("### Failed to process upload-html-hindi response: {}", ex.getMessage(), ex);
+//            throw new RuntimeException("Failed to process upload-html-hindi response", ex);
+//        }
+//    }
 
-        logger.debug("Replacing placeholders: [member.name -> '{}', member.name_hindi -> '{}']", fullNameEn, fullNameHi);
-
-        return htmlTemplate
-                .replace("${member.name}", fullNameEn)
-                .replace("${member.name_hindi}", fullNameHi);
-    }
-
-    // for the hindi
+    // new code hindi
     private UUID generateHindiDocument(ESummonNotification esummon, ESummonHistory history, PersonalDetails member, String token) {
         if (StringUtils.isEmpty(token)) {
             logger.error("Authorization token is missing or invalid.");
@@ -312,7 +457,8 @@ public void consume(String messageJson) {
         String templateHi = esummon.getTemplateContentHindi();
         logger.info("### Original Hindi Template:\n{}", templateHi);
 
-        String personalizedHtmlHi = replacePlaceholders(templateHi, member);
+        // ✅ Use new method with member ID
+        String personalizedHtmlHi = replacePlaceholders(templateHi, member.getId());
         logger.info("### Personalized Hindi HTML Content:\n{}", personalizedHtmlHi);
 
         HttpHeaders headers = new HttpHeaders();
@@ -320,7 +466,7 @@ public void consume(String messageJson) {
         headers.setBearerAuth(token);
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
-        formParams.add("htmlContentEn", personalizedHtmlHi);
+        formParams.add("htmlContentEn", personalizedHtmlHi); // Note: API param still uses `htmlContentEn`
         formParams.add("startingPageNo", "1");
         formParams.add("applicationId", "24");
 
@@ -330,7 +476,7 @@ public void consume(String messageJson) {
         try {
             logger.info("### Sending Hindi HTML content to document generation service...");
             uploadResponse = restTemplate.postForEntity(
-                    "https://dspstg.sansad.in/template/upload-html-english",
+                    "https://dspstg.sansad.in/template/upload-html-english", // Ensure this is correct for Hindi
                     formRequest,
                     String.class
             );

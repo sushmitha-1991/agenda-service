@@ -17,5 +17,41 @@ public interface PersonalDetailsRepository extends JpaRepository<PersonalDetails
     @Query("SELECT e.memberId FROM ESummonMembers e WHERE e.eSummonId = :eSummonId")
     List<Long> findMemberIdsByESummonId(@Param("eSummonId") Long eSummonId);
 
+
+    // ✅ English Display Name
+    @Query(value = """
+        SELECT
+            CONCAT_WS(' ',
+                CASE
+                    WHEN c.abbr = 'NAME_INITIAL_Other' THEN pd.initials_other_en
+                    ELSE c.code
+                END,
+                NULLIF(TRIM(pd.first_name), ''),
+                NULLIF(TRIM(pd.middle_name), ''),
+                NULLIF(TRIM(pd.last_name), '')
+            ) AS displayNameEn
+        FROM members.personal_details pd
+        LEFT JOIN master.codes c ON c.id = pd.initials_id
+        WHERE pd.id = :memberId
+        """, nativeQuery = true)
+    String getDisplayNameEn(@Param("memberId") Long memberId);
+
+    // ✅ Hindi Display Name
+    @Query(value = """
+        SELECT
+            CONCAT_WS(' ',
+                CASE
+                    WHEN c.abbr = 'NAME_INITIAL_Other' THEN pd.initials_other_hi
+                    ELSE c.code_data->>'hi'
+                END,
+                NULLIF(TRIM(pd.first_name_hindi), ''),
+                NULLIF(TRIM(pd.middle_name_hi), ''),
+                NULLIF(TRIM(pd.last_name_hindi), '')
+            ) AS displayNameHi
+        FROM members.personal_details pd
+        LEFT JOIN master.codes c ON c.id = pd.initials_id
+        WHERE pd.id = :memberId
+        """, nativeQuery = true)
+    String getDisplayNameHi(@Param("memberId") Long memberId);
 }
 
