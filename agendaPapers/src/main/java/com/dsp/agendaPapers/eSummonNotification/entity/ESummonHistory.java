@@ -60,9 +60,5 @@ public class ESummonHistory extends Auditable {
     @Column(name = "email_id", nullable = false, length = 255)
     private String emailId;
 
-    // ✅ Add this getter
-    public String getApplicationNo() {
-        return eSummon != null ? eSummon.getApplicationNo() : null;}
-
 
 }
