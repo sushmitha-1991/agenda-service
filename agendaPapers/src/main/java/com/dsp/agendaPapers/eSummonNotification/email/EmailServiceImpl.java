@@ -99,12 +99,9 @@ public class EmailServiceImpl implements EmailService {
         formData.add("emailsub", subject);
         formData.add("emailbody", body);
 
-        // ✅ Use applicationNo as filename base
-        String applicationNo = history.getApplicationNo() != null ? history.getApplicationNo() : "EsumonDocument";
-
         // Attach file using UUID
         if (history.getDocumentUuid() != null) {
-            ByteArrayResource fileResource = downloadFileFromUUID(history.getDocumentUuid(),applicationNo);
+            ByteArrayResource fileResource = downloadFileFromUUID(history.getDocumentUuid());
 
             System.out.println("### fileResource -  " + fileResource);
 
@@ -123,7 +120,7 @@ public class EmailServiceImpl implements EmailService {
 
         // Attach Hindi file
         if (history.getDocumentUuidHindi() != null) {
-            ByteArrayResource hindiFileResource = downloadHindiFileFromUUID(history.getDocumentUuidHindi(),applicationNo);
+            ByteArrayResource hindiFileResource = downloadHindiFileFromUUID(history.getDocumentUuidHindi());
 
             System.out.println("### hindiFileResource - " + hindiFileResource);
 
@@ -150,7 +147,7 @@ public class EmailServiceImpl implements EmailService {
         log.info("Email successfully sent to {} with attachment", history.getEmailId());
     }
 // for english
-    private ByteArrayResource downloadFileFromUUID(UUID uuid, String applicationNo) {
+    private ByteArrayResource downloadFileFromUUID(UUID uuid) {
         try {
             String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + uuid;
 
@@ -161,13 +158,12 @@ public class EmailServiceImpl implements EmailService {
                     new HttpEntity<>(new HttpHeaders()),
                     byte[].class
             );
+
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 return new ByteArrayResource(response.getBody()) {
                     @Override
                     public String getFilename() {
-
-//                        return uuid + ".pdf";
-                        return applicationNo + "_English.pdf";
+                        return uuid + ".pdf";
                     }
                 };
             } else {
@@ -190,7 +186,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     // for the hindi
-    private ByteArrayResource downloadHindiFileFromUUID(UUID hindiUuid, String applicationNo) {
+    private ByteArrayResource downloadHindiFileFromUUID(UUID hindiUuid) {
         try {
             String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + hindiUuid;
 
@@ -206,8 +202,7 @@ public class EmailServiceImpl implements EmailService {
                 return new ByteArrayResource(response.getBody()) {
                     @Override
                     public String getFilename() {
-//                        return hindiUuid + ".pdf";
-                        return applicationNo + "_Hindi.pdf";
+                        return hindiUuid + ".pdf";
                     }
                 };
             } else {
