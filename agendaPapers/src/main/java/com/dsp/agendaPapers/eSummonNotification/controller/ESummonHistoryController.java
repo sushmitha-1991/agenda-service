@@ -21,6 +21,7 @@ import com.dsp.agendaPapers.dto.UserDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonHistoryDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonMemberDetailsDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.SendESummonRequest;
+import com.dsp.agendaPapers.eSummonNotification.dto.SummonResponseRSDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.eSummonFileDto;
 import com.dsp.agendaPapers.eSummonNotification.dto.eSummonFileWrapperDto;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonHistoryService;
@@ -215,6 +216,21 @@ public class ESummonHistoryController {
 	    List<eSummonFileDto> dtoList = eSummonFileservice.getFilesListByMpCode(mpCode, houseId);
 	    eSummonFileWrapperDto wrapperDto = new eSummonFileWrapperDto(dtoList);
 	    return ResponseEntity.ok(wrapperDto);
+	}
+
+	@GetMapping("/rs/mpCode/{mpCode}")
+	@Operation(summary = "Get RS E-Summon File By MpCode", description = "Retrieve Rajya Sabha E-Summon File using MP Code.")
+	@ApiResponses(value = {
+	        @ApiResponse(responseCode = "200", description = "RS E-Summon File retrieved successfully"),
+	        @ApiResponse(responseCode = "404", description = "RS E-Summon File not found"),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	})
+	public ResponseEntity<SummonResponseRSDTO> getRsFilesListByMpCode(@PathVariable String mpCode) {
+	    SummonResponseRSDTO dto = eSummonFileservice.getRsFilesListByMpCode(mpCode);
+	    if (dto == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+	    return ResponseEntity.ok(dto);
 	}
 
 
