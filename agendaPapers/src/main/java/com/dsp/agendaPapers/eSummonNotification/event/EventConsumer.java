@@ -73,7 +73,7 @@ public void consume(String messageJson) {
         if (notificationOpt.isEmpty()) {
             log.error("No eSummonNotification found for ID: {}", eSummonId);
             return;
-        }
+        } 
 
         ESummonNotification notification = notificationOpt.get();
         int sessionNo = parseIntSafe(notification.getSessionNo());
