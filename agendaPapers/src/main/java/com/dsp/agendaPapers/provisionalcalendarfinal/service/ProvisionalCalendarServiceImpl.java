@@ -279,7 +279,7 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
                 .documentDate(inputDTO.getDateOfInput())
                 // .applicationNo(applicationNo.getId())
                 // Set applicationNo
-                // .inputRefNo(applicationNo.getId())
+                .inputRefNo(inputDTO.getInputRefNo())
                 .generatedFlag(false)
                 .htmlContentEnglish(inputDTO.getInputText())
                 // input status and remarks
@@ -309,9 +309,11 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
         }
         if (StringUtils.isBlank(inputDTO.getInputRefNo())) {
             SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
-            provisionalCalendar.setApplicationNo(applicationNo.getId());
             provisionalCalendar.setInputRefNo(applicationNo.getId());
         }
+       
+            provisionalCalendar.setApplicationNo(provisionalCalendar.getInputRefNo());
+
         ProvisionalCalendar savedEntity = provisionalCalendarRepository.save(
                 provisionalCalendar);
         savedEntity.setRefId(savedEntity.getId());
@@ -319,7 +321,8 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
         // Changes by Sushmitha Starts here
         ProvisionalCalendarInputDTO responceDTO = mapToDtoPCinput(savedEntity);
         InputInstance inputInstanceEntity = InputInstance.builder().id(savedEntity.getId())
-                .applicationId(savedEntity.getApplicationId()).applicationNo(savedEntity.getApplicationNo())
+                .applicationId(savedEntity.getApplicationId())
+                .applicationNo(savedEntity.getApplicationNo())
                 .refId(savedEntity.getRefId()).documentDate(savedEntity.getDateOfInput())
                 .currentStatus(savedEntity.getInputStatus())
                 .lokSabhaSession(savedEntity.getLokSabhaSession())
@@ -417,6 +420,14 @@ public class ProvisionalCalendarServiceImpl implements ProvisionalCalendarServic
             inputInstance.setPendingAt("Table Office A");
         }
         inputInstance = inputInstanceRepository.save(inputInstance);
+
+        //removing draft entry for table office
+        if (!StringUtils.isBlank(provisionalCalendarTableOfficeDTO.getApplicationNo())) {
+            // Get the Draft ID from draft table using appNo
+            String res = bearerClient.deleteDraftEntry(provisionalCalendarTableOfficeDTO.getApplicationNo());
+            System.out.println("res:::::::"+res);
+            // /delete-save-as-draft
+        }
         return ProvisionalCalendarTableOfficeDTO.builder().id(updatedProvisionalCalendar.getId())
                 .groupchartsLS(updatedProvisionalCalendar.getGroupchartsLS())
                 .groupchartsRS(updatedProvisionalCalendar.getGroupchartsRS())
