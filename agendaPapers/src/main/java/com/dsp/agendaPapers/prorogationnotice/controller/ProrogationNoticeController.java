@@ -38,7 +38,7 @@ public class ProrogationNoticeController {
 
 		ProrogationNoticeDTO savedNotification = prorogationNoticeService.saveProrogationNotice(prorogationNoticeDTO);
 		GenericResponse<ProrogationNoticeDTO> response = new GenericResponse<>(true,
-				"ProrogationNotice created successfully", savedNotification, HttpStatus.CREATED.value());
+				"Prorogation Notice created successfully", savedNotification, HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 

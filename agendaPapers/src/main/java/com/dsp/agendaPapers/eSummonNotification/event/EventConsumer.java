@@ -323,6 +323,7 @@ public void consume(String messageJson) {
         formParams.add("htmlContentEn", personalizedHtmlHi);
         formParams.add("startingPageNo", "1");
         formParams.add("applicationId", "24");
+        formParams.add("locale", "hi");
 
         HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, headers);
 
