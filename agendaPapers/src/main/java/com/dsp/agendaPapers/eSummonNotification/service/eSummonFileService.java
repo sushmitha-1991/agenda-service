@@ -80,26 +80,26 @@ public class eSummonFileService {
     }
     public SummonResponseRSDTO getRsFilesListByMpCode(String mpCode) {
         String sql = """
-             SELECT 
-                rm.session_number AS sessionNoEng,
-                rm.session_number AS sessionNoHin,
-                TO_CHAR(es.e_summon_issuance_date, 'DD/MM/YYYY') AS summonDateEng,
-                es.e_summon_issuance_date_hindi_en AS summonDateTextEng,
-                es.template_content AS textEnglish,
-                es.template_content_hindi AS textHindi,
-                'P.C. MODY,' AS sgNameEng,
-                'पी. सी. मोदी,' AS sgNameHin,
-                CONCAT_WS(' ', pd.first_name, pd.last_name) AS mpFullNameEng,
-                CONCAT_WS(' ', pd.first_name_hindi, pd.last_name_hindi) AS mpFullNameHin,
-                es.e_summon_issuance_date_hindi AS summonDateTextHin,
-                es.document_list
-            FROM agenda_papers.e_summon es
-            JOIN master.rajya_sabha_session_master rm ON rm.session_number = es.rajya_sabha_session_no
-            JOIN agenda_papers.e_summon_history h ON h.e_summon_id = es.id
-            JOIN members.personal_details pd ON pd.id = h.member_id
-            WHERE pd.mp_code = :mpCode and es.e_summon_issuance_date_hindi_en is not null
-            ORDER BY es.e_summon_issuance_date DESC
-            LIMIT 1
+           SELECT 
+            rm.session_number AS sessionNoEng,
+            rm.session_number AS sessionNoHin,
+            TO_CHAR(es.e_summon_issuance_date, 'DD/MM/YYYY') AS summonDateEng,
+            es.e_summon_issuance_date_hindi_en AS summonDateTextEng,
+            es.template_content AS textEnglish,
+            es.template_content_hindi AS textHindi,
+            'P.C. MODY,' AS sgNameEng,
+            'पी. सी. मोदी,' AS sgNameHin,
+            CONCAT_WS(' ', pd.first_name, pd.last_name) AS mpFullNameEng,
+            CONCAT_WS(' ', pd.first_name_hindi, pd.last_name_hindi) AS mpFullNameHin,
+            es.e_summon_issuance_date_hindi AS summonDateTextHin,
+            es.document_list
+        FROM agenda_papers.e_summon es
+        JOIN master.rajya_sabha_session_master rm ON rm.session_number = es.rajya_sabha_session_no
+        JOIN agenda_papers.e_summon_history h ON h.e_summon_id = es.id
+        JOIN members.personal_details pd ON pd.id = h.member_id
+        WHERE pd.mp_code = :mpCode and es.e_summon_issuance_date_hindi_en is not null
+        ORDER BY es.e_summon_issuance_date DESC
+        LIMIT 1
         """;
 
         Query query = entityManager.createNativeQuery(sql);
@@ -135,8 +135,12 @@ public class eSummonFileService {
         dto.setMpFullNameHin(safeString(row[9]));
         dto.setSummonDateTextHin(safeString(row[10]));
 
+        
         String docListJson = safeString(row[11]);
-        dto.setFiles(parseFileList(docListJson));
+        System.out.println("Document List JSON: " + docListJson);
+        
+        dto.setFiles(parseFileList(docListJson)); 
+        
 
         return dto;
     }
@@ -161,22 +165,43 @@ public class eSummonFileService {
     }
 
     private List<SummonResponseRSDTO.FileDTO> parseFileList(String json) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(json);
-            List<SummonResponseRSDTO.FileDTO> list = new ArrayList<>();
+        if (json == null || json.isBlank()) return List.of();
 
+        ObjectMapper mapper = new ObjectMapper();
+        List<SummonResponseRSDTO.FileDTO> list = new ArrayList<>();
+
+        try {
+            JsonNode node = mapper.readTree(json);
             for (JsonNode file : node) {
                 SummonResponseRSDTO.FileDTO fileDTO = new SummonResponseRSDTO.FileDTO();
-                fileDTO.setTitle(file.get("title").asText());
-                fileDTO.setUrl(file.get("url").asText());
+
+                // Get raw name like "ProvisionalCalendar-files"
+                String rawName = file.get("name").asText();
+
+                // Remove "-files"
+                String cleanName = rawName.replace("-files", "");
+
+                // Convert camel case to spaced
+                cleanName = cleanName.replaceAll("([a-z])([A-Z])", "$1 $2");
+
+                // Optional typo fixes
+                cleanName = cleanName
+                    .replace("Bullletin", "Bulletin")
+                    .replace("Part2", "Part 2");
+
+                fileDTO.setTitle(cleanName.trim()); // ✅ no extra quotes
+                fileDTO.setUrl(file.get("url").asText().trim()); // ✅ no extra quotes
+
                 list.add(fileDTO);
             }
-            return list;
         } catch (Exception e) {
-            return List.of(); // or return null
+            e.printStackTrace();
         }
+
+        return list;
     }
+
+
     private static final String[] units = {
             "", "One", "Two", "Three", "Four", "Five", "Six",
             "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
