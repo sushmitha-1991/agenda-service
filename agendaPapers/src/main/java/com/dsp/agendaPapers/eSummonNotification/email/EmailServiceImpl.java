@@ -41,17 +41,6 @@ public class EmailServiceImpl implements EmailService {
         PersonalDetails member = history.getMember();
         String fullName = member != null && member.getFullName() != null ? member.getFullName() : "Member";
 
-        // for document name change
-        // Build safe member name for file naming
-        String memberNameSafe = fullName.trim().replaceAll("[^a-zA-Z0-9\\-_]", "").replaceAll("\\s+", "");
-
-        // Get applicationNo
-        String applicationNo = (history.getESummon() != null && history.getESummon().getApplicationNo() != null)
-                ? history.getESummon().getApplicationNo()
-                : "Document";
-
-        String fileBaseName = applicationNo + "-" + memberNameSafe;
-
 
         String sessionRoman = "";
         String lokSabhaNoWord = "";
@@ -110,66 +99,40 @@ public class EmailServiceImpl implements EmailService {
         formData.add("emailsub", subject);
         formData.add("emailbody", body);
 
-//        // Attach file using UUID
-//        if (history.getDocumentUuid() != null) {
-//            ByteArrayResource fileResource = downloadFileFromUUID(history.getDocumentUuid());
-//
-//            System.out.println("### fileResource -  " + fileResource);
-//
-//
-//            if (fileResource != null) {
-//                formData.add("file", fileResource);
-//                System.out.println("### inside if ####");
-//                log.info("Attached file with UUID: {}", history.getDocumentUuid());
-//            } else {
-//                log.info("Attachment not found for UUID: {}", history.getDocumentUuid());
-//            }
-//        }
-//        else {
-//            log.info("No UUID found in history to attach a file.");
-//        }
-//
-//        // Attach Hindi file
-//        if (history.getDocumentUuidHindi() != null) {
-//            ByteArrayResource hindiFileResource = downloadHindiFileFromUUID(history.getDocumentUuidHindi());
-//
-//            System.out.println("### hindiFileResource - " + hindiFileResource);
-//
-//            if (hindiFileResource != null) {
-//                formData.add("file", hindiFileResource); // Attach Hindi file (same param name — most APIs accept multiple)
-//                System.out.println("### Attached Hindi file ###");
-//                log.info("Attached Hindi file with UUID: {}", history.getDocumentUuidHindi());
-//            } else {
-//                log.info("Hindi attachment not found for UUID: {}", history.getDocumentUuidHindi());
-//            }
-//        } else {
-//            log.info("No Hindi UUID found in history to attach a file.");
-//        }
-
-        // Attach English file
+        // Attach file using UUID
         if (history.getDocumentUuid() != null) {
-            ByteArrayResource fileResource = downloadFileFromUUID(history.getDocumentUuid(), fileBaseName, "EN");
+            ByteArrayResource fileResource = downloadFileFromUUID(history.getDocumentUuid());
+
+            System.out.println("### fileResource -  " + fileResource);
+
+
             if (fileResource != null) {
                 formData.add("file", fileResource);
-                log.info("Attached English file with UUID: {}", history.getDocumentUuid());
+                System.out.println("### inside if ####");
+                log.info("Attached file with UUID: {}", history.getDocumentUuid());
             } else {
                 log.info("Attachment not found for UUID: {}", history.getDocumentUuid());
             }
-        } else {
-            log.info("No UUID found in history to attach English file.");
+        }
+        else {
+            log.info("No UUID found in history to attach a file.");
         }
 
         // Attach Hindi file
         if (history.getDocumentUuidHindi() != null) {
-            ByteArrayResource hindiFileResource = downloadHindiFileFromUUID(history.getDocumentUuidHindi(), fileBaseName, "HI");
+            ByteArrayResource hindiFileResource = downloadHindiFileFromUUID(history.getDocumentUuidHindi());
+
+            System.out.println("### hindiFileResource - " + hindiFileResource);
+
             if (hindiFileResource != null) {
-                formData.add("file", hindiFileResource);
+                formData.add("file", hindiFileResource); // Attach Hindi file (same param name — most APIs accept multiple)
+                System.out.println("### Attached Hindi file ###");
                 log.info("Attached Hindi file with UUID: {}", history.getDocumentUuidHindi());
             } else {
                 log.info("Hindi attachment not found for UUID: {}", history.getDocumentUuidHindi());
             }
         } else {
-            log.info("No UUID found in history to attach Hindi file.");
+            log.info("No Hindi UUID found in history to attach a file.");
         }
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(formData, headers);
@@ -183,43 +146,12 @@ public class EmailServiceImpl implements EmailService {
 
         log.info("Email successfully sent to {} with attachment", history.getEmailId());
     }
-// for english old
-//    private ByteArrayResource downloadFileFromUUID(UUID uuid) {
-//        try {
-//            String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + uuid;
-//
-//            System.out.println("### downloadFileFromUUID called");
-//            ResponseEntity<byte[]> response = restTemplate.exchange(
-//                    downloadUrl,
-//                    HttpMethod.GET,
-//                    new HttpEntity<>(new HttpHeaders()),
-//                    byte[].class
-//            );
-//
-//            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-//                return new ByteArrayResource(response.getBody()) {
-//                    @Override
-//                    public String getFilename() {
-//                        return uuid + ".pdf";
-//                    }
-//                };
-//            } else {
-//                log.info("Failed to download file for UUID: {}, Status: {}", uuid, response.getStatusCode());
-//                System.out.println("#### Failed to download file for UUID");
-//            }
-//        } catch (Exception e) {
-//            System.out.println("#### Error downloading file for UUID" + uuid);
-//            log.info("Error downloading file for UUID: " + uuid, e);
-//        }
-//
-//        return null;
-//    }
-
-    // new
-    private ByteArrayResource downloadFileFromUUID(UUID uuid, String baseName, String langCode) {
+// for english
+    private ByteArrayResource downloadFileFromUUID(UUID uuid) {
         try {
             String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + uuid;
 
+            System.out.println("### downloadFileFromUUID called");
             ResponseEntity<byte[]> response = restTemplate.exchange(
                     downloadUrl,
                     HttpMethod.GET,
@@ -231,18 +163,21 @@ public class EmailServiceImpl implements EmailService {
                 return new ByteArrayResource(response.getBody()) {
                     @Override
                     public String getFilename() {
-                        return baseName + "-" + langCode + ".pdf";
+                        return uuid + ".pdf";
                     }
                 };
+            } else {
+                log.info("Failed to download file for UUID: {}, Status: {}", uuid, response.getStatusCode());
+                System.out.println("#### Failed to download file for UUID");
             }
         } catch (Exception e) {
+            System.out.println("#### Error downloading file for UUID" + uuid);
             log.info("Error downloading file for UUID: " + uuid, e);
         }
 
         return null;
     }
-
-    private String getTokenFromRequest() {
+        private String getTokenFromRequest() {
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);
@@ -250,42 +185,12 @@ public class EmailServiceImpl implements EmailService {
         return null;
     }
 
-    // for the hindi old
-//    private ByteArrayResource downloadHindiFileFromUUID(UUID hindiUuid) {
-//        try {
-//            String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + hindiUuid;
-//
-//            System.out.println("### downloadHindiFileFromUUID called");
-//            ResponseEntity<byte[]> response = restTemplate.exchange(
-//                    downloadUrl,
-//                    HttpMethod.GET,
-//                    new HttpEntity<>(new HttpHeaders()),
-//                    byte[].class
-//            );
-//
-//            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-//                return new ByteArrayResource(response.getBody()) {
-//                    @Override
-//                    public String getFilename() {
-//                        return hindiUuid + ".pdf";
-//                    }
-//                };
-//            } else {
-//                log.info("Failed to download Hindi file for UUID: {}, Status: {}", hindiUuid, response.getStatusCode());
-//                System.out.println("#### Failed to download Hindi file for UUID");
-//            }
-//        } catch (Exception e) {
-//            System.out.println("#### Error downloading Hindi file for UUID " + hindiUuid);
-//            log.info("Error downloading Hindi file for UUID: " + hindiUuid, e);
-//        }
-//
-//        return null;
-//    }
-
-    private ByteArrayResource downloadHindiFileFromUUID(UUID uuid, String baseName, String langCode) {
+    // for the hindi
+    private ByteArrayResource downloadHindiFileFromUUID(UUID hindiUuid) {
         try {
-            String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + uuid;
+            String downloadUrl = "https://dspstg.sansad.in/dms/openkm/dsp1/downloads/" + hindiUuid;
 
+            System.out.println("### downloadHindiFileFromUUID called");
             ResponseEntity<byte[]> response = restTemplate.exchange(
                     downloadUrl,
                     HttpMethod.GET,
@@ -297,12 +202,16 @@ public class EmailServiceImpl implements EmailService {
                 return new ByteArrayResource(response.getBody()) {
                     @Override
                     public String getFilename() {
-                        return baseName + "-" + langCode + ".pdf";
+                        return hindiUuid + ".pdf";
                     }
                 };
+            } else {
+                log.info("Failed to download Hindi file for UUID: {}, Status: {}", hindiUuid, response.getStatusCode());
+                System.out.println("#### Failed to download Hindi file for UUID");
             }
         } catch (Exception e) {
-            log.info("Error downloading Hindi file for UUID: " + uuid, e);
+            System.out.println("#### Error downloading Hindi file for UUID " + hindiUuid);
+            log.info("Error downloading Hindi file for UUID: " + hindiUuid, e);
         }
 
         return null;
