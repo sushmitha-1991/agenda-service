@@ -1,5 +1,9 @@
 package com.dsp.agendaPapers.eSummonNotification.service;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
 
 import com.dsp.agendaPapers.eSummonNotification.dto.SummonResponseRSDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.eSummonFileDto;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @Service
 public class eSummonFileService {
@@ -127,8 +132,15 @@ public class eSummonFileService {
 
         dto.setSummonDateEng(safeString(row[2]));
         dto.setSummonDateTextEng(safeString(row[3]));
-        dto.setTextEnglish(safeString(row[4]));
-        dto.setTextHindi(safeString(row[5]));
+        
+        String textEnglish = safeString(row[4]);
+        String textHindi = safeString(row[5]);
+
+        dto.setTextEnglish(extractMainContent(textEnglish, "en"));
+        dto.setTextHindi(extractMainContent(textHindi, "hi"));
+       
+
+
         dto.setSgNameEng(safeString(row[6]));
         dto.setSgNameHin(safeString(row[7]));
         dto.setMpFullNameEng(safeString(row[8]));
@@ -295,6 +307,37 @@ public class eSummonFileService {
         }
         private String safeString(Object obj) {
             return obj == null ? "" : obj.toString().trim();
+        }
+        public static String extractMainContent(String html, String language) {
+            Document doc = Jsoup.parse(html);
+            String para1Text = "";
+            String para2Text = "";
+
+            if (language.equalsIgnoreCase("en")) {
+                para1Text = doc.select("p").stream()
+                        .filter(p -> p.text().startsWith("I am directed to inform you"))
+                        .findFirst()
+                        .map(Element::text)
+                        .orElse("");
+                para2Text = doc.select("p").stream()
+                        .filter(p -> p.text().startsWith("You are requested to attend"))
+                        .findFirst()
+                        .map(Element::text)
+                        .orElse("");
+            } else if (language.equalsIgnoreCase("hi")) {
+                para1Text = doc.select("p").stream()
+                        .filter(p -> p.text().startsWith("मुझे आपको यह सूचि"))
+                        .findFirst()
+                        .map(Element::text)
+                        .orElse("");
+                para2Text = doc.select("p").stream()
+                        .filter(p -> p.text().startsWith("आपसे अनुरोध है"))
+                        .findFirst()
+                        .map(Element::text)
+                        .orElse("");
+            }
+
+            return para1Text + "\n\n" + para2Text;
         }
 
 }
