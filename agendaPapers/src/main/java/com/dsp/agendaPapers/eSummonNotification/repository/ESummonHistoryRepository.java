@@ -57,8 +57,17 @@ import java.util.UUID;
         @Query(value = """
     SELECT 
         pd.id AS member_id,
-        pd.full_name,
-        pd.profile_picture,
+	    CONCAT_WS(' ',
+        CASE
+            WHEN co.abbr = 'NAME_INITIAL_Other' THEN pd.initials_other_en
+            ELSE co.code_data->>'en'
+        END,
+        NULLIF(TRIM(pd.first_name), ''),
+        NULLIF(TRIM(pd.middle_name), ''),
+        NULLIF(TRIM(pd.last_name), '')
+        ) AS full_name,	
+	    -- pd.full_name,        
+	    pd.profile_picture,
         pp.party_name,
         pp.abbr AS party_abbr,
         c.constituency_name,
@@ -72,13 +81,14 @@ import java.util.UUID;
     JOIN master.political_parties pp ON pd.party_id = pp.id
     LEFT JOIN master.constituencies c ON pd.constituency_id = c.id
     LEFT JOIN master.states s ON pd.state_id = s.id
+    left join master.codes co on co.id = pd.initials_id 
     JOIN agenda_papers.e_summon_history h ON esm.e_summon_id = h.e_summon_id AND esm.member_id = h.member_id
     WHERE esm.e_summon_id = :eSummonId
-    GROUP BY 
+     GROUP BY 
         pd.id, pd.full_name, pd.profile_picture, 
         pp.party_name, pp.abbr, 
         c.constituency_name, c.abbr,
-        s.state_name
+        s.state_name, co.abbr, co.code_data
     """, nativeQuery = true)
         List<Object[]> getMemberDetailsByESummonId(@Param("eSummonId") Long eSummonId);
 
