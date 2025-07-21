@@ -70,8 +70,8 @@ import java.util.UUID;
     FROM agenda_papers.e_summon_members esm
     JOIN members.personal_details pd ON esm.member_id = pd.id
     JOIN master.political_parties pp ON pd.party_id = pp.id
-    JOIN master.constituencies c ON pd.constituency_id = c.id
-    JOIN master.states s ON pd.state_id = s.id
+    LEFT JOIN master.constituencies c ON pd.constituency_id = c.id
+    LEFT JOIN master.states s ON pd.state_id = s.id
     JOIN agenda_papers.e_summon_history h ON esm.e_summon_id = h.e_summon_id AND esm.member_id = h.member_id
     WHERE esm.e_summon_id = :eSummonId
     GROUP BY 
