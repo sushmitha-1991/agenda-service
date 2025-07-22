@@ -58,6 +58,8 @@ public class EventConsumer {
     private static String LOCALE_EN = "en";
     
     private static String LOCALE_HI = "hi";
+    
+    private static String APP_ABBR = "ES";
 
 //name replcament code by me for name
 @KafkaListener(topics = "${kafka.topic.eSummon}", groupId = "eSummonGroup")
@@ -271,6 +273,7 @@ public void consume(String messageJson) {
         formParams.add("applicationId", "24");
         formParams.add("locale", locale);
         formParams.add("fileName", generateFileName(esummon, member, locale));
+        formParams.add("applicationAbbr", APP_ABBR);
 
         HttpEntity<MultiValueMap<String, String>> formRequest = new HttpEntity<>(formParams, headers);
 
