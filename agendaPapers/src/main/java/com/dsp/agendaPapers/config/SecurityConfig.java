@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,15 +23,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.dsp.agendaPapers.exception.CustomAccessDeniedHandler;
 import com.dsp.agendaPapers.filter.JwtFilter;
 import com.dsp.agendaPapers.service.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
 	@Autowired
 	private JwtFilter jwtFilter;
+
+	@Autowired
+	private CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Bean
 	public UserDetailsService userDetailsService() {
@@ -58,32 +64,17 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(
-				(authz) -> authz.requestMatchers("/agendapapers/v3/api-docs/**", "/agendapapers/swagger-ui/**", "/agendapapers/swagger-ui.html","/summon-history/mpCode/**").permitAll()
-						.anyRequest().authenticated())
+		http.authorizeHttpRequests((authz) -> authz
+				.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/summon-history/mpCode/**")
+				.permitAll().requestMatchers("/**").hasRole("ADMIN").anyRequest().authenticated())
 				.csrf(AbstractHttpConfigurer::disable).authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-		http.exceptionHandling((ex) -> ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
+		http.exceptionHandling((ex) -> ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+				.accessDeniedHandler(customAccessDeniedHandler))
 				.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		return http.build();
 	}
-	
-	// @Bean
-	// public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	// 	http.authorizeHttpRequests(
-	// 			(authz) -> authz.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-	// 					.anyRequest().authenticated())
-	// 			.csrf(AbstractHttpConfigurer::disable).authenticationProvider(authenticationProvider())
-	// 			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-	// 	http.exceptionHandling((ex) -> ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
-	// 			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-	// 	return http.build();
-	// }
-	
-	
 
 }
