@@ -45,10 +45,9 @@ public class ESummonNotificationController {
 			@RequestBody ESummonNotificationDTO eSummonNotificationDTO) {
 		ESummonNotificationDTO savedNotification = eSummonNotificationService
 				.saveESummonNotification(eSummonNotificationDTO);
-		System.out.println("############" + eSummonNotificationDTO);
 		GenericResponse<ESummonNotificationDTO> response = new GenericResponse<>(true, "E-Summon created successfully.",
 				savedNotification, HttpStatus.CREATED.value());
-		return new ResponseEntity<>(response, HttpStatus.CREATED); 
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	@Operation(summary = "Get all E-SummonNotifications", description = "Retrieves a list of all E-Summon Notifications.")
@@ -118,7 +117,6 @@ public class ESummonNotificationController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-// new code
 	@PostMapping("/send-esummon")
 	public ResponseEntity<?> sendESummon(@RequestBody SendESummonRequest request, HttpServletRequest httpRequest) {
 		try {

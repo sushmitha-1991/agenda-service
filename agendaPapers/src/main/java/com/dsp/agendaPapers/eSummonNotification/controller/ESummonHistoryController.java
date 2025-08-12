@@ -29,10 +29,10 @@ import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationServi
 import com.dsp.agendaPapers.eSummonNotification.service.eSummonFileService;
 import com.dsp.agendaPapers.response.GenericResponse;
 
-import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/summon-history")
@@ -43,7 +43,7 @@ public class ESummonHistoryController {
 
 	@Autowired
 	private ESummonNotificationService eSummonNotificationService;
-	
+
 	@Autowired
 	private eSummonFileService eSummonFileservice;
 
@@ -191,7 +191,6 @@ public class ESummonHistoryController {
 	public ResponseEntity<GenericResponse<List<ESummonMemberDetailsDTO>>> getESummonMemberDetails(
 			@PathVariable("eSummonId") Long eSummonId) {
 
-		System.out.println("############################tetsing samar");
 		// Fetch the member details using the eSummonId
 		List<ESummonMemberDetailsDTO> details = eSummonHistoryService.getMemberDetailsByESummonId(eSummonId);
 
@@ -204,34 +203,29 @@ public class ESummonHistoryController {
 
 	@GetMapping("/mpCode/{mpCode}")
 	@Operation(summary = "Get E-Summon File By MpCode", description = "Retrieve Get E-Summon File By MpCode.")
-	@ApiResponses(value = {
-	        @ApiResponse(responseCode = "200", description = "E-Summon File retrieved successfully"),
-	        @ApiResponse(responseCode = "404", description = "E-Summon File not found"),
-	        @ApiResponse(responseCode = "500", description = "Internal server error")
-	})
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "E-Summon File retrieved successfully"),
+			@ApiResponse(responseCode = "404", description = "E-Summon File not found"),
+			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	public ResponseEntity<eSummonFileWrapperDto> getFilesListByMpCode(@PathVariable String mpCode,
-	                                                                   @AuthenticationPrincipal UserDetailsDTO currentUser) {
-	    Long houseId = currentUser.getHouseId(); 
+			@AuthenticationPrincipal UserDetailsDTO currentUser) {
+		Long houseId = currentUser.getHouseId();
 
-	    List<eSummonFileDto> dtoList = eSummonFileservice.getFilesListByMpCode(mpCode, houseId);
-	    eSummonFileWrapperDto wrapperDto = new eSummonFileWrapperDto(dtoList);
-	    return ResponseEntity.ok(wrapperDto);
+		List<eSummonFileDto> dtoList = eSummonFileservice.getFilesListByMpCode(mpCode, houseId);
+		eSummonFileWrapperDto wrapperDto = new eSummonFileWrapperDto(dtoList);
+		return ResponseEntity.ok(wrapperDto);
 	}
 
 	@GetMapping("/rs/mpCode/{mpCode}")
 	@Operation(summary = "Get RS E-Summon File By MpCode", description = "Retrieve Rajya Sabha E-Summon File using MP Code.")
-	@ApiResponses(value = {
-	        @ApiResponse(responseCode = "200", description = "RS E-Summon File retrieved successfully"),
-	        @ApiResponse(responseCode = "404", description = "RS E-Summon File not found"),
-	        @ApiResponse(responseCode = "500", description = "Internal server error")
-	})
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "RS E-Summon File retrieved successfully"),
+			@ApiResponse(responseCode = "404", description = "RS E-Summon File not found"),
+			@ApiResponse(responseCode = "500", description = "Internal server error") })
 	public ResponseEntity<SummonResponseRSDTO> getRsFilesListByMpCode(@PathVariable String mpCode) {
-	    SummonResponseRSDTO dto = eSummonFileservice.getRsFilesListByMpCode(mpCode);
-	    if (dto == null) {
-	        return ResponseEntity.notFound().build();
-	    }
-	    return ResponseEntity.ok(dto);
+		SummonResponseRSDTO dto = eSummonFileservice.getRsFilesListByMpCode(mpCode);
+		if (dto == null) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(dto);
 	}
-
 
 }
