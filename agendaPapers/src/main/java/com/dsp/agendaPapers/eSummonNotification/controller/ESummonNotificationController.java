@@ -1,6 +1,8 @@
 package com.dsp.agendaPapers.eSummonNotification.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,6 +139,30 @@ public class ESummonNotificationController {
 					HttpStatus.BAD_REQUEST.value());
 			return ResponseEntity.badRequest().body(response);
 		}
+	}
+
+	@GetMapping("/e-summons/{id}/created-at")
+	public ResponseEntity<GenericResponse<LocalDateTime>> getCreatedAt(@PathVariable Long id) {
+		LocalDateTime createdAt = eSummonNotificationService.getCreatedAtById(id);
+		GenericResponse<LocalDateTime> body = new GenericResponse<>(
+				true,
+				"createdAt fetched successfully",
+				createdAt,
+				HttpStatus.OK.value()
+		);
+		return ResponseEntity.ok(body);
+	}
+
+	@GetMapping("/e-summons/{id}/document-list")
+	public ResponseEntity<GenericResponse<List<Map<String, Object>>>> getDocumentList(@PathVariable Long id) {
+		List<Map<String, Object>> documentList =eSummonNotificationService.getDocumentListById(id);
+		GenericResponse<List<Map<String, Object>>> body = new GenericResponse<>(
+				true,
+				"documentList fetched successfully",
+				documentList,
+				HttpStatus.OK.value()
+		);
+		return ResponseEntity.ok(body);
 	}
 
 }

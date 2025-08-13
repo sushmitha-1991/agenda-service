@@ -52,10 +52,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.context.annotation.Lazy;
 
@@ -858,5 +855,20 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
 	
 	}
 
+    @Override
+    public LocalDateTime getCreatedAtById(Long id) {
+        return eSummonNotificationRepository.findCreatedAtById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("e-summon not found for id: " + id));
+    }
+
+    @Override
+    public List<Map<String, Object>> getDocumentListById(Long id) {
+        return (List<Map<String, Object>>) eSummonNotificationRepository.findDocumentListViewById(id)
+                .map(view -> {
+                    List<Map<String, Object>> docs = view.getDocumentList();
+                    return docs != null ? docs : Collections.emptyList();
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("e-summon not found for id: " + id));
+    }
 }
 

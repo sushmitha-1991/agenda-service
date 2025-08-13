@@ -4,8 +4,9 @@ import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Map;
 
 
 public interface ESummonNotificationService {
@@ -25,6 +26,11 @@ public interface ESummonNotificationService {
 	List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, String token);
 
 	List<PersonalDetails> sendESummonV2(Long eSummonId, List<Long> memberIds, String token);
+
+	LocalDateTime getCreatedAtById(Long id);
+
+	List<Map<String, Object>> getDocumentListById(Long id);
+
 
 }
 
