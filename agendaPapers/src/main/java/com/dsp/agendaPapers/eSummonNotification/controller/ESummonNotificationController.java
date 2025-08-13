@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.agendaPapers.eSummonNotification.dto.WorkflowHistoryDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,13 +142,13 @@ public class ESummonNotificationController {
 		}
 	}
 
-	@GetMapping("created-at/e-summons/{id}")
-	public ResponseEntity<GenericResponse<LocalDateTime>> getCreatedAt(@PathVariable Long id) {
-		LocalDateTime createdAt = eSummonNotificationService.getCreatedAtById(id);
-		GenericResponse<LocalDateTime> body = new GenericResponse<>(
+	@GetMapping("/history/e-summons/{id}")
+	public ResponseEntity<GenericResponse<List<WorkflowHistoryDto>>> getEsummonHistory(@PathVariable Long id) {
+		List<WorkflowHistoryDto> histories = eSummonNotificationService.getHistoryByESummonId(id);
+		GenericResponse<List<WorkflowHistoryDto>> body = new GenericResponse<>(
 				true,
-				"createdAt fetched successfully",
-				createdAt,
+				"Records found",
+				histories,
 				HttpStatus.OK.value()
 		);
 		return ResponseEntity.ok(body);

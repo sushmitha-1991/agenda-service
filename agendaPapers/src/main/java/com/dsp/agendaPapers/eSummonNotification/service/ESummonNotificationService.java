@@ -1,5 +1,6 @@
 package com.dsp.agendaPapers.eSummonNotification.service;
 
+import com.dsp.agendaPapers.eSummonNotification.dto.WorkflowHistoryDto;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.dto.ESummonNotificationDTO;
 
@@ -27,7 +28,7 @@ public interface ESummonNotificationService {
 
 	List<PersonalDetails> sendESummonV2(Long eSummonId, List<Long> memberIds, String token);
 
-	LocalDateTime getCreatedAtById(Long id);
+	List<WorkflowHistoryDto> getHistoryByESummonId(Long id);
 
 	List<Map<String, Object>> getDocumentListById(Long id);
 

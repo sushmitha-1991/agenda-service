@@ -6,6 +6,7 @@ import com.dsp.agendaPapers.applicationPapers.entity.ApplicationPapers;
 import com.dsp.agendaPapers.applicationPapers.repository.ApplicationPapersRepository;
 import com.dsp.agendaPapers.applicationPapers.service.ApplicationPapersService;
 import com.dsp.agendaPapers.dto.UserDetailsDTO;
+import com.dsp.agendaPapers.eSummonNotification.dto.WorkflowHistoryDto;
 import com.dsp.agendaPapers.eSummonNotification.entity.ESummonHistory;
 import com.dsp.agendaPapers.eSummonNotification.entity.PersonalDetails;
 import com.dsp.agendaPapers.eSummonNotification.event.EventProducer;
@@ -153,7 +154,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
         Long houseId = null;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetailsDTO) {
-            houseId = ((UserDetailsDTO) principal).getHouseId(); 
+            houseId = ((UserDetailsDTO) principal).getHouseId();
         }
 
         SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
@@ -169,7 +170,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
         try {
             // Convert DTO to entity
-            ESummonNotification esummon = ESummonNotificationMapper.toEntity(eSummonNotificationDTO); 
+            ESummonNotification esummon = ESummonNotificationMapper.toEntity(eSummonNotificationDTO);
             if (StringUtils.isBlank(esummon.getApplicationNo())) {
                 SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
                 System.out.println(applicationNo);
@@ -208,7 +209,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                     "Saved E-SummonNotification attributes: ID={}, LokSabhaNo={}, SessionNo={}, SummonIssuanceDate={}, Status={}, TemplateContent={}",
                     savedNotification.getId(), savedNotification.getLokSabhaNo(), savedNotification.getSessionNo(),
                     savedNotification.getEsummonIssuanceDate(), savedNotification.getStatus(),
-                    savedNotification.getTemplateContent()); 
+                    savedNotification.getTemplateContent());
 
             // Create ApplicationInstanceDTO to send to the ApplicationInstance microservice
 //            ApplicationInstanceDTO applicationInstanceDTO = ApplicationInstanceDTO.builder()
@@ -296,14 +297,14 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
                 System.out.println("res:::::::" + res);
                 // /delete-save-as-draft
             }
-            
+
             // Save in esummon_member table
-            
+
             // Save in esummon history table
-            
+
             // generate event
-            
-            
+
+
             return responseDTO;
         } catch (Exception e) {
             log.error("Error in saveESummonNotification: ", e);
@@ -618,7 +619,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
             }
 
 
-            
+
 
             // Save the updated ESummonNotification
             ESummonNotification updatedNotification = eSummonNotificationRepository.save(existingNotification);
@@ -631,7 +632,7 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 //                instance.setHtmlContentHindi(updatedNotification.getTemplateContentHindi());
 //                instance = inputInstanceRepository.save(instance);
 //            }
-            
+
             // Prepare the response DTO
             ESummonNotificationDTO responseDTO = ESummonNotificationMapper.toDTO(updatedNotification);
 
@@ -818,20 +819,20 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
 		if (!optionalNotification.isPresent()) {
 			throw new RuntimeException("eSummonNotification not found for id: " + eSummonId);
 		}
-	
+
 		ESummonNotification eSummon = optionalNotification.get();
 		ESummonNotificationDTO dto = ESummonNotificationMapper.toDTO(eSummon);
-	
+
 		// ✅ Save eSummon members
 		List<PersonalDetails> members = personalDetailsRepository.findAllById(memberIds);
 		System.out.println("Member details fetched");
-		
+
 		List<ESummonMembers> summonMembersList = memberIds.stream()
 								.map(memberId -> new ESummonMembers(eSummonId, memberId))
 								.collect(Collectors.toList());
 		eSummonMembersRepository.saveAll(summonMembersList);
 		System.out.println("Member list saved");
-	
+
 		// ✅ Save eSummon history with document UUID
 		List<ESummonHistory> historyList = members.stream()
 				.map(member -> ESummonHistory.builder()
@@ -847,18 +848,25 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
 		System.out.println("History list saved");
 
 		log.debug("### saved successfully ! ");
-	
+
 		// Trigger Kafka event with token
 		eventProducerService.generateEventV2(eSummonId, token);
-	
+
 		return members;
-	
+
 	}
 
     @Override
-    public LocalDateTime getCreatedAtById(Long id) {
-        return eSummonNotificationRepository.findCreatedAtById(id)
+    public List<WorkflowHistoryDto> getHistoryByESummonId(Long id) {
+        LocalDateTime createdAt = eSummonNotificationRepository.findCreatedAtById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("e-summon not found for id: " + id));
+
+        WorkflowHistoryDto dto = new WorkflowHistoryDto();
+        dto.setActionTakenOn(createdAt); // <-- the only populated field per your requirement
+
+        // Fields like actionTakenByName, status, pendingWithName default to "" via DTO; others remain null.
+
+        return Collections.singletonList(dto);
     }
 
     @Override
