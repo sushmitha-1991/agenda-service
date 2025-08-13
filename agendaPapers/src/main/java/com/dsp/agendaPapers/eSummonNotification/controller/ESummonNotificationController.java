@@ -141,7 +141,7 @@ public class ESummonNotificationController {
 		}
 	}
 
-	@GetMapping("/e-summons/{id}/created-at")
+	@GetMapping("created-at/e-summons/{id}")
 	public ResponseEntity<GenericResponse<LocalDateTime>> getCreatedAt(@PathVariable Long id) {
 		LocalDateTime createdAt = eSummonNotificationService.getCreatedAtById(id);
 		GenericResponse<LocalDateTime> body = new GenericResponse<>(
@@ -153,7 +153,7 @@ public class ESummonNotificationController {
 		return ResponseEntity.ok(body);
 	}
 
-	@GetMapping("/e-summons/{id}/document-list")
+	@GetMapping("document-list/e-summons/{id}")
 	public ResponseEntity<GenericResponse<List<Map<String, Object>>>> getDocumentList(@PathVariable Long id) {
 		List<Map<String, Object>> documentList =eSummonNotificationService.getDocumentListById(id);
 		GenericResponse<List<Map<String, Object>>> body = new GenericResponse<>(
