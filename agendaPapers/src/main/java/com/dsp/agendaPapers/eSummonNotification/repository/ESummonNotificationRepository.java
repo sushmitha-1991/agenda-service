@@ -15,8 +15,8 @@ public interface ESummonNotificationRepository extends JpaRepository<ESummonNoti
 
 	List<ESummonNotification> findBySessionNo(String sessionNo);
 
-	@Query("select e.createdAt from ESummonNotification e where e.id = :id")
-	Optional<LocalDateTime> findCreatedAtById(Long id);
+	@Query("select e from ESummonNotification e where e.id = :id")
+	Optional<ESummonNotification> findCreatedAtById(Long id);
 
 
 	interface DocumentListView {

@@ -18,6 +18,7 @@ import com.dsp.agendaPapers.eSummonNotification.entityrecord.ESummonMembers;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonMembersRepository;
 import com.dsp.agendaPapers.eSummonNotification.repository.ESummonNotificationRepository;
 import com.dsp.agendaPapers.eSummonNotification.service.ESummonNotificationService;
+import com.dsp.agendaPapers.entity.BaseUser;
 import com.dsp.agendaPapers.entity.MastersLokSabhaSession;
 import com.dsp.agendaPapers.entity.MastersRajyaSabha;
 import com.dsp.agendaPapers.exception.ResourceNotFoundException;
@@ -31,6 +32,7 @@ import com.dsp.agendaPapers.provisionalcalendarfinal.mapper.InputInstanceMapper;
 import com.dsp.agendaPapers.provisionalcalendarfinal.repository.InputInstanceRepository;
 import com.dsp.agendaPapers.repository.MasterLSSRepository;
 import com.dsp.agendaPapers.repository.MastersRSSRepository;
+import com.dsp.agendaPapers.repository.MyUserRepository;
 import com.dsp.agendaPapers.response.GenericResponse;
 import com.dsp.agendaPapers.summonNotification.dto.ApplicationInstanceDTO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,7 +73,8 @@ public class ESummonNotificationServiceImpl implements ESummonNotificationServic
 
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
-
+  @Autowired
+    private MyUserRepository userRepository;
     @Autowired
     private MasterLSSRepository masterLSSRepository;
     @Autowired
@@ -858,11 +861,15 @@ public List<PersonalDetails> sendESummon(Long eSummonId, List<Long> memberIds, S
 
     @Override
     public List<WorkflowHistoryDto> getHistoryByESummonId(Long id) {
-        LocalDateTime createdAt = eSummonNotificationRepository.findCreatedAtById(id)
+        ESummonNotification eSumm = eSummonNotificationRepository.findCreatedAtById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("e-summon not found for id: " + id));
 
         WorkflowHistoryDto dto = new WorkflowHistoryDto();
-        dto.setActionTakenOn(createdAt); // <-- the only populated field per your requirement
+        dto.setActionTakenOn(eSumm.getCreatedAt());
+        BaseUser user=userRepository.findById(eSumm.getCreatedBy())
+                .orElseThrow(() -> new ResourceNotFoundException("user not found for id: " + eSumm.getCreatedBy()));
+        dto.setActionTaken(user.getFirstName()+" "+user.getLastName()); // <-- the only populated field per your requirement
+         // <-- the only populated field per your requirement
 
         // Fields like actionTakenByName, status, pendingWithName default to "" via DTO; others remain null.
 
