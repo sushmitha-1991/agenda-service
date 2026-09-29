@@ -6,7 +6,9 @@ import org.jsoup.nodes.Element;
 
 import com.dsp.agendaPapers.eSummonNotification.dto.SummonResponseRSDTO;
 import com.dsp.agendaPapers.eSummonNotification.dto.SummonResponseRSDTO.FileDTO;
+import com.dsp.agendaPapers.eSummonNotification.entity.PublishHistory;
 import com.dsp.agendaPapers.eSummonNotification.dto.eSummonFileDto;
+import com.dsp.agendaPapers.eSummonNotification.repository.PublishRepo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,10 +21,13 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,6 +38,14 @@ public class eSummonFileService {
 
     @Value("${openKm.dsp1.download.endpoint}")
     private String baseUrl;
+    private static final String PC = "ProvisionalCalendar";
+    private static final String B2_EN = "BulletinEnglish";
+    private static final String B2_HI = "BulletinHindi";
+    private static final String APP_PC = "PROVISIONAL_CALENDER";
+    private static final String APP_B2 = "BULLETIN_2";
+
+    @Autowired
+    private PublishRepo publishRepo;
 
     @Autowired
     private EntityManager entityManager;
@@ -146,15 +159,27 @@ public class eSummonFileService {
         dto.setSummonDateTextHin(safeString(row[10]));
         String docListJson = safeString(row[11]);
         System.out.println("Document List JSON: " + docListJson);
-
+        System.out.println("summon date " + dto.getSummonDateEng());
         // List<Map<String,Object>> docList=(List<Map<String,Object>>)row[11];
         // System.out.println("Document List: " + docList);
-        dto.setFiles(parseFileList(docListJson));
+        dto.setFiles(parseFileList(docListJson, getDate(dto.getSummonDateEng())));
         System.out.println("dto list first " + dto.getFiles());
         // dto.setFiles(parseFileListFileDTO(docList));
         // System.out.println("dto list second"+dto.getFiles());
 
         return dto;
+    }
+
+    private LocalDate getDate(String summonDateEng) {
+        System.out.println("summonDateEng: " + summonDateEng);
+
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        // Parse to LocalDate
+        LocalDate localDate = LocalDate.parse(summonDateEng, inputFormatter);
+
+        System.out.println("Converted LocalDate: " + localDate); // yyyy-MM-dd
+        return localDate;
     }
 
     private String toWords(Object val) {
@@ -177,11 +202,15 @@ public class eSummonFileService {
         }
     }
 
-    private List<FileDTO> parseFileList(String json) {
+    private List<FileDTO> parseFileList(String json, LocalDate eSummonDate) {
         if (json == null || json.isBlank())
             return List.of();
         ObjectMapper mapper = new ObjectMapper();
         List<FileDTO> list = new ArrayList<>();
+        Boolean isFindPC = false;
+        Boolean isFindB2En = false;
+        Boolean isFindB2Hi = false;
+
         try {
             JsonNode node = mapper.readTree(json);
             for (JsonNode file : node) {
@@ -196,19 +225,28 @@ public class eSummonFileService {
 
                 String rawName = file.get("name").asText();
                 String cleanName = rawName.replace("-files", "");
-
                 // Remove "-files"
-                System.out.println("clear name " + cleanName);
+                System.out.println("clear name  PC or B2" + cleanName);
+                if (PC.equalsIgnoreCase(cleanName.trim()))
+                    isFindPC = true;
+                if (B2_EN.equalsIgnoreCase(cleanName.trim()))
+                    isFindB2En = true;
+                if (B2_HI.equalsIgnoreCase(cleanName.trim()))
+                    isFindB2Hi = true;
                 // Convert camel case to spaced
                 cleanName = cleanName.replaceAll("([a-z])([A-Z])", "$1 $2");
                 System.out.println("clear name after replaceAll " + cleanName);
 
                 // Optional typo fixes
                 cleanName = cleanName
-                        .replace("Bullletin", "Bulletin")
-                        .replace("Part2", "Part 2");
+                        // .replace("Bullletin", "Bulletin")
+                        // .replace("Part2", " ")
+                        .replace("Bulletin", "Bulletin Part 2");
+                System.out.println("clearname " + cleanName);
+                System.out.println("is PC found " + isFindPC);
+                System.out.println("is b2 en found " + isFindB2En);
+                System.out.println("is b2 hi found " + isFindB2Hi);
                 fileDTO.setTitle(cleanName.trim());
-
                 // ✅ no extra quote
                 UUID docUuid = UUID.fromString(file.get("documentUuid").asText().trim());
                 String fileUrl = baseUrl + docUuid;
@@ -219,12 +257,46 @@ public class eSummonFileService {
                 list.add(fileDTO);
                 System.out.println("list " + list);
             }
+            if (!isFindPC)
+                list.add(fetchDocumentFromExists(APP_PC, "en", eSummonDate, PC));
+            if (!isFindB2En)
+                list.add(fetchDocumentFromExists(APP_B2, "en", eSummonDate, B2_EN));
+            if (!isFindB2Hi)
+                list.add(fetchDocumentFromExists(APP_B2, "hi", eSummonDate, B2_HI));
             return list;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return list;
+    }
+
+    private FileDTO fetchDocumentFromExists(String appName, String locale, LocalDate forDate, String name) {
+        FileDTO file = new FileDTO();
+        System.out.println("appName " + appName);
+        System.out.println("locale " + locale);
+        System.out.println("forDate " + forDate);
+        Optional<PublishHistory> publishedData = publishRepo
+                .findLatestPublishHistory(appName, forDate, locale,"RS");
+        System.out.println("published " + publishedData);
+        
+        if (publishedData.isPresent()) {
+            file.setTitle(updatedTitle(name));
+            file.setUrl(publishedData.get().getPublishUrl());
+        }
+        return file;
+
+    }
+
+    private String updatedTitle(String name) {
+
+        if (PC.equalsIgnoreCase(name))
+            return "Provisional Calender";
+        if (B2_EN.equalsIgnoreCase(name))
+            return "Bulletin Part 2 English";
+        if (B2_HI.equalsIgnoreCase(name))
+            return "Bulletin Part 2 Hindi";
+        return "";
     }
 
     private List<FileDTO> parseFileListFileDTO(List<Map<String, Object>> docList) {
